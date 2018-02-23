@@ -1,0 +1,12 @@
+{
+  "name": "laplace",
+  "version": "0.0.0",
+  "description": "Laplace",
+  "main": "app.js",
+  "author": {
+    "name": "deltagare"
+  },
+  "dependencies": {
+    "discord.js": "^11.3.0"
+  }
+}
