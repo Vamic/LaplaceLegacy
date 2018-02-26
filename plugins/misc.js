@@ -1,23 +1,24 @@
 ﻿var bot = module.parent.exports;
 
-var getRandomEmojis = function (emojis, amount) {
+var getRandomEmojis = function (emojiCollection, amount) {
     var result = [];
-    var keys = Object.keys(emojis);
-    while (amount > 0 && keys.length > 0) {
-        var key = keys.splice(Math.floor(Math.random() * keys.length), 1)[0];
-        result.push({
-            id: emojis[key],
-            name: key
-        });
-        amount--;
-    }
+    while (amount > 0) {
+        var randoms = emojiCollection.random(amount);
+        for (var i in randoms) {
+            result.push({
+                id: randoms[i].id,
+                name: randoms[i].name
+            });
+        }
+        amount -= result.length;
+    } 
     return result;
 };
-var reactInOrder = function (msg, emojis, i) {
+var reactInOrder = function (msg, emojiIds, i) {
     if (!i) i = 0;
-    if (!emojis[i]) return;
-    msg.react(bot.emojis[emojis[i]]).then(function () {
-        reactInOrder(msg, emojis, i + 1);
+    if (!emojiIds[i]) return;
+    msg.react(emojiIds[i]).then(function () {
+        reactInOrder(msg, emojiIds, i + 1);
     });
 };
 var buildPollMessage = function (question, user, data) {
@@ -37,15 +38,15 @@ var buildPollMessage = function (question, user, data) {
 exports.commands = {
     testCommand: {
         commands: ["!test"],
-        exec: function (command, info, rawMessage) {
+        exec: function (command, message) {
             console.log(command.arguments);
             console.log(command.modifiers);
         }
     },
     poll: {
         commands: ["!poll"],
-        use: "!poll:time question goes here | choice1/choice2/...",
-        exec: function (command, info, rawMessage) {
+        usage: "!poll:time question goes here | choice1/choice2/...",
+        exec: function (command, message) {
             //Decide how long the poll will last
             var time = 20;
             var lowLim = 5;
@@ -66,59 +67,76 @@ exports.commands = {
                 question: pollParts[0],
                 choices: pollParts[1].split("/").filter(Boolean)
             };
+            var emojis, pollMessage;
             //Check if we have any choices
             if (poll.choices.length > 0) {
                 //We've got one, what a poll
                 if (poll.choices.length === 1) {
                     //Get a random emoji to vote with
-                    var emoji = getRandomEmojis(bot.emojis, 1);
-                    info.channel.send(info.user + " created a poll: <:" + emoji + ":" + bot.emojis[emoji] + "> " + poll.choices[0]).then(function (msg) {
-                        msg.react(bot.emojis[emoji]);
-                    });
-                //We've got more than one, amazing use of poll
-                } else if (poll.choices.length < 6) {
-                    //Get random emojis to vote with
-                    var emojis = getRandomEmojis(bot.emojis, poll.choices.length);
+                    emojis = getRandomEmojis(bot.emojis, 1);
 
                     data = {
                         emojis: emojis,
                         options: poll.choices
                     };
 
-                    var pollMessage = buildPollMessage(poll.question, info.user, data);
+                    //Make a message, should probably make it sassy because this poll sucks
+                    pollMessage = buildPollMessage(poll.question, message.author.username, data);
 
-                    info.channel.send(pollMessage).then(function (msg) {
+                    //Send & react
+                    message.channel.send(pollMessage).then(function (msg) {
+                        msg.react(emojis[0].id);
+
+                        //No need to actually collect the reactions, who cares
+                        setTimeout(function () {
+                            data.emojis[0].votes = Math.ceil(Math.random() * 2000);
+                            pollMessage = buildPollMessage(poll.question, message.author.username, data);
+                            msg.edit(pollMessage);
+                        }, time * 1000);
+                    });
+                //We've got more than one, amazing use of poll
+                } else if (poll.choices.length < 6) {
+                    //Get random emojis to vote with
+                    emojis = getRandomEmojis(bot.emojis, poll.choices.length);
+
+                    data = {
+                        emojis: emojis,
+                        options: poll.choices
+                    };
+
+                    pollMessage = buildPollMessage(poll.question, message.author.username, data);
+
+                    message.channel.send(pollMessage).then(function (msg) {
                         //Put up option reactions in the correct order
-                        var emojiNames = emojis.map(a => a.name);
-                        reactInOrder(msg, emojiNames);
+                        var emojiIds = data.emojis.map(a => a.id);
+                        reactInOrder(msg, emojiIds);
 
                         //Collect the results after some seconds
                         var collector = msg.createReactionCollector(
                             //Collect only the reactions we gave them
-                            (reaction) => emojiNames.indexOf(reaction.emoji.name) > -1,
+                            (reaction) => emojiIds.indexOf(reaction.emoji.id) > -1,
                             //End after previously decided time in seconds
                             { time: time * 1000 }
                         );
                         collector.on('end', (collected, reason) => {
-                            data.emojis = [];
+                            //Add the votes to each option
                             for (var [key, reaction] of collected) {
-                                data.emojis.push({
-                                    id: key,
-                                    name: reaction.emoji.name,
-                                    votes: reaction.count - 1 //Remove the bot from the count
-                                });
+                                var index = emojiIds.indexOf(reaction.emoji.id);
+                                data.emojis[index].votes = reaction.count - 1; //Remove the bot from the count
                             }
-                            pollMessage = buildPollMessage(poll.question, info.user, data);
+
+                            //Edit
+                            pollMessage = buildPollMessage(poll.question, message.author.username, data);
                             msg.edit(pollMessage);
                         });
                     });
                 //T-that many? It won't fit!!!
                 } else {
-                    rawMessage.reply("Too much shit. Max 5 things for now.");
+                    message.reply("Too much shit. Max 5 things for now.");
                 }
             //We got nothing, what the fuck
             } else {
-                rawMessage.reply("You need some choices. `!poll:[time] question goes here | choice1/choice2/choice3`");
+                message.reply("You need some choices. `" + this.usage + "`");
             }
         }
     }

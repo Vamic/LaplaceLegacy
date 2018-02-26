@@ -1,16 +1,36 @@
 'use strict';
 const fs = require('fs');
 const Discord = require('discord.js');
-const client = new Discord.Client();
-const secrets = require('./secrets.json'); //Juicy secrets, no looking
-var plugins = [];
-var commands = {};
+const http = require('http');
+const request = require('request');
+const urlf = require('url');
 
+//Juicy secrets, no looking
+const secrets = require('./secrets.json'); 
+
+const client = new Discord.Client();
+
+//Data storage
+var datastoreURL = secrets.datastore.url,
+    datastoreKey = secrets.datastore.key,
+    datastore = {}; //the cache
+
+//Other
+var plugins = [],
+    commands = {};
+
+
+//Functions
 var log = function (msg) {
     console.log(msg);
 };
+var error = function (msg) {
+    log(msg);
+};
 
-var reloadPlugin = function (pluginName) {
+function reloadPlugin(pluginName) {
+    //Delete from cache so its actually reloading
+    delete require.cache[require.resolve("./plugins/" + pluginName + ".js")];
     try {
         var i, j;
         //Get plugin
@@ -31,7 +51,7 @@ var reloadPlugin = function (pluginName) {
             for (j in command.commands) {
                 //Add them to the main list of commands
                 if (commands[command.commands]) {
-                    log("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands);
+                    error("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands);
                 } else {
                     commands[command.commands[j]] = {
                         source: pluginName,
@@ -40,26 +60,27 @@ var reloadPlugin = function (pluginName) {
                 }
             }
         }
+        log("Loaded " + pluginName);
         return true;
     }
     catch (e) {
-        log("Unable to load plugin: " + pluginName);
-        log(e.message);
+        error("Unable to load plugin: " + pluginName);
+        error(e.message);
         return false;
     }
-};
-var reloadPlugins = function (cb) {
+}
+function reloadPlugins(callback) {
     fs.readdir('plugins', function (err, files) {
         if (err) {
-            log("Couldn't load plugins.");
-            log(err);
-            if (cb)
-                cb("Couldn't load one or more plugins", false);
+            error("Couldn't load plugins.");
+            error(err);
+            if (callback)
+                callback("Couldn't load one or more plugins", false);
         }
         try {
             var success = true;
             //Reset plugin variables
-            plugins = [];
+            module.exports.admin.plugins = plugins = [];
             commands = {};
 
             //Load plugins
@@ -71,49 +92,191 @@ var reloadPlugins = function (cb) {
                     success = success && reloadPlugin(plugin);
                 }
             }
-            if(!success && cb)
-                cb("Couldn't load one or more plugins", false);
-            else if (cb)
-                cb(null, true);
+            if(!success && callback)
+                callback("Couldn't load one or more plugins", false);
+            else if (callback)
+                callback(null, true);
         } catch (err) {
-            log("Couldn't load plugins.");
-            log(err);
-            if (cb)
-                cb("Couldn't load one or more plugins", false);
+            error("Couldn't load plugins.");
+            error(err);
+            if (callback)
+                callback("Couldn't load one or more plugins", false);
         }
     });
-};
+}
 
 //Load em up
 reloadPlugins();
 
+
+function getDatastore(key, callback) {
+    if (datastore[key]) {
+        log("Returning cached Datastore for " + key);
+        callback(null, JSON.parse(JSON.stringify(datastore[key]))); // Make sure object is cloned
+    } else {
+        var url = datastoreURL + "get?key=" + datastoreKey + "&datakey=" + key;
+        httpGetJson(url, function (err, data) {
+            if (err) {
+                error("Error getting Datastore for " + key + ": " + err.message);
+                callback(err);
+                return;
+            }
+
+            log("Got Datastore for " + key);
+            datastore[key] = data;
+            callback(null, JSON.parse(JSON.stringify(datastore[key]))); // Make sure object is cloned
+        }, true);
+    }
+}
+
+function setDatastore(key, data, callback) {
+    var sdata = JSON.stringify(data);
+    datastore[key] = JSON.parse(sdata); // Make sure object is cloned
+    sdata = Buffer(sdata);
+    httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, function (err) {
+        if (err) {
+            error("Error setting Datastore for " + key + ": " + err.message);
+            if (callback) callback(err);
+            return;
+        }
+        log("Set Datastore for " + key);
+        if (callback) callback();
+    }, true);
+}
+
+function removePossiblyDangerousInformation(str) {
+    return str.replace(/([?&]k(?:ey)*=).*?([&])/g, "$1[API KEY]$2");
+}
+
+function httpGet(url, callback, silent, headers, _retries) {
+    if (!silent) log("[HTTP GET]" +
+        (_retries ? " (retry #" + _retries + ") " : " ") +
+        removePossiblyDangerousInformation(url));
+
+    if (!headers) headers = {};
+
+    request({
+        url: url,
+        headers: headers
+    }, function (err, response, body) {
+        if (err) {
+            var retries = _retries ? _retries : 0;
+            error("[HTTP GET] " + removePossiblyDangerousInformation(url) +
+                " (" + retries + "/3 retries) error: " + err.message);
+            if (retries === 3) {
+                error("[HTTP GET] Failed: " + err.message + "(" + err + ")");
+                callback(err);
+            } else {
+                httpGet(url, callback, silent, headers, retries + 1);
+            }
+            return;
+        }
+
+        callback(null, body);
+    });
+}
+
+function httpGetJson(url, callback, silent, headers) {
+    httpGet(url, function (err, data) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        if (!silent) log("[JSON PARSE] " + removePossiblyDangerousInformation(url));
+        var jsondata;
+        try {
+            jsondata = JSON.parse(data);
+        } catch (ex) {
+            callback(ex);
+            return;
+        }
+        callback(null, jsondata);
+    }, silent, headers);
+}
+
+function httpPost(url, data, callback, silent, headers) {
+    var purl = urlf.parse(url);
+    if (!silent) log("[HTTP POST] " + removePossiblyDangerousInformation(url));
+    var post_options = {
+        hostname: purl.hostname,
+        port: 80,
+        path: purl.path,
+        method: 'POST',
+        headers: {
+            "User-Agent": "node.js",
+            "Content-Type": "text/plain",
+            "Content-Length": data.length
+        }
+    };
+
+    if (headers) {
+        for (var i in headers) {
+            post_options.headers[i] = headers[i];
+        }
+    }
+
+    var req = http.request(post_options, function (res) {
+        var body = "";
+        res.on("data", function (chunk) {
+            body += chunk;
+        });
+        res.on("end", function () {
+            callback(null, body);
+        });
+    });
+
+    req.on("error", function (err) {
+        error("[HTTP POST] " + removePossiblyDangerousInformation(url) + " error: " + err.message);
+        callback(err);
+    });
+
+    req.write(data);
+    req.end();
+}
+
 module.exports = {
-    reloadPlugins: reloadPlugins,
-    reloadPlugin: reloadPlugin,
-    emojis: {}
-};
-
-
-var setupEmojis = function () {
-    for (var [key, value] of client.emojis) {
-        module.exports.emojis[value.name] = key;
+    log: log,
+    error: error,
+    emojis: client.emojis,
+    util: {
+        httpGet: httpGet,
+        httpGetJson: httpGetJson,
+        httpPost: httpPost
+    },
+    datastore: {
+        get: getDatastore,
+        set: setDatastore,
+        cache: datastore
+    },
+    admin: {
+        reloadPlugins: reloadPlugins,
+        reloadPlugin: reloadPlugin,
+        kill: function () {
+            log("Will die in a second.");
+            setTimeout(function () {
+                process.exit(0);
+            }, 1000);
+        },
+        plugins: plugins
     }
 };
 
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    setupEmojis();
+    //Set again as discord js didnt know what emojis we have until now
+    module.exports.emojis = client.emojis;
 });
 
 client.on('message', msg => {
     if (msg.author.bot) return;
 
-
     //msg.mentions.MessageMentions.everyone
     //
+    var msgCommand = msg.content.split(" ")[0].split(":")[0];
+
     for (var cmd in commands) {
-        if (msg.content.startsWith(cmd)) {
+        if (msgCommand === cmd) {
             //Get arguments (words separated by spaces)
             var args = msg.content.split(" ");
             //Take out the modifiers (words separated by : directly after the command)
@@ -126,13 +289,7 @@ client.on('message', msg => {
                 arguments: args,
                 modifiers: modifiers
             };
-            var info = {
-                msgId: msg.id,
-                tts: msg.tts,
-                channel: msg.channel,
-                user: msg.author.username
-            };
-            commands[cmd].exec(data, info, msg);
+            commands[cmd].exec(data, msg);
             
         }
     }
