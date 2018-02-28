@@ -38,6 +38,9 @@
     <Compile Include="plugins\misc.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plugins\search.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="secrets.json">

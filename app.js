@@ -187,7 +187,10 @@ function httpGetJson(url, callback, silent, headers) {
         try {
             jsondata = JSON.parse(data);
         } catch (ex) {
-            callback(ex);
+            if (data === "")
+                callback("Empty response body."); //Used in search for gelbooru because no hits = nothing in response
+            else
+                callback(ex);
             return;
         }
         callback(null, jsondata);
