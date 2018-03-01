@@ -118,6 +118,7 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
 
         //Sort the tags into known and unknown to know what to look up
         var unknownTags = [];
+        var countedAsteriskTags = [];
         for (var i in resultTags) {
             var tag = resultTags[i];
             //Unknown tag
@@ -132,7 +133,14 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
                     if (searchedTags[k].split("*")[0].length < 3)
                         continue;
                     //Otherwise it may be inentional so lets up the searched count
-                    if (tag.startsWith(searchedTags[k].split("*")[0])) {
+                    if (tag.indexOf("*") > -1 && countedAsteriskTags.indexOf(searchedTags[k]) === -1) {
+                        if (tag.startsWith(searchedTags[k].split("*")[0])) {
+                            data.sites[site].tags[tag].timesSearched++;
+                            //Only count the * tag once
+                            countedAsteriskTags.push(searchedTags[k]);
+                        }
+                    }
+                    else if (searchedTags[k] === tag) {
                         data.sites[site].tags[tag].timesSearched++;
                     }
                 }
@@ -140,6 +148,7 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
         }
 
         //Look up the unknown tags
+        countedAsteriskTags = [];
         getTags(site, unknownTags, {}, function (err, foundTags) {
             if (err)
                 return console.log(err);
@@ -153,14 +162,22 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
                         timesGotten: 1,
                         timesSearched: 0
                     };
-                    for (i in searchedTags) {
+                    for (k in searchedTags) {
                         //Handle * for searched tags
                         //if the searched tag was "xxx*" it probably wasnt focused at a specific tag
-                        if (searchedTags[i].split("*")[0].length < 3)
+                        if (searchedTags[k].split("*")[0].length < 3)
                             continue;
                         //Otherwise it may be inentional so lets up the searched count
-                        if (tag.name.startsWith(searchedTags[i].split("*")[0])) {
-                            data.sites[site].tags[tag.name].timesSearched++;
+                        if (tag.indexOf("*") > -1 && countedAsteriskTags.indexOf(searchedTags[k]) === -1) {
+                            if (tag.startsWith(searchedTags[k].split("*")[0])) {
+                                data.sites[site].tags[tag].timesSearched++;
+                                //Only count the * tag once
+                                countedAsteriskTags.push(searchedTags[k]);
+                            }
+                        }
+                        //If it doesnt have * it needs to match perfectly
+                        else if (searchedTags[k] === tag) {
+                            data.sites[site].tags[tag].timesSearched++;
                         }
                     }
                 }
