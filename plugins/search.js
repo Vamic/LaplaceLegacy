@@ -168,16 +168,16 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
                         if (searchedTags[k].split("*")[0].length < 3)
                             continue;
                         //Otherwise it may be inentional so lets up the searched count
-                        if (tag.indexOf("*") > -1 && countedAsteriskTags.indexOf(searchedTags[k]) === -1) {
+                        if (tag.name.indexOf("*") > -1 && countedAsteriskTags.indexOf(searchedTags[k]) === -1) {
                             if (tag.startsWith(searchedTags[k].split("*")[0])) {
-                                data.sites[site].tags[tag].timesSearched++;
+                                data.sites[site].tags[tag.name].timesSearched++;
                                 //Only count the * tag once
                                 countedAsteriskTags.push(searchedTags[k]);
                             }
                         }
                         //If it doesnt have * it needs to match perfectly
-                        else if (searchedTags[k] === tag) {
-                            data.sites[site].tags[tag].timesSearched++;
+                        else if (searchedTags[k] === tag.name) {
+                            data.sites[site].tags[tag.name].timesSearched++;
                         }
                     }
                 }
@@ -468,22 +468,32 @@ exports.commands = {
                     if (!data.searchstats || !data.searchstats.sites) {
                         return message.channel.send("No stats found.");
                     }
-                    if (!args.length) {
-                        var sites = Object.getOwnPropertyNames(data.searchstats.sites);
-                        args[0] = sites[Math.floor(Math.random() * sites.length)];
-                    }
-                    for (var j in cmds) {
-                        var cmd = cmds[j];
-                        if (contains(cmd, args[0])) {
-                            var site = data.searchstats.sites[cmd[0]];
-                            var tags = Object.getOwnPropertyNames(site.tags);
-                            args.push(tags[Math.floor(Math.random() * tags.length)]);
-                            break;
+
+                    var sites = data.searchstats.sites;
+                    var site = "";
+                    //No additional arguments, get a random site
+                    if (args.length) {
+                        //Check each site for the provided argument
+                        for (var j in cmds) {
+                            var cmd = cmds[j];
+                            if (contains(cmd, args[0])) {
+                                site = cmd[0];
+                            }
                         }
                     }
+                    //No site, get a random one
+                    if (!site) {
+                        var keys = Object.keys(sites);
+                        site = keys[Math.floor(Math.random() * keys.length)];
+                    }
+                    //Get tag
+                    var tags = Object.keys(sites[site].tags);
+                    var tag = [tags[Math.floor(Math.random() * tags.length)]];
+
+                    //Search
+                    if (contains(cmds.gelbooru, site))
+                        return gbSearch(info, args);
                 });
-                if (contains(cmds.gelbooru, firstArg))
-                    return gbSearch(info, args);
             } else if (contains(cmds.gelbooru, firstArg)) {
                 return gbSearch(info, args);
             } else {
