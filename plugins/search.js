@@ -284,7 +284,7 @@ function limitTags(arr, limit) {
 }
 
 function gbSearch(info, args) {
-    var url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=rating:safe+sort:random+-spoilers+" + encodeURIComponent(args.join("+"));
+    var url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=rating:safe+sort:random+-spoilers+" + encodeURIComponent(args.join("+")).replace(/%2B/g,"+");
     //Exclude unless searched for
     if (args.indexOf("game_cg") === -1)
         url += "+-game_cg";
