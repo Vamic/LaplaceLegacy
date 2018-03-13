@@ -58,6 +58,7 @@ function reloadPlugin(pluginName) {
                 } else {
                     commands[command.commands[j]] = {
                         source: pluginName,
+                        requirements: command.requirements,
                         exec: command.exec
                     };
                 }
@@ -240,11 +241,27 @@ function httpPost(url, data, callback, silent, headers) {
     req.end();
 }
 
+function checkRequirements(requirements, message) {
+    if (!requirements) return true;
+    for (var i = 0; i < requirements.length; i++) {
+        if (!requirements[i](message)) return false;
+    }
+    return true;
+}
+
 module.exports = {
     log: log,
     error: error,
     emojis: client.emojis,
     Attachment: Discord.Attachment,
+    requirements: {
+        guild: function (message) {
+            return message.guild ? true : false;
+        },
+        direct: function (message) {
+            return message.guild ? false : true;
+        }
+    },
     util: {
         httpGet: httpGet,
         httpGetJson: httpGetJson,
@@ -284,6 +301,11 @@ client.on('message', msg => {
 
     for (var cmd in commands) {
         if (msgCommand === cmd) {
+            if (!checkRequirements(commands[cmd].requirements, msg)) {
+                msg.reply("Nope.");
+                break;
+            }
+
             //Get arguments (words separated by spaces)
             var args = msg.content.split(" ");
             //Take out the modifiers (words separated by : directly after the command)
