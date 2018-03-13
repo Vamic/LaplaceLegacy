@@ -297,7 +297,7 @@ client.on('message', msg => {
                 modifiers: modifiers
             };
             commands[cmd].exec(data, msg);
-            
+            break;
         }
     }
 });
