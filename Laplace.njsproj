@@ -38,7 +38,11 @@
     <Compile Include="plugins\misc.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plugins\reactionimages.js" />
     <Compile Include="plugins\search.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="plugins\urbandictionary.js">
       <SubType>Code</SubType>
     </Compile>
     <Content Include="package.json" />

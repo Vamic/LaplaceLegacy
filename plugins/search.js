@@ -348,11 +348,11 @@ function gbSearch(info, args) {
                         for (var m in tags) {
                             if (tags[m] === i) {
                                 //Decide what group the tag goes in
-                                if (tag.type == tagTypes[site]["artist"])
+                                if (tag.type === tagTypes[site]["artist"])
                                     artists.push(tags[m]);
-                                else if (tag.type == tagTypes[site]["copyright"])
+                                else if (tag.type === tagTypes[site]["copyright"])
                                     copyrights.push(tags[m]);
-                                else if (tag.type == tagTypes[site]["character"])
+                                else if (tag.type === tagTypes[site]["character"])
                                     characters.push(tags[m]);
                             }
                         }

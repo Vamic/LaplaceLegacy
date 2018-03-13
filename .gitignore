@@ -298,3 +298,7 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 secrets.json
+*.gif
+*.png
+*.jpg
+*.jpeg
