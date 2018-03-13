@@ -1,6 +1,6 @@
 ﻿var bot = module.parent.exports;
 
-const trusted = ['95611335676526592'];
+const trusted = bot.secrets.admins;
 
 exports.commands = {
     kill: {

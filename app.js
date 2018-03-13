@@ -254,6 +254,10 @@ module.exports = {
     error: error,
     emojis: client.emojis,
     Attachment: Discord.Attachment,
+    secrets: {
+        keys: secrets.keys,
+        admins: secrets.admins
+    },
     requirements: {
         guild: function (message) {
             return message.guild ? true : false;
