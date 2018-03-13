@@ -47,6 +47,9 @@ function reloadPlugin(pluginName) {
         //Go through commands
         for (i in plugin.commands) {
             var command = plugin.commands[i];
+            //If no commands are defined, use the name of the property
+            if (!command.commands)
+                command.commands = [i];
             //Check all the ways to invoke the command
             for (j in command.commands) {
                 //Add them to the main list of commands
@@ -241,6 +244,7 @@ module.exports = {
     log: log,
     error: error,
     emojis: client.emojis,
+    Attachment: Discord.Attachment,
     util: {
         httpGet: httpGet,
         httpGetJson: httpGetJson,
