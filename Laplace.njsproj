@@ -32,6 +32,7 @@
     <Compile Include="plugins\admin.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plugins\dice.js" />
     <Compile Include="plugins\lists.js">
       <SubType>Code</SubType>
     </Compile>

@@ -92,7 +92,7 @@ function reloadPlugins(callback) {
                 if (files[i].length > 3 && files[i].endsWith(".js")) {
                     //Get filename
                     var plugin = files[i].substr(0, files[i].length - 3);
-                    success = success && reloadPlugin(plugin);
+                    success = reloadPlugin(plugin) && success;
                 }
             }
             if(!success && callback)
