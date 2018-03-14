@@ -53,8 +53,8 @@ function reloadPlugin(pluginName) {
             //Check all the ways to invoke the command
             for (j in command.commands) {
                 //Add them to the main list of commands
-                if (commands[command.commands]) {
-                    error("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands);
+                if (commands[command.commands[j]]) {
+                    error("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands[j]);
                 } else {
                     commands[command.commands[j]] = {
                         source: pluginName,
@@ -242,29 +242,32 @@ function httpPost(url, data, callback, silent, headers) {
 }
 
 function checkRequirements(requirements, message) {
-    if (!requirements) return true;
+    if (!requirements) return [true];
     for (var i = 0; i < requirements.length; i++) {
-        if (!requirements[i](message)) return false;
+        if (!requirements[i](message)) return [false, requirements[i].name];
     }
-    return true;
+    return [true];
 }
 
 module.exports = {
     log: log,
     error: error,
     emojis: client.emojis,
+    guilds: client.guilds,
+    voiceConnections: client.voiceConnections,
     Attachment: Discord.Attachment,
     secrets: {
         keys: secrets.keys,
         admins: secrets.admins
     },
     requirements: {
-        guild: function (message) {
-            return message.guild ? true : false;
-        },
-        direct: function (message) {
-            return message.guild ? false : true;
-        }
+        isAdmin: (msg) => secrets.admins.indexOf(msg.author.id) > -1,
+        guild: (msg) => msg.guild,
+        direct: (msg) => !msg.guild,
+        botInVoice: (msg) => msg.guild && client.voiceConnections.get(msg.guild.id),
+        botNotInVoice: (msg) => !(msg.guild && client.voiceConnections.get(msg.guild.id)),
+        userInVoice: (msg) => msg.member && msg.member.voiceChannel,
+        userNotInVoice: (msg) => !(msg.member && msg.member.voiceChannel)
     },
     util: {
         httpGet: httpGet,
@@ -302,29 +305,50 @@ client.on('message', msg => {
     //msg.mentions.MessageMentions.everyone
     //
     var msgCommand = msg.content.split(" ")[0].split(":")[0];
+    var foundCmd, cmdUsed, softCmd, softCmdUsed;
 
     for (var cmd in commands) {
-        if (msgCommand === cmd) {
-            if (!checkRequirements(commands[cmd].requirements, msg)) {
-                msg.reply("Nope.");
-                break;
-            }
-
-            //Get arguments (words separated by spaces)
-            var args = msg.content.split(" ");
-            //Take out the modifiers (words separated by : directly after the command)
-            var modifiers = args.splice(0, 1)[0].replace(cmd, "").split(":");
-            //Remove empty elemenst
-            args = args.filter(Boolean);
-            modifiers = modifiers.filter(Boolean);
-            var data = {
-                command: cmd,
-                arguments: args,
-                modifiers: modifiers
-            };
-            commands[cmd].exec(data, msg);
+        //If we get an exact match
+        if (msgCommand === cmd || msg.content === cmd) {
+            foundCmd = commands[cmd];
+            cmdUsed = cmd;
             break;
+        //If it starts with the command, followed by a space or :
+        } else if (msg.content.startsWith(cmd)) {
+            var char = msg.content[cmd.length];
+            if (char === " " || char === ":") {
+                softCmd = commands[cmd];
+                softCmdUsed = cmd;
+            }
         }
+    }
+
+    if (softCmd && !foundCmd) {
+        foundCmd = softCmd;
+        cmdUsed = softCmdUsed;
+    }
+
+    if (foundCmd) {
+        var reqs = checkRequirements(foundCmd.requirements, msg);
+        if (!reqs[0]) {
+            return msg.reply("Nope, failed requirement: " + reqs[1]);
+        }
+        var content = msg.content.replace(cmdUsed, "");
+
+        //Get arguments (words separated by spaces)
+        var args = content.split(" ");
+        //Take out the modifiers (words separated by : directly after the command)
+        var modifiers = args.splice(0, 1)[0].split(":");
+
+        //Remove empty elemenst
+        args = args.filter(Boolean);
+        modifiers = modifiers.filter(Boolean);
+        var data = {
+            command: cmdUsed,
+            arguments: args,
+            modifiers: modifiers
+        };
+        foundCmd.exec(data, msg);
     }
 });
 
