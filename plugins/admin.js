@@ -5,6 +5,7 @@ const trusted = bot.secrets.admins;
 exports.commands = {
     kill: {
         commands: ["-kill", "-die", "-quit", "-exit"],
+        requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (trusted.indexOf(message.author.id) === -1) return;
 
@@ -13,6 +14,7 @@ exports.commands = {
     },
     reloadPlugins: {
         commands: ["-reload", "-reloadPlugin", "-reloadPlugins"],
+        requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (trusted.indexOf(message.author.id) === -1) return;
 
