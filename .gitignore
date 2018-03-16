@@ -302,3 +302,5 @@ secrets.json
 *.png
 *.jpg
 *.jpeg
+plugins/djextension.js
+plugins/services/extension/

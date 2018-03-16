@@ -4,6 +4,10 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>Laplace</Name>
     <RootNamespace>Laplace</RootNamespace>
+    <EnableTypeScript>true</EnableTypeScript>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+    <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -23,6 +27,19 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
+    <TypeScriptTarget>ES2015</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptModuleKind>ES6</TypeScriptModuleKind>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,6 +52,12 @@
     <Compile Include="plugins\chatsayings.js" />
     <Compile Include="plugins\colors.js" />
     <Compile Include="plugins\dice.js" />
+    <Compile Include="plugins\dj.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="plugins\djextension.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="plugins\lists.js">
       <SubType>Code</SubType>
     </Compile>
@@ -45,6 +68,14 @@
     <Compile Include="plugins\search.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plugins\services\direct\Service.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="plugins\services\direct\Song.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="plugins\services\extension\Service.js" />
+    <Compile Include="plugins\services\extension\Song.js" />
     <Compile Include="plugins\urbandictionary.js">
       <SubType>Code</SubType>
     </Compile>
@@ -60,6 +91,9 @@
   <ItemGroup>
     <Folder Include="plugins\" />
     <Folder Include="plugins\chatsayings\" />
+    <Folder Include="plugins\services\" />
+    <Folder Include="plugins\services\direct\" />
+    <Folder Include="plugins\services\extension\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

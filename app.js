@@ -29,9 +29,9 @@ var error = function (msg) {
 };
 
 function reloadPlugin(pluginName) {
-    //Delete from cache so its actually reloading
-    delete require.cache[require.resolve("./plugins/" + pluginName + ".js")];
     try {
+        //Delete from cache so its actually reloading
+        delete require.cache[require.resolve("./plugins/" + pluginName + ".js")];
         var i, j;
         //Get plugin
         var plugin = require("./plugins/" + pluginName + ".js");
@@ -54,7 +54,8 @@ function reloadPlugin(pluginName) {
             for (j in command.commands) {
                 //Add them to the main list of commands
                 if (commands[command.commands[j]]) {
-                    error("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands[j]);
+                    if (!command.silentDupe)
+                        error("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands[j]);
                 } else {
                     commands[command.commands[j]] = {
                         source: pluginName,
@@ -256,6 +257,7 @@ module.exports = {
     guilds: client.guilds,
     voiceConnections: client.voiceConnections,
     Attachment: Discord.Attachment,
+    RichEmbed: Discord.RichEmbed,
     secrets: {
         keys: secrets.keys,
         admins: secrets.admins

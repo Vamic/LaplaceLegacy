@@ -9,6 +9,7 @@ exports.commands = {
         exec: function (command, message) {
             if (trusted.indexOf(message.author.id) === -1) return;
 
+            message.delete();
             bot.admin.kill();
         }
     },
@@ -16,6 +17,7 @@ exports.commands = {
         commands: ["-reload", "-reloadPlugin", "-reloadPlugins"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
+            message.delete();
             if (trusted.indexOf(message.author.id) === -1) return;
 
             //Reload all plugins
@@ -23,9 +25,9 @@ exports.commands = {
                 command.command === "-reload" && command.arguments.length === 0) {
                 bot.admin.reloadPlugins(function (err, result) {
                     if (err) {
-                        message.reply("One or more plugins failed to load.");
+                        message.reply("One or more plugins failed to load.").then(m => m.delete(5000));
                     } else {
-                        message.reply("Plugins successfully reloaded.");
+                        message.reply("Plugins successfully reloaded.").then(m => m.delete(5000));
                     }
                 });
             } else if (command.arguments.length > 0) {
@@ -35,12 +37,12 @@ exports.commands = {
                     if (bot.admin.reloadPlugin(command.arguments[i])) successes++;
                 }
                 if (successes === command.arguments.length) {
-                    message.reply("Plugins successfully reloaded.");
+                    message.reply("Plugins successfully reloaded.").then(m => m.delete(5000));
                 } else {
-                    message.reply("One or more plugins failed to load.");
+                    message.reply("One or more plugins failed to load.").then(m => m.delete(5000));
                 }
             } else {
-                message.reply("What?");
+                message.reply("What?").then(m => m.delete(5000));
             }
         }
     }
