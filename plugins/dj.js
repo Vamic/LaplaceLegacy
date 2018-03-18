@@ -103,7 +103,11 @@ scService.getSongInfo = function (url, cb) {
     });
 };
 
-const services = {};
+dService.setSongDisplay = setSongDisplay;
+scService.setSongDisplay = setSongDisplay;
+ytService.setSongDisplay = setSongDisplay;
+
+const services = module.exports.services ? module.exports.services : {};
 services[dService.type] = dService;
 services[ytService.type] = ytService;
 services[scService.type] = scService;
@@ -123,7 +127,7 @@ function getStreamOptions(id) {
     if (!volumes[id])
         setVolume(id, 50);
     return {
-        seek: bot.guilds.get(id).playlist.current.seek,
+        seek: (bot.guilds.get(id).playlist) ? bot.guilds.get(id).playlist.current.seek : 0,
         volume: volumes[id]
     };
 }
@@ -138,7 +142,8 @@ function setSongInfo(song, cb) {
 
         song.info = info;
         
-        setSongDisplay(song);
+        services[song.type].setSongDisplay(song);
+        setSongDisplayDescription(song);
         cb();
     });
 }
@@ -148,7 +153,7 @@ function setSongDisplayDescription(song) {
     song.info.currentTime = vc.dispatcher.time / 1000;
     
     var playtime = toHHMMSS(song.info.currentTime) + "/";
-    if (song.info.metadataType === "youtube" || song.info.metadataType === "soundcloud")
+    if (song.info.duration > 0)
         playtime += toHHMMSS(song.info.duration);
     else
         playtime += "?";
@@ -206,7 +211,6 @@ function setSongDisplay(song) {
         song.display.files = [new bot.Attachment(tags.img, thumbnailName)];
     }
     song.display.embed = embed;
-    setSongDisplayDescription(song);
 }
 
 function toDoubleDigit(input) {
@@ -260,12 +264,12 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: function (command, message) {
+            message.delete(DELETE_TIME);
             if (command.command === "!dj queue" && command.arguments.length === 0) return exports.commands.showqueue.exec(command, message);
 
             var input = command.arguments.join(" ");
             var serviceType = "youtube";
             var foundService = services["youtube"];
-            console.log(services);
             for (var type in services) {
                 if (services[type].regex.test(input)) {
                     if (services[type]) {
@@ -278,21 +282,42 @@ exports.commands = {
 
             var playlist = message.guild.playlist;
             playlist.add(command.arguments.join(" "), [foundService]).then(function (songs) {
-                if (!songs) return;
+                if (!songs.length) return;
                 for (var i in songs) {
                     var song = songs[i];
                     playlist[playlist.indexOf(song)].adder = message.member;
                     playlist[playlist.indexOf(song)].guild = message.guild;
                     playlist[playlist.indexOf(song)].seek = 0;
-                    playlist[playlist.indexOf(song)].serviceType = serviceType;
+                    var input = command.arguments[i];
+                    if (input.indexOf("&t=") > -1 ||
+                        input.indexOf("#t=") > -1 ||
+                        input.indexOf("?t=") > -1) {
+                        var time = "";
+                        var char = "";
+                        var start = input.indexOf("&t=") + 3;
+                        if (input.indexOf("#t=") > -1) {
+                            start = input.indexOf("#t=");
+                        }
+                        else if (input.indexOf("?t=") > -1) {
+                            start = input.indexOf("?t=");
+                        }
+                        for (var j = start; j < input.length; j++) {
+                            char = input[j];
+                            if (isNaN(char))
+                                break;
+                            time += char;
+                        }
+                        playlist[playlist.indexOf(song)].seek = time;
+                    }
                 }
                 if(songs.length === 1)
                     message.channel.send(message.member.displayName + " added song: " + songs[0].title + "\n<" + songs[0].streamURL + ">").then(m => m.delete(DELETE_TIME));
                 else
                     message.channel.send(message.member.displayName + " added " + songs.length + " songs").then(m => m.delete(DELETE_TIME));
-                message.delete(DELETE_TIME);
                 if (!playlist.playing)
-                    playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
+                    playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id)).then(function () {
+                        bot.user.setPresence({ game: { name: playlist.current.title }, status: 'online' });
+                    });
             });
         }
     },
@@ -305,14 +330,10 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
         exec: function (command, message) {
             message.channel.send("Skipped.").then(m => m.delete(DELETE_TIME));
-            var wasPlaying = message.guild.playlist.playing;
-            if (!message.guild.playlist.hasNext()) {
-                return message.guild.playlist.destroy();
-            }
-            message.guild.playlist.stop();
+            if (!message.guild.playlist.hasNext()) message.guild.playlist.destroy();
             message.guild.playlist.next();
-            if (wasPlaying)
-                message.guild.playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
+            message.guild.playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
+
             message.delete(DELETE_TIME);
         }
     },
@@ -352,6 +373,7 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
         exec: function (command, message) {
             var playlist = message.guild.playlist;
+            if (!playlist.current) return bot.error("[DJ-showcurrent] Error: No Current song.");
             var response = "Current: " + playlist.current.title + " **added by " + playlist.current.adder.displayName + "**";
             var count = 0;
             var overflow = 0;

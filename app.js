@@ -17,12 +17,16 @@ var datastoreURL = secrets.datastore.url,
 
 //Other
 var plugins = [],
+    extensions = {},
     commands = {};
 
 
 //Functions
 var log = function (msg) {
     console.log(msg);
+};
+var warn = function (msg) {
+    log(msg);
 };
 var error = function (msg) {
     log(msg);
@@ -43,6 +47,14 @@ function reloadPlugin(pluginName) {
                 delete commands[i];
             }
         }
+        //Check if this plugin is extending another
+        if (plugin.extends) {
+            if (!extensions[plugin.extends]) extensions[plugin.extends] = [];
+            if (extensions[pluginName] && extensions[pluginName].indexOf(plugin.extends) > -1)
+                warn("Infinite extensions detected between: " + pluginName + " and " + plugin.extends + "\n Ignored extensions from " + pluginName);
+            else if (!extensions[plugin.extends] || extensions[plugin.extends].indexOf(pluginName) === -1)
+                extensions[plugin.extends].push(pluginName);
+        }
 
         //Go through commands
         for (i in plugin.commands) {
@@ -54,7 +66,7 @@ function reloadPlugin(pluginName) {
             for (j in command.commands) {
                 //Add them to the main list of commands
                 if (commands[command.commands[j]]) {
-                    if (!command.silentDupe)
+                    if (!plugin.extends) //Ignore dupes when we're extending
                         error("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands[j]);
                 } else {
                     commands[command.commands[j]] = {
@@ -65,7 +77,15 @@ function reloadPlugin(pluginName) {
                 }
             }
         }
+
         log("Loaded " + pluginName);
+        if (extensions[pluginName]) {
+            for (i in extensions[pluginName]) {
+                var extensionPlugin = extensions[pluginName][i];
+                log("Extending " + pluginName);
+                reloadPlugin(extensionPlugin);
+            }
+        }
         return true;
     }
     catch (e) {
@@ -253,6 +273,7 @@ function checkRequirements(requirements, message) {
 module.exports = {
     log: log,
     error: error,
+    user: client.user,
     emojis: client.emojis,
     guilds: client.guilds,
     voiceConnections: client.voiceConnections,
@@ -299,6 +320,8 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     //Set again as discord js didnt know what emojis we have until now
     module.exports.emojis = client.emojis;
+    //ditto
+    module.exports.user = client.user;
 });
 
 client.on('message', msg => {
