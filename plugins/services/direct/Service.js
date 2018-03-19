@@ -28,6 +28,13 @@ class DirectService {
                         url: song
                     };
                     fetched.push(new DirectSong.default(this, info, this.ytdlBinary));
+                } else if (song.indexOf("http") > -1) {
+                    const info = {
+                        filename: song,
+                        id: fetchable.songs.indexOf(song),
+                        url: song
+                    };
+                    fetched.push(new DirectSong.default(this, info, this.ytdlBinary));
                 }
             }
             return fetched;
@@ -45,6 +52,26 @@ class DirectService {
         }
         
         return fetchable;
+    }
+
+    getSeekTo(inputUrl) {
+        var lookFor = ["&t=", "#t=", "?t=", "#"];
+        for (var i in lookFor) {
+            var key = lookFor[i];
+            var start = inputUrl.indexOf(key);
+            if (start === -1) continue;
+            start += key.length;
+            var time = "";
+            var char = "";
+            for (var j = start; j < inputUrl.length; j++) {
+                char = inputUrl[j];
+                if (isNaN(char))
+                    break;
+                time += char;
+            }
+            return time;
+        }
+        return 0;
     }
     
     getSongInfo(requestURL, cb) {
@@ -67,7 +94,7 @@ class DirectService {
                     array.push(data.charCodeAt(i));
                 }
                 if (array.length !== 10 || !data.startsWith("ID3"))
-                    return cb("not id3v2 -  " + data.substr(0, 10));
+                    return cb("not id3v2: " + data.substr(0, 10));
                 var offset = 6;
                 var size1 = array[offset];
                 var size2 = array[offset + 1];

@@ -18,7 +18,7 @@ class DirectSong extends Song {
         this.title = info.filename;
         this.trackID = info.id;
         this.streamURL = info.url;
-        this.ytdlBinary = ytdlBinary
+        this.ytdlBinary = ytdlBinary;
     }
     stream() {
         const ytdl = spawn(this.ytdlBinary, ["--no-playlist", "-f", "bestaudio/best/worst", "-o", "-", this.streamURL], { maxBuffer: Infinity });
