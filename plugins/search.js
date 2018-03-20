@@ -487,7 +487,8 @@ exports.commands = {
                         site = keys[Math.floor(Math.random() * keys.length)];
                     }
                     //Get tag
-                    var tags = Object.keys(sites[site].tags);
+                    var tags = Object.keys(sites[site].tags).map((tag) => sites[site].tags[tag].timesSearched ? tag : null).filter(Boolean);
+                    if (tags.length === 0) tags = [""];
                     var tag = [tags[Math.floor(Math.random() * tags.length)]];
 
                     //Search
