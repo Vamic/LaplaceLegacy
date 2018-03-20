@@ -231,7 +231,7 @@ function setSongDisplay(song) {
             }
         }
     }
-    if (tags.genre && tags.genre.length) {
+    if (tags.genre && tags.genre.filter(Boolean).length) {
         embed.addField("Genre", tags.genre.join(", "), true);
     }
     if (tags.imgURL) {

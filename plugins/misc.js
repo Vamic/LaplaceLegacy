@@ -47,6 +47,10 @@ exports.commands = {
         commands: ["!poll"],
         usage: "!poll:time question goes here | choice1/choice2/...",
         exec: function (command, message) {
+            if (command.arguments.length === 0 ||
+                command.arguments.join("").indexOf("|") === -1)
+                return message.reply("`" + this.usage + "`");
+
             //Decide how long the poll will last
             var time = 20;
             var lowLim = 5;
