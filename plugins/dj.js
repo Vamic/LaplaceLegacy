@@ -287,7 +287,7 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
         exec: function (command, message) {
-            message.guild.playlist.stop();
+            message.guild.playlist.pause();
             bot.voiceConnections.get(message.guild.id).channel.leave();
             message.delete(DELETE_TIME);
         }
@@ -475,7 +475,7 @@ exports.commands = {
             } else {
                 message.delete(DELETE_TIME);
                 initiateSongInfo(playlist.current, function (err) {
-                    bot.error(err);
+                    if(err) bot.error(err);
                     _sendQueue(message);
                 });
             }
@@ -500,7 +500,7 @@ exports.commands = {
                     var song = playlist[i];
                     waiting++;
                     initiateSongInfo(song, function (err, returnedSong) {
-                        bot.error(err);
+                        if(err) bot.error(err);
                         waiting--;
                         responsereArr.push("[" + returnedSong.info.title + "](" + returnedSong.info.url + ") added by " + returnedSong.adder.displayName);
                     });
@@ -555,7 +555,7 @@ exports.commands = {
             } else {
                 initiateSongInfo(playlist.current, function (err) {
                     message.channel.send(playlist.current.display).then(m => m.delete(DELETE_TIME * 3));
-                    bot.error(err);
+                    if(err) bot.error(err);
                 });
             }
         }

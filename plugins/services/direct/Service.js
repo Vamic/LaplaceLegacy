@@ -107,8 +107,7 @@ class DirectService {
                     | (size1 & 0x7f) << 21;
 
                 id3size = size + 10;
-
-                console.log("size of id3: " + id3size);
+                
                 options.headers.Range = "bytes=0-" + id3size;
                 var realrequest = https.get(options, function (response) {
                     require("musicmetadata")(response, function (err, data) {
