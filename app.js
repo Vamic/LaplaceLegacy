@@ -65,7 +65,7 @@ function reloadPlugin(pluginName) {
                 command.commands = [i];
             //Check all the ways to invoke the command
             for (j in command.commands) {
-                cmdName = command.commands[j].toLowerCase();
+                var cmdName = command.commands[j].toLowerCase();
                 //Add them to the main list of commands
                 if (commands[cmdName]) {
                     if (!plugin.extends) //Ignore dupes when we're extending
