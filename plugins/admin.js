@@ -1,16 +1,21 @@
 ﻿var bot = module.parent.exports;
 
-const trusted = bot.secrets.admins;
-
 exports.commands = {
     kill: {
         commands: ["-kill", "-die", "-quit", "-exit"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
-            if (trusted.indexOf(message.author.id) === -1) return;
 
             message.delete();
             bot.admin.kill();
+        }
+    },
+    say: {
+        commands: ["-say", "!say"],
+        requirements: [bot.requirements.isAdmin],
+        exec: function (command, message) {
+            message.delete();
+            message.channel.send(command.arguments.join(" "));
         }
     },
     reloadPlugins: {
@@ -18,7 +23,6 @@ exports.commands = {
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             message.delete();
-            if (trusted.indexOf(message.author.id) === -1) return;
 
             //Reload all plugins
             if (command.command === "-reloadPlugins" ||
