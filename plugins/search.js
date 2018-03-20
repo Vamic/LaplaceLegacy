@@ -492,7 +492,7 @@ exports.commands = {
 
                     //Search
                     if (contains(cmds.gelbooru, site))
-                        return gbSearch(info, args);
+                        return gbSearch(info, tag);
                 });
             } else if (contains(cmds.gelbooru, firstArg)) {
                 return gbSearch(info, args);
