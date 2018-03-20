@@ -18,6 +18,47 @@ exports.commands = {
             message.channel.send(command.arguments.join(" "));
         }
     },
+    listPlugins: {
+        commands: ["-plugins"],
+        requirements: [bot.requirements.isAdmin, bot.requirements.guild],
+        exec: function (command, message) {
+            message.delete();
+            var disabled = bot.admin.disabled[message.guild.id];
+            var plugins = bot.admin.plugins;
+            var response = [];
+            if (!disabled) disabled = {};
+            for (var i in plugins) {
+                var char = disabled[plugins[i]] ? "~~" : "";
+                response.push(char + plugins[i] + char);
+            }
+
+            message.channel.send("Plugins:\n" + response.join("\n")).then(m => m.delete(15000));
+        }
+    },
+    togglePlugins: {
+        commands: ["-enable", "-disable"],
+        requirements: [bot.requirements.isAdmin, bot.requirements.guild],
+        exec: function (command, message) {
+            message.delete();
+            if (command.arguments.length === 0) return message.reply("This command requires arguments.").then(m => m.delete(5000));
+            var i;
+            var success = true;
+            if (command.command === "-enable") {
+                for (i in command.arguments) {
+                    success = bot.admin.enablePlugin(command.arguments[i], message.guild.id) && success;
+                }
+            } else {
+                for (i in command.arguments) {
+                    success = bot.admin.disablePlugin(command.arguments[i], message.guild.id) && success;
+                }
+            }
+            if (success) {
+                message.reply(":thumbsup::skin-tone-1:").then(m => m.delete(5000));
+            } else {
+                message.reply(":thumbsdown::skin-tone-1:").then(m => m.delete(5000));
+            }
+        }
+    },
     reloadPlugins: {
         commands: ["-reload", "-reloadPlugin", "-reloadPlugins"],
         requirements: [bot.requirements.isAdmin],

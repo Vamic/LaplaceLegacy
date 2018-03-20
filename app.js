@@ -17,6 +17,7 @@ var datastoreURL = secrets.datastore.url,
 
 //Other
 var plugins = [],
+    disabled = {},
     extensions = {},
     commands = {};
 
@@ -64,14 +65,16 @@ function reloadPlugin(pluginName) {
                 command.commands = [i];
             //Check all the ways to invoke the command
             for (j in command.commands) {
+                cmdName = command.commands[j].toLowerCase();
                 //Add them to the main list of commands
-                if (commands[command.commands[j]]) {
+                if (commands[cmdName]) {
                     if (!plugin.extends) //Ignore dupes when we're extending
                         error("Duplicate command found and skipped: plugin=" + pluginName + " command=" + command.commands[j]);
                 } else {
-                    commands[command.commands[j]] = {
+                    commands[cmdName] = {
                         source: pluginName,
                         requirements: command.requirements,
+                        usage: command.usage,
                         exec: command.exec
                     };
                 }
@@ -94,6 +97,54 @@ function reloadPlugin(pluginName) {
         return false;
     }
 }
+
+function enablePlugin(pluginName, guildID) {
+    if (!disabled[guildID]) disabled[guildID] = {};
+    if (!disabled[guildID][pluginName]) return true;
+    try {
+        delete disabled[guildID][pluginName];
+        reloadPlugin(pluginName);
+        if (extensions[pluginName]) {
+            for (var i in extensions[pluginName])
+                enablePlugin(extensions[pluginName][i]);
+        }
+        return true;
+    }
+    catch (e) {
+        error("Unable to enable plugin: " + pluginName);
+        error(e.message);
+        return false;
+    }
+}
+
+function disablePlugin(pluginName, guildID) {
+    if (!disabled[guildID]) disabled[guildID] = {};
+    if (disabled[guildID][pluginName]) return true;
+    if (pluginName === "admin") return false;
+    try {
+        disabled[guildID][pluginName] = true;
+        if (extensions[pluginName]) {
+            for (var i in extensions[pluginName])
+                disablePlugin(extensions[pluginName][i]);
+        }
+
+        var extending = require("./plugins/" + pluginName + ".js").extends;
+        delete require.cache[require.resolve("./plugins/" + pluginName + ".js")];
+
+        if (extending) {
+            if (!disabled[guildID][extending])
+                reloadPlugin(extending);
+        }
+        return true;
+    }
+    catch (e) {
+        error("Unable to disable plugin: " + pluginName);
+        error(e.message);
+        return false;
+    }
+}
+
+
 function reloadPlugins(callback) {
     fs.readdir('plugins', function (err, files) {
         if (err) {
@@ -114,7 +165,8 @@ function reloadPlugins(callback) {
                 if (files[i].length > 3 && files[i].endsWith(".js")) {
                     //Get filename
                     var plugin = files[i].substr(0, files[i].length - 3);
-                    success = reloadPlugin(plugin) && success;
+                    if (!disabled[plugin])
+                        success = reloadPlugin(plugin) && success;
                 }
             }
             if(!success && callback)
@@ -305,13 +357,16 @@ module.exports = {
     admin: {
         reloadPlugins: reloadPlugins,
         reloadPlugin: reloadPlugin,
+        enablePlugin: enablePlugin,
+        disablePlugin: disablePlugin,
+        plugins: plugins,
+        disabled: disabled,
         kill: function () {
             log("Will die in a second.");
             setTimeout(function () {
                 process.exit(0);
             }, 1000);
-        },
-        plugins: plugins
+        }
     }
 };
 
@@ -329,17 +384,19 @@ client.on('message', msg => {
 
     //msg.mentions.MessageMentions.everyone
     //
-    var msgCommand = msg.content.split(" ")[0].split(":")[0];
+    var msgCommand = msg.content.split(" ")[0].split(":")[0].toLowerCase();
     var foundCmd, cmdUsed, softCmd, softCmdUsed;
 
     for (var cmd in commands) {
+        if (disabled[msg.guild.id] && disabled[msg.guild.id][commands[cmd].source])
+            continue;
         //If we get an exact match
-        if (msgCommand === cmd || msg.content === cmd) {
+        if (msgCommand === cmd || msg.content.toLowerCase() === cmd) {
             foundCmd = commands[cmd];
             cmdUsed = cmd;
             break;
         //If it starts with the command, followed by a space or :
-        } else if (msg.content.startsWith(cmd)) {
+        } else if (msg.content.toLowerCase().startsWith(cmd)) {
             var char = msg.content[cmd.length];
             if (char === " " || char === ":") {
                 softCmd = commands[cmd];
