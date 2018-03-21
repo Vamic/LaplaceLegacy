@@ -19,7 +19,21 @@ var datastoreURL = secrets.datastore.url,
 var plugins = [],
     disabled = {},
     extensions = {},
-    commands = {};
+    commands = {},
+    helpCommands = {},
+    rCommands = {};
+
+var requirements = {
+    isAdmin: (msg) => secrets.admins.indexOf(msg.author.id) > -1,
+    isUser: (msg) => !msg.author.bot,
+    isBot: (msg) => msg.author.bot,
+    guild: (msg) => msg.guild,
+    direct: (msg) => !msg.guild,
+    botInVoice: (msg) => msg.guild && client.voiceConnections.get(msg.guild.id),
+    botNotInVoice: (msg) => !(msg.guild && client.voiceConnections.get(msg.guild.id)),
+    userInVoice: (msg) => msg.member && msg.member.voiceChannel,
+    userNotInVoice: (msg) => !(msg.member && msg.member.voiceChannel)
+};
 
 
 //Functions
@@ -56,6 +70,9 @@ function reloadPlugin(pluginName) {
             else if (!extensions[plugin.extends] || extensions[plugin.extends].indexOf(pluginName) === -1)
                 extensions[plugin.extends].push(pluginName);
         }
+        else {
+            helpCommands[pluginName] = {};
+        }
 
         //Go through commands
         for (i in plugin.commands) {
@@ -63,6 +80,27 @@ function reloadPlugin(pluginName) {
             //If no commands are defined, use the name of the property
             if (!command.commands)
                 command.commands = [i];
+            else if (command.commands[0] === "") {
+                if (!command.requirements) continue;
+                rCommands[i] = {
+                    source: pluginName,
+                    requirements: command.requirements,
+                    usage: command.usage,
+                    exec: command.exec
+                };
+                continue;
+            }
+            if (!command.requirements) command.requirements = [];
+            if (command.requirements.indexOf(requirements.isBot) === -1)
+                command.requirements.push(requirements.isUser);
+
+            if (helpCommands[pluginName]) {
+                helpCommands[pluginName][command.commands[0]] = {
+                    requirements: command.requirements,
+                    usage: command.usage
+                };
+            }
+
             //Check all the ways to invoke the command
             for (j in command.commands) {
                 var cmdName = command.commands[j].toLowerCase();
@@ -335,15 +373,7 @@ module.exports = {
         keys: secrets.keys,
         admins: secrets.admins
     },
-    requirements: {
-        isAdmin: (msg) => secrets.admins.indexOf(msg.author.id) > -1,
-        guild: (msg) => msg.guild,
-        direct: (msg) => !msg.guild,
-        botInVoice: (msg) => msg.guild && client.voiceConnections.get(msg.guild.id),
-        botNotInVoice: (msg) => !(msg.guild && client.voiceConnections.get(msg.guild.id)),
-        userInVoice: (msg) => msg.member && msg.member.voiceChannel,
-        userNotInVoice: (msg) => !(msg.member && msg.member.voiceChannel)
-    },
+    requirements: requirements,
     util: {
         httpGet: httpGet,
         httpGetJson: httpGetJson,
@@ -377,18 +407,33 @@ client.on('ready', () => {
     module.exports.emojis = client.emojis;
     //ditto
     module.exports.user = client.user;
+
+    commands["!help"] = {
+        source: "",
+        usage: "Shows this.",
+        exec: helpCommand
+    };
 });
 
 client.on('message', msg => {
+    if (Object.keys(rCommands).length) {
+        for (var i in rCommands) {
+            var rCmd = rCommands[i];
+            var reqs = checkRequirements(rCmd.requirements, msg);
+            if (reqs[0]) {
+                rCmd.exec(msg);
+                return;
+            }
+        }
+    }
     if (msg.author.bot) return;
-
     //msg.mentions.MessageMentions.everyone
     //
     var msgCommand = msg.content.split(" ")[0].split(":")[0].toLowerCase();
     var foundCmd, cmdUsed, softCmd, softCmdUsed;
 
     for (var cmd in commands) {
-        if (disabled[msg.guild.id] && disabled[msg.guild.id][commands[cmd].source])
+        if (msg.guild && disabled[msg.guild.id] && disabled[msg.guild.id][commands[cmd].source])
             continue;
         //If we get an exact match
         if (msgCommand === cmd || msg.content.toLowerCase() === cmd) {
@@ -411,8 +456,9 @@ client.on('message', msg => {
     }
 
     if (foundCmd) {
-        var reqs = checkRequirements(foundCmd.requirements, msg);
+        reqs = checkRequirements(foundCmd.requirements, msg);
         if (!reqs[0]) {
+            if (reqs[1] === "isUser" || reqs[1] === "isBot") return;
             return msg.reply("Nope, failed requirement: " + reqs[1]);
         }
         var content = msg.content.replace(cmdUsed, "");
@@ -433,5 +479,36 @@ client.on('message', msg => {
         foundCmd.exec(data, msg);
     }
 });
+
+function helpCommand(command, message) {
+    var response = new Discord.RichEmbed();
+    var plugin, commands, fieldText, cmd;
+
+    response.setTitle("Help command for helpful helping.");
+    if (command.arguments.length === 0) {
+        fieldText = [];
+        for (var i in plugins) {
+            plugin = plugins[i];
+            if (plugin === "admin") continue;
+            fieldText.push("**" + plugin + "**");
+        }
+        if (fieldText.join("").length)
+            response.addField("Plugins", fieldText.join("\n"));
+    } else {
+        var content = command.arguments.join(" ");
+        var pIndex = plugins.indexOf(content);
+        if (pIndex > -1) {
+            plugin = plugins[pIndex];
+            commands = helpCommands[plugin];
+            fieldText = [];
+            for (cmd in commands) {
+                fieldText.push("**" + cmd + "**   " + (commands[cmd].usage ? "`" + commands[cmd].usage + "`" : ""));
+            }
+            if (fieldText.join("").length)
+                response.addField(plugin, fieldText.join("\n"));
+        }
+    }
+    message.author.send(response);
+}
 
 client.login(secrets.token);

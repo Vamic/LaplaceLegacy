@@ -5,8 +5,8 @@ exports.commands = {
         commands: ["-kill", "-die", "-quit", "-exit"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
-
-            message.delete();
+            if (message.channel.type !== "dm")
+                message.delete();
             bot.admin.kill();
         }
     },
@@ -14,7 +14,8 @@ exports.commands = {
         commands: ["-say", "!say"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
-            message.delete();
+            if (message.channel.type !== "dm")
+                message.delete();
             message.channel.send(command.arguments.join(" "));
         }
     },
@@ -63,7 +64,8 @@ exports.commands = {
         commands: ["-reload", "-reloadPlugin", "-reloadPlugins"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
-            message.delete();
+            if (message.channel.type !== "dm")
+                message.delete();
 
             //Reload all plugins
             if (command.command === "-reloadPlugins" ||

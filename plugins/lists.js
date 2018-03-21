@@ -12,7 +12,7 @@ function contains(lst, val) {
 
 exports.commands = {
     do: {
-        usage: "!do [index/indices to remove]",
+        usage: "[index/indices to remove]",
         commands: ["!do"],
         exec: function (command, message) {
             var args = command.arguments;
@@ -64,7 +64,7 @@ exports.commands = {
         }
     },
     todo: {
-        usage: "!todo [text to add] or [index to remove] or [two indices to swap]",
+        usage: "[text to add] or [index to remove] or [two indices to swap]",
         commands: ["!todo"],
         exec: function (command, message) {
             var args = command.arguments;
@@ -113,7 +113,7 @@ exports.commands = {
         }
     },
     newlist: {
-        usage: "!newlist [list name]",
+        usage: "[list name]",
         commands: ["!newlist"],
         exec: function (command, message) {
             var args = command.arguments;
@@ -143,7 +143,7 @@ exports.commands = {
     },
     lists: {
         commands: ["!list", "!lists"],
-        usage: "!list [list name] [add|delete|move] [thing(s)|index(es)|indexes]\nex: \n!list bestgirls add shinobu\nmichiru\n!list shoppinglist remove 0 2 3 4\n!list add [name of new list]",
+        usage: "[list name] [add|delete|move] [thing(s)|index(es)|indexes]\nex: \n!list bestgirls add shinobu\nmichiru\n!list shoppinglist remove 0 2 3 4\n!list add [name of new list]",
         description: "Lists are fun!",
         exec: function (command, message) {
             var args = command.arguments;
