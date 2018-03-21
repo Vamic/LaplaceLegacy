@@ -419,6 +419,8 @@ client.on('message', msg => {
     if (Object.keys(rCommands).length) {
         for (var i in rCommands) {
             var rCmd = rCommands[i];
+            if (msg.guild && disabled[msg.guild.id] && disabled[msg.guild.id][rCmd.source])
+                continue;
             var reqs = checkRequirements(rCmd.requirements, msg);
             if (reqs[0]) {
                 rCmd.exec(msg);
