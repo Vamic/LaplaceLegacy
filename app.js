@@ -494,8 +494,10 @@ function helpCommand(command, message) {
             if (plugin === "admin") continue;
             fieldText.push("**" + plugin + "**");
         }
-        if (fieldText.join("").length)
+        if (fieldText.join("").length) {
+            fieldText.push("`use !help [plugin name] to see commands`");
             response.addField("Plugins", fieldText.join("\n"));
+        }
     } else {
         var content = command.arguments.join(" ");
         var pIndex = plugins.indexOf(content);

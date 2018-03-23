@@ -28,7 +28,7 @@ exports.commands = {
             var time = Date.now();
             var embed = new bot.RichEmbed();
             embed.setTitle("A wild pokémon has appeared!");
-            embed.setDescription("Use p!catch <Pokemon> to enslave it!");
+            embed.setDescription("Use p!catch <Pokemon>");
             embed.setThumbnail(url);
             message.delete();
             message.channel.send(embed).then(function (newMessage) {
@@ -52,10 +52,9 @@ exports.commands = {
             var pokemonIndex = message.content.indexOf("caught a ") + "caught a ".length;
             var pokemon = message.content.substr(pokemonIndex).replace("!", "");
             for (var i in unclaimed) {
-                var item = unclaimed[i];
-                if (item.pokemon.endsWith(pokemon)) {
-                    item.msg.delete();
-                    delete item;
+                if (unclaimed[i].pokemon.endsWith(pokemon)) {
+                    unclaimed[i].msg.delete();
+                    delete unclaimed[i];
                 }
             }
         }
