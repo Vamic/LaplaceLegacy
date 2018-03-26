@@ -454,17 +454,18 @@ exports.commands = {
                 tags.sort((a, b) => b.count - a.count);
 
                 var responseText = [];
-
+                responseText.push("```");
                 for (var i in tags) {
                     if (i > 20) break;
                     var tag = tags[i];
-                    if (tag.count > 9)
-                        responseText.push(tag.tag + " `(" + tag.count + ")`");
+                    if (tag.count > 9 || tags.length < 20)
+                        responseText.push(tag.tag + " (" + tag.count + ")");
                 }
-                if (responseText.length === 0) responseText.push("No tags matched.");
+                if (responseText.length === 1)
+                    responseText.push("No tags matched.");
+                responseText.push("```");
                 var response = new bot.RichEmbed()
-                    .setTitle("Tags matching " + command.arguments[0])
-                    .addField('\u200B', responseText.join("\n"));
+                    .addField("Tags matching \"" + command.arguments[0] + "\"", responseText.join("\n"));
                 message.channel.send(response);
             });
         }
