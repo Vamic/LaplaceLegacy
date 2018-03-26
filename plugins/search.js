@@ -439,6 +439,37 @@ function contains(lst, val) {
 }
 
 exports.commands = {
+    tagsearch: {
+        commands: ["!searchtag", "!tagsearch", "!st", "!ts"],
+        description: "Look up tags",
+        exec: function (command, message) {
+            if (command.arguments.length !== 1) return;
+            var url = "https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=" + encodeURIComponent(command.arguments[0]);
+            bot.util.httpGetJson(url, function (err, tags) {
+                if (err) {
+                    console.log("Error while getting the tags from gelbooru.");
+                    console.log(err);
+                    return getTags(site, unknownTags, knownTags, callback);
+                }
+                tags.sort((a, b) => b.count - a.count);
+
+                var responseText = [];
+                responseText.push("```");
+                for (var i in tags) {
+                    if (i > 20) break;
+                    var tag = tags[i];
+                    if (tag.count > 9 || tags.length < 20)
+                        responseText.push(tag.tag + " (" + tag.count + ")");
+                }
+                if (responseText.length === 1)
+                    responseText.push("No tags matched.");
+                responseText.push("```");
+                var response = new bot.RichEmbed()
+                    .addField("Tags matching \"" + command.arguments[0] + "\"", responseText.join("\n"));
+                message.channel.send(response);
+            });
+        }
+    },
     search: {
         commands: ["!search", "!s"],
         description: "Search for stuff",
