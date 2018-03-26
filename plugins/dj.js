@@ -487,7 +487,7 @@ exports.commands = {
 
                 var waiting = 0;
 
-                var responsereArr = [];
+                var responseArr = [];
 
                 for (var i = playlist.pos + 1; i < playlist.length; i++) {
                     count++;
@@ -502,19 +502,21 @@ exports.commands = {
                     initiateSongInfo(song, function (err, returnedSong) {
                         if(err) bot.error(err);
                         waiting--;
-                        responsereArr.push("[" + returnedSong.info.title + "](" + returnedSong.info.url + ") added by " + returnedSong.adder.displayName);
+                        responseArr.push("[" + returnedSong.info.title + "](" + returnedSong.info.url + ") added by " + returnedSong.adder.displayName);
                     });
                 }
                 var interval = setInterval(function () {
                     if (waiting === 0) {
                         if (overflow > 0) {
-                            responsereArr.push(" . . . and " + overflow + " more.");
+                            responseArr.push(" . . . and " + overflow + " more.");
                         }
-                        var queueField = response.embed.fields.map((field) => field.name === "Queue" ? field : null).filter(Boolean);
-                        if (queueField.length) {
-                            queueField[0].value = responsereArr.join("\n");
-                        } else {
-                            response.embed.addField("Queue", responsereArr.join("\n"));
+                        if (responseArr.length) {
+                            var queueField = response.embed.fields.map((field) => field.name === "Queue" ? field : null).filter(Boolean);
+                            if (queueField.length) {
+                                queueField[0].value = responseArr.join("\n");
+                            } else {
+                                response.embed.addField("Queue", responseArr.join("\n"));
+                            }
                         }
                         message.channel.send(response).then(m => m.delete(DELETE_TIME * 3));
                         clearInterval(interval);
