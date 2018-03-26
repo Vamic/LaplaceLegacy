@@ -401,7 +401,7 @@ function gbSearch(info, args) {
 }
 
 
-function getTopTags(site) {
+function getTopTags(site, siteName) {
     var topArtist = { timesGotten: 0 };
     var topCopyright = { timesGotten: 0 };
     var topCharacter = { timesGotten: 0 };
@@ -410,17 +410,17 @@ function getTopTags(site) {
         if (tagName === "original" || tagName === "artist_request" || tagName === "copyright_request")
             continue;
 
-        if (tag.type === '1' && tag.timesGotten > topArtist.timesGotten) {
+        if (tag.type === tagTypes[siteName].artist && tag.timesGotten > topArtist.timesGotten) {
             topArtist = {
                 name: tagName,
                 timesGotten: tag.timesGotten
             };
-        } else if (tag.type === '3' && tag.timesGotten > topCharacter.timesGotten) {
+        } else if (tag.type === tagTypes[siteName].copyright && tag.timesGotten > topCopyright.timesGotten) {
             topCopyright = {
                 name: tagName,
                 timesGotten: tag.timesGotten
             };
-        } else if (tag.type === '4' && tag.timesGotten > topCharacter.timesGotten) {
+        } else if (tag.type === tagTypes[siteName].character && tag.timesGotten > topCharacter.timesGotten) {
             topCharacter = {
                 name: tagName,
                 timesGotten: tag.timesGotten
@@ -529,7 +529,7 @@ exports.commands = {
                             if (contains(cmd, args[0])) {
                                 if (data.sites[cmd[0]]) {
                                     site = data.sites[cmd[0]];
-                                    top = getTopTags(site);
+                                    top = getTopTags(site, cmd[0]);
 
                                     messageOut = "```Stats for " + cmd[0];
                                     messageOut += "\nSearches: " + site.searches;
@@ -560,7 +560,7 @@ exports.commands = {
                             if (site.chickens)
                                 totalChickens += site.chickens;
 
-                            var siteTop = getTopTags(site);
+                            var siteTop = getTopTags(site, i);
                             if (siteTop.topArtist.timesGotten > top.topArtist.timesGotten)
                                 top.topArtist = siteTop.topArtist;
                             if (siteTop.topCopyright.timesGotten > top.topCopyright.timesGotten)
@@ -593,7 +593,7 @@ exports.commands = {
                             if (contains(cmd, args[0])) {
                                 if (data.searchstats.sites[cmd[0]]) {
                                     var site = data.searchstats.sites[cmd[0]];
-                                    var top = getTopTags(site);
+                                    var top = getTopTags(site, cmd[0]);
 
                                     var messageOut = "```Stats for " + message.author.username + " on " + cmd[0];
                                     messageOut += "\nSearches: " + site.searches;
@@ -621,7 +621,7 @@ exports.commands = {
                             site = data.searchstats.sites[i];
                             totalSearches += site.searches;
                             totalChickens += site.chickens;
-                            var siteTop = getTopTags(site);
+                            var siteTop = getTopTags(site, i);
                             if (siteTop.topArtist.timesGotten > top.topArtist.timesGotten)
                                 top.topArtist = siteTop.topArtist;
                             if (siteTop.topCopyright.timesGotten > top.topCopyright.timesGotten)
