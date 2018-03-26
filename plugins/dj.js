@@ -217,7 +217,7 @@ function setSongDisplay(song) {
         if (tags.album) {
             var albumtext = tags.album;
             if (tags.albumartist.length)
-                albumtext += " ft. " + tags.albumartists.join(", ");
+                albumtext += " ft. " + tags.albumartist.join(", ");
             if (tags.year)
                 albumtext += " (" + tags.year + ")";
             embed.addField("Album", albumtext, true);
