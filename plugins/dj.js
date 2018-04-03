@@ -59,7 +59,7 @@ var listening = {
 const DELETE_TIME = 15000;
 const DEFAULT_VOLUME = 50;
 
-ytService.regex = /(https?:\/\/(www\.)?youtube\.\w{2,3}\/)|(http:\/\/(www\.)?youtu\.be\/)/i;
+ytService.regex = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/i;
 scService.regex = /https?:\/\/(www\.)*soundcloud.com\/.*?\/./i;
 //bcService.regex = /https?:\/\/(.*?)\.bandcamp.com\/track\/./i;
 
@@ -183,7 +183,7 @@ function setSongDisplayDescription(song) {
     var vc = bot.voiceConnections.get(song.guild.id);
     song.info.currentTime = vc.dispatcher.time / 1000;
     
-    var playtime = toHHMMSS(song.info.currentTime) + "/";
+    var playtime = toHHMMSS(song.info.currentTime + song.seek) + "/";
     if (song.info.duration > 0)
         playtime += toHHMMSS(song.info.duration);
     else
@@ -257,7 +257,7 @@ function toHHMMSS(input) {
 }
 
 function isValidURL(str) {
-    var pattern = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
+    var pattern = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/g;
     return pattern.test(str);
 }
 
@@ -377,9 +377,9 @@ exports.commands = {
                         var song = songs[i];
                         playlist[playlist.indexOf(song)].adder = message.member;
                         playlist[playlist.indexOf(song)].guild = message.guild;
-                        var input = foundServices[songs.type];
-                        if (isValidURL(input))
-                            playlist[playlist.indexOf(song)].seek = foundService.getSeekTo(input);
+                        var input = foundServices[songs[i].type];
+                        if (isValidURL(input)) 
+                            playlist[playlist.indexOf(song)].seek = parseInt(services[songs[i].type].getSeekTo(input));
                         else
                             playlist[playlist.indexOf(song)].seek = 0;
                     }
