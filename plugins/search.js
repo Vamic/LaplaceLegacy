@@ -100,7 +100,6 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
         //First time initialization
         if (!data.sites) {
             data.sites = {
-                sites: {}
             };
         }
         if (!data.sites[site]) {
@@ -204,16 +203,24 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
                     };
                 }
 
-                //Update stats for the site
-                userData.searchstats.sites[site].searches++;
+                //Update stats for the site on the user
+                var siteData = data.sites[site];
+                var userSiteData = userData.searchstats.sites[site];
+                userSiteData.searches++;
                 if (chicken)
-                    userData.searchstats.sites[site].chickens++;
-
+                    userSiteData.chickens++;
+                var searched = [];
                 //Store the searched for tags, artists and copyrights
                 for (i in resultTags) {
                     resultTag = resultTags[i];
-                    var tag = data.sites[site].tags[resultTag];
+
+                    var tag = siteData.tags[resultTag];
+                    if (!tag && userSiteData.tags[resultTag]) tag = userSiteData.tags[resultTag];
+                    if (tag && tag.type === tagTypes[site].metadata) continue;
+                    if (tag && tag.type === "0")
+                        console.log(tag);
                     var j;
+                    
                     //If it wasnt found, 
                     if (!tag) {
                         //Add the tag if it was searched for
@@ -223,44 +230,48 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
                                 continue;
                             if (resultTag.startsWith(searchedTags[j].split("*")[0])) {
                                 //Store it if its not there already
-                                if (!userData.searchstats.sites[site].tags[resultTag]) {
-                                    userData.searchstats.sites[site].tags[resultTag] = {
-                                        type: 0,
+                                if (!userSiteData.tags[resultTag]) {
+                                    userSiteData.tags[resultTag] = {
+                                        type: tagTypes[site].tag, //Type tag because otherwise it wouldve been found
                                         timesGotten: 0,
                                         timesSearched: 0
                                     };
                                 }
                                 //Up the stats
-                                userData.searchstats.sites[site].tags[resultTag].timesSearched++;
+                                userSiteData.tags[resultTag].timesSearched++;
+                                searched.push(resultTag);
+                                searchedTags.splice(j, 1); //Only count it once
                             }
                         }
                         //Up the amount gotten on added tags
-                        if (userData.searchstats.sites[site].tags[resultTag]) {
-                            userData.searchstats.sites[site].tags[resultTag].timesGotten++;
+                        if (userSiteData.tags[resultTag]) {
+                            userSiteData.tags[resultTag].timesGotten++;
                         }
-                        //Artist/Copyright/Character tags
-                    } else if (tag.type > 0 && tag.type < 5) {
-                        if (!userData.searchstats.sites[site].tags[resultTag]) {
-                            userData.searchstats.sites[site].tags[resultTag] = {
+                    } else {
+                        if (!userSiteData.tags[resultTag]) {
+                            userSiteData.tags[resultTag] = {
                                 type: tag.type,
                                 timesGotten: 0,
                                 timesSearched: 0
                             };
                         }
                         //Add stats
-                        userData.searchstats.sites[site].tags[resultTag].timesGotten++;
+                        userSiteData.tags[resultTag].timesGotten++;
                         for (j in searchedTags) {
                             //Bla bla "xxx*" not enough to count
                             if (searchedTags[j].split("*")[0].length < 3)
                                 continue;
                             if (resultTag.startsWith(searchedTags[j].split("*")[0])) {
-                                userData.searchstats.sites[site].tags[resultTag].timesSearched++;
+                                userSiteData.tags[resultTag].timesSearched++;
+                                searched.push(resultTag);
+                                searchedTags.splice(j, 1); //Only count it once
                             }
                         }
                     }
                 }
                 //Save it
                 bot.datastore.set("user_" + user, userData);
+                data["userSearch"] = searched;
                 callback(null, data);
             });
         });
@@ -296,7 +307,7 @@ function gbSearch(info, args) {
             //if we got an empty response there were no posts with those tags
             if (err === "Empty response body.") {
                 return updateStats(cmds.gelbooru[0], args, [], info.user, true, function (err, data) {
-                    info.channel.send("Nobody here but us chickens!");
+                    info.channel.send("Nobody here but us chickens!" + ((args.length === 1) ? " (" + args[0] + ")" : ""));
                 });
             } else {
                 console.log(err);
@@ -316,6 +327,7 @@ function gbSearch(info, args) {
         var artists = [];
         var copyrights = [];
         var characters = [];
+        var searched = [];
 
         var timeOutTriggered = false;
         //Whether or not to go ahead and send the image without the tags
@@ -341,24 +353,25 @@ function gbSearch(info, args) {
                     return;
                 }
                 handled = true;
-                for (var i in data.sites[site].tags) {
-                    var tag = data.sites[site].tags[i];
-                    if (tag.type > 0) {
-                        //Filter out special tags from the ones we have in the post
-                        for (var m in tags) {
-                            if (tags[m] === i) {
-                                //Decide what group the tag goes in
-                                if (tag.type === tagTypes[site]["artist"])
-                                    artists.push(tags[m]);
-                                else if (tag.type === tagTypes[site]["copyright"])
-                                    copyrights.push(tags[m]);
-                                else if (tag.type === tagTypes[site]["character"])
-                                    characters.push(tags[m]);
-                            }
-                        }
+                
+                for (var m in tags) {
+                    var tag = data.sites[site].tags[tags[m]];
+                    if (tag) {
+                        //Decide what group the tag goes in
+                        if (tag.type === tagTypes[site]["artist"])
+                            artists.push(tags[m]);
+                        else if (tag.type === tagTypes[site]["copyright"])
+                            copyrights.push(tags[m]);
+                        else if (tag.type === tagTypes[site]["character"])
+                            characters.push(tags[m]);
+                        if (data.userSearch.length === 1 && data.userSearch.indexOf(tags[m]) > -1)
+                            searched.push(tags[m]);
+                    } else if (data.userSearch.indexOf(tags[m]) > -1) {
+                        //Get the searched non special tags
+                        searched.push(tags[m]);
                     }
                 }
-
+                
                 //Allow for up to 10 tags
                 if (characters.length > 10)
                     characters = limitTags(characters, 10);
@@ -377,6 +390,8 @@ function gbSearch(info, args) {
                 var result = "`Art: " + artists.join(" ");
                 result += "`  `Copyrights: " + copyrights.join(" ");
                 result += "`\n`Characters: " + characters.join(" ");
+                if (searched.length > 0 && searched.length < 10)
+                    result += "`  `Searched: " + searched.join(" ");
                 result += "`\n [" + id + "+" + score + "p]" + imgUrl;
 
 
