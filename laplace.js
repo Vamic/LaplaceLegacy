@@ -17,6 +17,7 @@ var datastoreURL = secrets.datastore.url,
 
 //Other
 var plugins = [],
+    hooks = {},
     disabled = {},
     extensions = {},
     commands = {},
@@ -37,17 +38,19 @@ var requirements = {
 
 
 //Functions
-var log = function (msg) {
-    console.log(msg);
+
+var log = function (msg, type) {
+    if (!type) type = "log";
+    console.log("[Laplace." + type + "] " + msg);
 };
 var warn = function (msg) {
-    log(msg);
+    log(msg, "warn");
 };
 var error = function (msg) {
-    log(msg);
+    log(msg, "err");
 };
 
-function reloadPlugin(pluginName) {
+function reloadPlugin(pluginName, shush) {
     try {
         //Delete from cache so its actually reloading
         delete require.cache[require.resolve("./plugins/" + pluginName + ".js")];
@@ -119,11 +122,17 @@ function reloadPlugin(pluginName) {
             }
         }
 
-        log("Loaded " + pluginName);
+        //Add hooks
+        for (i in plugin.hooks) {
+            if (!hooks[i]) hooks[i] = [];
+            hooks[i].push(plugin.hooks[i]);
+        }
+
+        if (!shush) log("Loaded " + pluginName);
         if (extensions[pluginName]) {
             for (i in extensions[pluginName]) {
                 var extensionPlugin = extensions[pluginName][i];
-                log("Extending " + pluginName);
+                if (!shush) log("Extending " + pluginName);
                 reloadPlugin(extensionPlugin);
             }
         }
@@ -193,6 +202,8 @@ function reloadPlugins(callback) {
         }
         try {
             var success = true;
+            var successCount = 0;
+            var failCount = 0;
             //Reset plugin variables
             module.exports.admin.plugins = plugins = [];
             commands = {};
@@ -203,10 +214,15 @@ function reloadPlugins(callback) {
                 if (files[i].length > 3 && files[i].endsWith(".js")) {
                     //Get filename
                     var plugin = files[i].substr(0, files[i].length - 3);
-                    if (!disabled[plugin])
-                        success = reloadPlugin(plugin) && success;
+                    if (!disabled[plugin]) {
+                        var currentSuccess = reloadPlugin(plugin, true);
+                        success = currentSuccess && success;
+                        if (currentSuccess) successCount++;
+                        else failCount++;
+                    }
                 }
             }
+            log("Reloaded " + successCount + " plugins, " + (success ? "none failed." : failCount + " failed."));
             if(!success && callback)
                 callback("Couldn't load one or more plugins", false);
             else if (callback)
@@ -222,6 +238,13 @@ function reloadPlugins(callback) {
 
 //Load em up
 reloadPlugins();
+
+function callHooks(hook) {
+    log("Calling hook: \"" + hook + "\"");
+    for (var i in hooks[hook]) {
+        hooks[hook][i]();
+    }
+}
 
 
 function getDatastore(key, callback) {
@@ -402,7 +425,7 @@ module.exports = {
 
 
 client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
+    log(`Logged in as ${client.user.tag}!`);
     //Set again as discord js didnt know what emojis we have until now
     module.exports.emojis = client.emojis;
     //ditto
@@ -413,6 +436,8 @@ client.on('ready', () => {
         usage: "Shows this.",
         exec: helpCommand
     };
+
+    callHooks("ready");
 });
 
 client.on('message', msg => {

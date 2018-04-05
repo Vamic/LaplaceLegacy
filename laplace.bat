@@ -2,3 +2,4 @@
 
 node app.js
 
+pause

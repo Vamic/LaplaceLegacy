@@ -8,6 +8,12 @@
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
+    <DebuggerPort>
+    </DebuggerPort>
+    <NodeExeArguments>
+    </NodeExeArguments>
+    <ScriptArguments>
+    </ScriptArguments>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -15,7 +21,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>5f65927e-c4ac-40b4-92fd-dfceeb4b431c</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>botmanager.js</StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
@@ -23,7 +29,7 @@
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <StartWebBrowser>false</StartWebBrowser>
+    <StartWebBrowser>False</StartWebBrowser>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,8 +50,11 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Run' ">
+    <OutputPath>bin\Run\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
-    <Compile Include="app.js" />
+    <Compile Include="laplace.js" />
     <Compile Include="plugins\admin.js">
       <SubType>Code</SubType>
     </Compile>
@@ -80,6 +89,9 @@
     <Compile Include="plugins\services\extension\Service.js" />
     <Compile Include="plugins\services\extension\Song.js" />
     <Compile Include="plugins\urbandictionary.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="botmanager.js">
       <SubType>Code</SubType>
     </Compile>
     <Content Include="package.json" />
