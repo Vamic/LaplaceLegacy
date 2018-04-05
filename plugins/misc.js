@@ -39,8 +39,8 @@ exports.commands = {
     testCommand: {
         commands: ["!test"],
         exec: function (command, message) {
-            console.log(command.arguments);
-            console.log(command.modifiers);
+            bot.log(command.arguments);
+            bot.log(command.modifiers);
         }
     },
     poll: {

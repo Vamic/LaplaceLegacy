@@ -56,8 +56,8 @@ function getTags(site, unknownTags, knownTags, callback) {
             var url = "https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name=" + encodeURIComponent(nextTag);
             bot.util.httpGetJson(url, function (err, tags) {
                 if (err) {
-                    console.log("Error while getting the tag from gelbooru.");
-                    console.log(err);
+                    bot.error("Error while getting the tag from gelbooru.");
+                    bot.error(err);
                     return getTags(site, unknownTags, knownTags, callback);
                 }
                 //Add the tag to our known tags and storage
@@ -150,7 +150,7 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
         countedAsteriskTags = [];
         getTags(site, unknownTags, {}, function (err, foundTags) {
             if (err)
-                return console.log(err);
+                return bot.error(err);
             //Add the tags to stats
             for (i in foundTags) {
                 var tag = foundTags[i];
@@ -218,7 +218,7 @@ function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
                     if (!tag && userSiteData.tags[resultTag]) tag = userSiteData.tags[resultTag];
                     if (tag && tag.type === tagTypes[site].metadata) continue;
                     if (tag && tag.type === "0")
-                        console.log(tag);
+                        bot.error(tag);
                     var j;
                     
                     //If it wasnt found, 
@@ -307,10 +307,10 @@ function gbSearch(info, args) {
             //if we got an empty response there were no posts with those tags
             if (err === "Empty response body.") {
                 return updateStats(cmds.gelbooru[0], args, [], info.user, true, function (err, data) {
-                    info.channel.send("Nobody here but us chickens!" + ((args.length === 1) ? " (" + args[0] + ")" : ""));
+                    info.channel.send("Nobody here but us chickens!" + (args.length === 1 ? " (" + args[0] + ")" : ""));
                 });
             } else {
-                console.log(err);
+                bot.error(err);
                 return info.channel.send("something broke when fetching the images");
             }
         }
@@ -462,8 +462,8 @@ exports.commands = {
             var url = "https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=" + encodeURIComponent(command.arguments[0]);
             bot.util.httpGetJson(url, function (err, tags) {
                 if (err) {
-                    console.log("Error while getting the tags from gelbooru.");
-                    console.log(err);
+                    bot.error("Error while getting the tags from gelbooru.");
+                    bot.error(err);
                     return getTags(site, unknownTags, knownTags, callback);
                 }
                 tags.sort((a, b) => b.count - a.count);
