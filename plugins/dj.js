@@ -5,8 +5,6 @@ const cassette = require("cassette");
 const djsmusic = require("discord.js-music");
 const ytdl = require('ytdl-core'); //For youtube service
 
-//Check and Download youtube-dl binary
-
 const request = require("request");
 const fs = require('fs');
 
@@ -22,7 +20,7 @@ var youtubeDlUrl = "https://yt-dl.org/latest/" + binName;
 var downloadFileTo = function (url, dest, cb) {
     var file = fs.createWriteStream(dest);
     file.on('error', function (err) {
-        console.log(err);
+        bot.error(err);
     });
     file.on('finish', function () {
         file.close(cb);
@@ -51,6 +49,9 @@ const dService = new DirectService.default(ytdlBinary);
 
 var volumes = {
     //<GUILD_ID> : <0-1>
+};
+var lastChannel = {
+    //<GUILD_ID> : <VOICE_CHANNEL_ID>
 };
 var listening = {
     //<GUILD_ID> : <BOOLEAN>
@@ -133,6 +134,61 @@ services[dService.type] = dService;
 services[ytService.type] = ytService;
 services[scService.type] = scService;
 
+var storedPlaylists = { playing: [] };
+function saveCurrentPlaylist(id, cb) {
+    var playlist = bot.guilds.get(id).playlist;
+    var tempSeek = playlist.current.seek;
+    playlist.current.seek = getSongTime(playlist.current);
+    if (!storedPlaylists[id]) storedPlaylists[id] = {};
+    storedPlaylists[id].songs = playlist.map((song) => (
+        {
+            url: song.streamURL,
+            seek: song.seek,
+            adder: song.adder,
+            type: song.type
+        }
+    ));
+    playlist.current.seek = tempSeek;
+    storedPlaylists[id].channel = lastChannel[id];
+    if (playlist.playing && storedPlaylists.playing.indexOf(id) === -1)
+        storedPlaylists.playing.push(id);
+    else if (!playlist.playing && storedPlaylists.playing.indexOf(id) > -1)
+        storedPlaylists.playing.splice(storedPlaylists.playing.indexOf(id));
+    
+    fs.writeFile("./tmp/dj/queues.json", JSON.stringify(storedPlaylists), function (err, data) {
+        if (err) {
+            bot.error(err);
+        }
+        if (cb) cb(err, data);
+    });
+}
+
+function clearPlaylistSave(id, cb) {
+    var playlist = bot.guilds.get(id).playlist;
+    delete storedPlaylists[id];
+
+    if (storedPlaylists.playing.indexOf(id) > -1)
+        storedPlaylists.playing.splice(storedPlaylists.playing.indexOf(id));
+
+    fs.writeFile("./tmp/dj/queues.json", JSON.stringify(storedPlaylists), function (err, data) {
+        if (err) {
+            bot.error(err);
+        }
+        if (cb) cb(err, data);
+    });
+}
+
+function loadLastPlaylists(cb) {
+    fs.readFile("./tmp/dj/queues.json", function (err, data) {
+        if (err) {
+            storedPlaylists = { playing: [] };
+        } else {
+            storedPlaylists = JSON.parse(data);
+        }
+        cb();
+    });
+}
+
 function setVolume(id, volume) {
     if (!volume) volume = DEFAULT_VOLUME;
     if (volume >= 0 && volume <= 100) volume = volume / 100;
@@ -159,14 +215,17 @@ function initiateSongInfo(song, cb) {
         if (!info) info = {};
 
         var vc = bot.voiceConnections.get(song.guild.id);
-        info.currentTime = vc.dispatcher.time / 1000;
-        info.addedBy = song.adder.displayName;
+        if (vc && vc.dispatcher)
+            info.currentTime = vc.dispatcher.time / 1000;
+        else
+            info.currentTime = 0;
+        info.addedBy = song.adder;
 
         song.info = info;
 
         if (err) {
             song.info = {};
-            song.info.addedBy = song.adder.displayName;
+            song.info.addedBy = song.adder;
             song.info.url = song.streamURL;
             song.info.title = song.streamURL;
             song.display = { embed: new bot.RichEmbed().setAuthor("Unknown").setTitle(song.streamURL) };
@@ -179,11 +238,18 @@ function initiateSongInfo(song, cb) {
     });
 }
 
-function setSongDisplayDescription(song) {
+function getSongTime(song) {
+    if (!song.guild) return song.seek || 0;
     var vc = bot.voiceConnections.get(song.guild.id);
-    song.info.currentTime = vc.dispatcher.time / 1000;
-    
-    var playtime = toHHMMSS(song.info.currentTime + song.seek) + "/";
+    if (vc && vc.dispatcher)
+        return song.seek + vc.dispatcher.time / 1000;
+    else
+        return song.seek;
+}
+
+function setSongDisplayDescription(song) {
+    song.info.currentTime = getSongTime(song);
+    var playtime = toHHMMSS(song.info.currentTime) + "/";
     if (song.info.duration > 0)
         playtime += toHHMMSS(song.info.duration);
     else
@@ -194,7 +260,6 @@ function setSongDisplayDescription(song) {
 function setSongDisplay(song) {
     var tags = song.info;
     var embed = new bot.RichEmbed();
-    var playtime = toHHMMSS(tags.currentTime) + "/";
     song.display = {};
 
     if (tags.metadataType === "youtube") embed.setColor([150, 50, 50]); 
@@ -257,8 +322,80 @@ function toHHMMSS(input) {
 }
 
 function isValidURL(str) {
-    var pattern = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/g;
+    const pattern = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/g;
     return pattern.test(str);
+}
+
+function startPlaying(id, playlist, channel) {
+    if (!listening[id]) {
+        listening[id] = true;
+        listenToPlaylistEvents(playlist);
+    }
+    lastChannel[id] = channel.id;
+    playlist.start(channel, getStreamOptions(id));
+}
+
+function listenToPlaylistEvents(playlist) {
+    playlist.events.on("playing", function () {
+        bot.user.setPresence({ game: { name: playlist.current.title }, status: 'online' });
+        if (!playlist.interval) {
+            playlist.interval = setInterval(function () {
+                if (!playlist.playing) {
+                    clearInterval(playlist.interval);
+                    playlist.interval = null;
+                }
+                saveCurrentPlaylist(playlist.guild.id);
+            }, 5000);
+        }
+    });
+    playlist.events.on("ended", function (reason) {
+        bot.user.setPresence({ game: {}, status: 'online' });
+        clearInterval(playlist.interval);
+        playlist.interval = null;
+        clearPlaylistSave(playlist.guild.id);
+    });
+    playlist.events.on("error", function (err) {
+        bot.user.setPresence({ game: {}, status: 'online' });
+        clearInterval(playlist.interval);
+        playlist.interval = null;
+        bot.error(err);
+    });
+    playlist.events.on("streamError", function (err) {
+        bot.user.setPresence({ game: {}, status: 'online' });
+        clearInterval(playlist.interval);
+        playlist.interval = null;
+        bot.error(err);
+    });
+}
+
+function queueSongs(id, input, service, cb) {
+    bot.guilds.get(id).playlist.add(input, [services[service]]).then(songs => cb(songs));
+}
+
+function reQueue(id, data) {
+    var queue = data.songs;
+    var channel = data.channel;
+    var queued = 0;
+    for (var i in queue) {
+        var song = queue[i];
+        queueSongs(id, song.url, song.type, function (songs) {
+            queued++;
+            if (songs.length) {
+                songs[0].seek = song.seek;
+                songs[0].adder = song.adder;
+            } else {
+                bot.error("Couldn't requeue " + song.url);
+            }
+        });
+    }
+    var check = setInterval(function () {
+        if (queued === queue.length) {
+            clearInterval(check);
+            var guild = bot.guilds.get(id);
+            var voiceChannel = guild.channels.get(channel);
+            startPlaying(id, guild.playlist, voiceChannel);
+        }
+    }, 1000);
 }
 
 exports.commands = {
@@ -274,8 +411,10 @@ exports.commands = {
             message.delete(DELETE_TIME);
             message.member.voiceChannel.join().then(function () {
                 message.channel.send("Here I am.").then(m => m.delete(DELETE_TIME));
-                if (message.guild.playlist.current)
+                if (message.guild.playlist.current) {
                     message.guild.playlist.start(message.member.voiceChannel);
+                    lastChannel[message.guild.id] = message.member.voiceChannel.id;
+                }
             });
         }
     },
@@ -361,7 +500,7 @@ exports.commands = {
             var count = 0;
 
             for (type in foundServices) {
-                playlist.add(foundServices[type], [services[type]]).then(function (songs) {
+                queueSongs(message.guild.id, foundServices[type], type, function (songs) {
                     totalSongs = totalSongs.concat(songs);
                     count++;
                     if (count === Object.keys(foundServices).length) {
@@ -375,7 +514,7 @@ exports.commands = {
 
                     for (var i in songs) {
                         var song = songs[i];
-                        playlist[playlist.indexOf(song)].adder = message.member;
+                        playlist[playlist.indexOf(song)].adder = message.member.displayName;
                         playlist[playlist.indexOf(song)].guild = message.guild;
                         var input = foundServices[songs[i].type];
                         if (isValidURL(input)) 
@@ -384,27 +523,7 @@ exports.commands = {
                             playlist[playlist.indexOf(song)].seek = 0;
                     }
 
-                    if (!playlist.playing)
-                        playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id)).then(function () {
-                            var vc = bot.voiceConnections.get(message.guild.id);
-                            if (!listening[message.guild.id]) {
-                                listening[message.guild.id] = true;
-                                playlist.events.on("playing", function () {
-                                    bot.user.setPresence({ game: { name: playlist.current.title }, status: 'online' });
-                                });
-                                playlist.events.on("ended", function (reason) {
-                                    bot.user.setPresence({ game: {}, status: 'online' });
-                                });
-                                playlist.events.on("error", function (err) {
-                                    bot.user.setPresence({ game: {}, status: 'online' });
-                                    bot.error(err);
-                                });
-                                playlist.events.on("streamError", function (err) {
-                                    bot.user.setPresence({ game: {}, status: 'online' });
-                                    bot.error(err);
-                                });
-                            }
-                        });
+                    if (!playlist.playing) startPlaying(message.guild.id, playlist, message.member.voiceChannel);
                 });
             }
         }
@@ -420,8 +539,10 @@ exports.commands = {
             message.channel.send("Skipped.").then(m => m.delete(DELETE_TIME));
             if (!message.guild.playlist.hasNext()) message.guild.playlist.destroy();
             message.guild.playlist.next();
-            if (message.guild.playlist.current)
+            if (message.guild.playlist.current) {
                 message.guild.playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
+                lastChannel[message.guild.id] = message.member.voiceChannel.id;
+            }
 
             message.delete(DELETE_TIME);
         }
@@ -449,8 +570,10 @@ exports.commands = {
         exec: function (command, message) {
             message.channel.send("Resumed.").then(m => m.delete(DELETE_TIME));
             message.guild.playlist.resume();
-            if (!message.guild.playlist.playing)
+            if (!message.guild.playlist.playing) {
                 message.guild.playlist.start(message.channel, getStreamOptions(message.guild.id));
+                lastChannel[message.guild.id] = message.member.voiceChannel.id;
+            }
             message.delete(DELETE_TIME);
         }
     },
@@ -502,7 +625,7 @@ exports.commands = {
                     initiateSongInfo(song, function (err, returnedSong) {
                         if(err) bot.error(err);
                         waiting--;
-                        responseArr.push("[" + returnedSong.info.title + "](" + returnedSong.info.url + ") added by " + returnedSong.adder.displayName);
+                        responseArr.push("[" + returnedSong.info.title + "](" + returnedSong.info.url + ") added by " + returnedSong.adder);
                     });
                 }
                 var interval = setInterval(function () {
@@ -604,6 +727,20 @@ exports.commands = {
             message.channel.send("Cleared all songs.").then(m => m.delete(DELETE_TIME));
             message.delete(DELETE_TIME);
         }
+    }
+};
+
+exports.hooks = {
+    "ready": function () {
+        loadLastPlaylists(() => {
+            if (storedPlaylists.playing && storedPlaylists.playing.length) {
+                for (var i in storedPlaylists.playing) {
+                    var id = storedPlaylists.playing[i];
+                    var queue = storedPlaylists[id];
+                    reQueue(id, queue);
+                }
+            }
+        });
     }
 };
 
