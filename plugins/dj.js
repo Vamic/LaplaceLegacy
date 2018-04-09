@@ -337,7 +337,7 @@ function startPlaying(id, playlist, channel) {
 
 function listenToPlaylistEvents(playlist) {
     playlist.events.on("playing", function () {
-        bot.user.setPresence({ game: { name: playlist.current.title }, status: 'online' });
+        bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
         if (!playlist.interval) {
             playlist.interval = setInterval(function () {
                 if (!playlist.playing) {
@@ -557,6 +557,7 @@ exports.commands = {
         exec: function (command, message) {
             message.channel.send("Paused.").then(m => m.delete(DELETE_TIME));
             message.guild.playlist.pause();
+            bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
             message.delete(DELETE_TIME);
         }
     },
@@ -571,9 +572,10 @@ exports.commands = {
             message.channel.send("Resumed.").then(m => m.delete(DELETE_TIME));
             message.guild.playlist.resume();
             if (!message.guild.playlist.playing) {
-                message.guild.playlist.start(message.channel, getStreamOptions(message.guild.id));
+                message.guild.playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
                 lastChannel[message.guild.id] = message.member.voiceChannel.id;
             }
+            bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
             message.delete(DELETE_TIME);
         }
     },
