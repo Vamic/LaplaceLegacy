@@ -3,18 +3,18 @@ const settings = require('./secrets.json').botmanager;
 const Discord = require("discord.js");
 const fs = require('fs'); //Used to check if the startpoint points to a start
 
-var botManagerName = "Bot Manager";
+var botManagerName = "BotManager";
 const bots = {
     laplace: {              //Object name is used in commands, recommended to be the same as name property but lowercase
         name: "Laplace",    //Display name in reports and console
         restarting: false,  //Makes the log quieter when restarting
         quick_restarts: 0,  //Amount of restarts done automatically within the min_uptime time limit in a row
         max_restarts: 2,    //Amount of quick_restarts before bot stops restarting automatically
-        restart_delay: 500, //Amount of time before an auto restart happens
+        restart_delay: 1000, //Amount of milliseconds before an auto restart happens
         start_time: 0,      //Last time started, used with min_uptime to determine uptime
         min_uptime: 10000,  //Milliseconds before bot is considered successfully started
         listening: false,   //If we're listening to the process events already
-        process: null       //The child process from forking
+        process: null,      //The child process from forking
     }
 };
 
@@ -31,7 +31,7 @@ function error(text) {
 }
 
 function _report(embed) {
-    reportChannel.send(embed);
+    return reportChannel.send(embed);
 }
 
 function reportError(title, desc) {
@@ -40,7 +40,7 @@ function reportError(title, desc) {
     e.setTitle(title);
     e.setDescription(desc);
     e.setFooter(botManagerName + ": Bot monitoring");
-    _report(e);
+    return _report(e);
 }
 
 function reportInfo(title, desc) {
@@ -49,7 +49,121 @@ function reportInfo(title, desc) {
     e.setTitle(title);
     e.setDescription(desc);
     e.setFooter(botManagerName + ": Bot monitoring");
-    _report(e);
+    return _report(e);
+}
+
+function isAlive(bot) {
+    return bot.process && !bot.process.killed;
+}
+
+function formatCrashResponse(bot) {
+    if (bot.quick_restarts >= bot.max_restarts) {
+        log(bot.name + " has exited after " + bot.max_restarts + " restarts");
+        if (bot.max_restarts > 0) {
+            return {
+                title: bot.name + " reached the restart limit",
+                description: bot.name + " crashed within " + (bot.min_uptime / 1000) + " seconds " + bot.max_restarts + " times in a row."
+            };
+        }
+        else {
+            return {
+                title: bot.name + " crashed",
+                description: bot.name + " crashed and is not allowed automatic restarts.\nRun `" + bot.name + " restart` to get it back online."
+            };
+        }
+    } else {
+        return {
+            title: bot.name + " crashed",
+            description: bot.name + " crashed and will restart. " + bot.quick_restarts + "/" + bot.max_restarts + " restarts."
+        };
+    }
+}
+
+function handleStatusMessage(type, bot, args) {
+    switch (type) {
+        case "initial":
+            clearTimeout(bot.success_timeout);
+            var restarting = bot.restarting;
+            bot.success_timeout = setTimeout((restarting, bot) => {
+                if (isAlive(bot)) {
+                    handleStatusMessage("success", bot, { restarting });
+                }
+            }, bot.min_uptime, restarting, bot);
+            if (bot.status_message) return false;
+            bot.status_message = "waiting";
+            if (args.report_type == "error")
+                reportError(args.title, args.description).then(msg => {
+                    bot.status_message = msg;
+                });
+            else
+                reportInfo(args.title, args.description).then(msg => {
+                    bot.status_message = msg;
+                });
+            break;
+        case "success":
+            var editMessage = function (restarting) {
+                var newEmbed = new Discord.RichEmbed(bot.status_message.embeds[0]);
+                delete newEmbed.footer.embed;
+                newEmbed.setColor("#0FBA4D");
+
+                if (args.restarting) {
+                    newEmbed.setTitle(bot.name + " restarted.");
+                    newEmbed.setDescription(bot.name + " has been restarted and is now online again.");
+                }
+                else {
+                    newEmbed.setTitle(bot.name + " online.");
+                    newEmbed.setDescription(bot.name + " has been started.");
+                }
+
+                bot.status_message.edit(newEmbed);
+                delete bot.status_message;
+            }
+            if (bot.status_message && bot.status_message !== "waiting") editMessage(args.restarting);
+            else if (bot.status_message === "waiting") {
+                bot.status_message = "handled";
+                var interval = setInterval((callback, args) => {
+                    if (bot.status_message && bot.status_message !== "handled") {
+                        callback(args);
+                        clearInterval(interval);
+                    }
+                }, 500, editMessage, args.restarting);
+                setTimeout(() => clearInterval(interval), 20000);
+            } else {
+                return false;
+            }
+            break;
+        case "crash":
+            clearTimeout(bot.success_timeout);
+            var editMessage = function (final) {
+                var newEmbed = new Discord.RichEmbed(bot.status_message.embeds[0]);
+                delete newEmbed.footer.embed;
+                newEmbed.setColor("#DB1111");
+                
+                var final = bot.quick_restarts >= bot.max_restarts;
+
+                var reponse = formatCrashResponse(bot);
+                newEmbed.setTitle(reponse.title);
+                newEmbed.setDescription(reponse.description);
+
+                bot.status_message.edit(newEmbed);
+                if (final) delete bot.status_message;
+            }
+            if (bot.status_message && bot.status_message !== "waiting") editMessage();
+            else if (bot.status_message === "waiting") {
+                bot.status_message = "handled";
+                var interval = setInterval((callback, args) => {
+                    if (bot.status_message && bot.status_message !== "handled") {
+                        callback(args);
+                        clearInterval(interval);
+                    }
+                }, 500, editMessage);
+                setTimeout(() => clearInterval(interval), 20000);
+            } else {
+                return false;
+            }
+            break;
+    }
+    return true;
 }
 
 function setup(bot) {
@@ -58,18 +172,35 @@ function setup(bot) {
         bot.process.on('exit', function (code, signal) {
             bot.listening = false;
             bot.process = null;
-            if (code !== 0) { //Auto restart when code isnt 0
+            if (code) {
+                var status_handled = handleStatusMessage("crash", bot);
                 if (bot.quick_restarts >= bot.max_restarts) {
-                    reportError("RESTART LIMIT REACH", bot.name + " crashed within " + bot.min_uptime / 1000 + " seconds " + bot.max_restarts + " times in a row.");
-                    log(bot.name + " has exited after " + bot.max_restarts + " restarts");
+                    if (!status_handled) {
+                        var response = formatCrashResponse(bot);
+                        reportError(response.title, response.description);
+                    }
                 } else {
                     if (Date.now() < bot.start_time + bot.min_uptime)
                         bot.quick_restarts++;
+                    else
+                        bot.quick_restarts = 0;
                     setTimeout(() => restart(bot), bot.restart_delay);
+                    if (!status_handled) {
+                        var message = formatCrashResponse(bot);
+                        handleStatusMessage("initial", bot, {
+                            title: message.title,
+                            description: message.description,
+                            report_type: "error"
+                        });
+                    }
                 }
             } else {
-                reportInfo("Process stopped", bot.name + " was manually stopped");
-                log(bot.name + " stopped.");
+                if (bot.restarting) {
+                    start(bot);
+                } else {
+                    reportInfo("Process stopped", bot.name + " was manually stopped");
+                    log(bot.name + " stopped.");
+                }
             }
         });
 
@@ -77,26 +208,38 @@ function setup(bot) {
             reportError(bot.name + " got an error.", err);
             error(err);
         });
+
+        bot.process.stderr.on('data', err => {
+            error("[stderr] " + bot.name + " got an error." + err);
+            reportError(bot.name + " got an error.", err);
+        });
     }
 }
 
 function start(bot) {
-    if (!bot.process || bot.process.killed) {
+    if (!isAlive(bot)) {
         bot.start_time = Date.now();
-        bot.process = fork(settings.startpoint, [], { execArgv: [] });
+        bot.process = fork(settings.startpoint, [], {
+            execArgv: [],
+            stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+        });
         setup(bot);
-        if (bot.restarting) reportInfo(bot.name + " restarted.", bot.name + " has been restarted and is now online again.");
-        else                reportInfo(bot.name + " online.", bot.name + " has been started");
+        var restarting = bot.restarting;
+        handleStatusMessage("initial", bot, {
+            title: bot.name + " starting.",
+            description: bot.name + " is starting up..."
+        });                        
         bot.restarting = false;
+        log(bot.name + " started.");
     } else {
         error(bot.name + " was instructed to start but is already running.");
     }
 }
 
 function stop(bot) {
-    if (bot.process && !bot.process.killed) {
+    if (isAlive(bot)) {
         bot.process.kill();
-        reportInfo(bot.name + " offline.", bot.name + " has shut down");
+        log(bot.name + " stopped.");
     } else if (!bot.restarting) {
         error(bot.name + " was instructed to stop but is not running.");
     }
@@ -104,8 +247,10 @@ function stop(bot) {
 
 function restart(bot) {
     bot.restarting = true;
-    stop(bot);
-    start(bot);
+    if (!isAlive(bot))
+        start(bot);
+    else
+        stop(bot);
 }
 
 const commands = ["start", "stop", "restart"];
