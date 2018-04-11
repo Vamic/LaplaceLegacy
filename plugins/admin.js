@@ -2,7 +2,7 @@
 
 exports.commands = {
     kill: {
-        commands: ["-kill", "-die", "-quit", "-exit"],
+        commands: ["!kill", "!die", "!quit", "!exit"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (message.channel.type !== "dm")
@@ -10,8 +10,15 @@ exports.commands = {
             bot.admin.kill();
         }
     },
+    crash: {
+        commands: ["!crash"],
+        requirements: [bot.requirements.isAdmin],
+        exec: function (command, message) {
+            throw "Manual crash from admin.";
+        }
+    },
     say: {
-        commands: ["-say", "!say"],
+        commands: ["!say"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (message.channel.type !== "dm")
@@ -20,7 +27,7 @@ exports.commands = {
         }
     },
     listPlugins: {
-        commands: ["-plugins"],
+        commands: ["!plugins"],
         requirements: [bot.requirements.isAdmin, bot.requirements.guild],
         exec: function (command, message) {
             message.delete();
@@ -37,7 +44,7 @@ exports.commands = {
         }
     },
     togglePlugins: {
-        commands: ["-enable", "-disable"],
+        commands: ["!enable", "!disable"],
         requirements: [bot.requirements.isAdmin, bot.requirements.guild],
         exec: function (command, message) {
             message.delete();
@@ -61,15 +68,15 @@ exports.commands = {
         }
     },
     reloadPlugins: {
-        commands: ["-reload", "-reloadPlugin", "-reloadPlugins"],
+        commands: ["!reload", "!reloadPlugin", "!reloadPlugins"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (message.channel.type !== "dm")
                 message.delete();
 
             //Reload all plugins
-            if (command.command === "-reloadPlugins" ||
-                command.command === "-reload" && command.arguments.length === 0) {
+            if (command.command === "!reloadPlugins" ||
+                command.command === "!reload" && command.arguments.length === 0) {
                 bot.admin.reloadPlugins(function (err, result) {
                     if (err) {
                         message.reply("One or more plugins failed to load.").then(m => m.delete(5000));
