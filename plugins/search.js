@@ -551,6 +551,57 @@ exports.commands = {
             }
         }
     },
+    blacklisttag: {
+        commands: ["!ssremovetag", "!sstagremove", "!removetag", "!tagremove"],
+        description: "Remove tags from your search stats",
+        exec: function (command, message) {
+            var args = command.arguments;
+            var mods = command.modifiers;
+            if (!args.length) return;
+
+            bot.datastore.get("user_" + message.author.id, function (err, data) {
+                if (err)
+                    return;
+
+                if (!data.searchstats || !data.searchstats.sites) {
+                    return message.channel.send("No stats found.");
+                }
+
+                var i, j;
+                var sites = [];
+                if (mods.length > 0) {
+                    for (i in mods) {
+                        var mod = mods[i];
+                        for (j in cmds) {
+                            var cmd = cmds[j];
+                            if (contains(cmd, mod)) {
+                                if (data.searchstats.sites[cmd[0]]) {
+                                    sites.push(data.searchstats.sites[cmd[0]]);
+                                    break;
+                                } else {
+                                    return message.channel.send("No stats found for " + cmd[0]);
+                                }
+                            }
+                        }
+                    }
+                    if (!sites.length) return message.channel.send("No stats found for `" + mods.join(", ") + "`");
+                }
+                else {
+                    sites = Object.values(data.searchstats.sites);
+                }
+                while (args.length) {
+                    var tag = args.shift();
+                    for (var i in sites) {
+                        if (sites[i].tags[tag]) {
+                            sites[i].tags[tag].timesSearched = 0;
+                        }
+                    }
+                }
+
+                bot.datastore.set("user_" + message.author.id, data);
+            });
+        }
+    },
     searchstats: {
         commands: ["!searchstats", "!ss"],
         description: "Get your search stats",
@@ -568,7 +619,7 @@ exports.commands = {
                         return message.channel.send("No stats found.");
                     }
 
-                    var top, site, messageOut;
+                    var top, site, response;
                     if (args.length) {
                         for (var j in cmds) {
                             var cmd = cmds[j];
@@ -577,14 +628,14 @@ exports.commands = {
                                     site = data.sites[cmd[0]];
                                     top = getTopTags(site, cmd[0]);
 
-                                    messageOut = "```Stats for " + cmd[0];
-                                    messageOut += "\nSearches: " + site.searches;
-                                    messageOut += "\nChickens: " + site.chickens;
-                                    messageOut += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
-                                    messageOut += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
-                                    messageOut += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
-                                    messageOut += "```";
-                                    message.channel.send(messageOut);
+                                    response = "```Stats for " + cmd[0];
+                                    response += "\nSearches: " + site.searches;
+                                    response += "\nChickens: " + site.chickens;
+                                    response += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
+                                    response += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
+                                    response += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
+                                    response += "```";
+                                    message.channel.send(response);
                                     break;
                                 } else {
                                     message.channel.send("No stats found for " + cmd[0]);
@@ -614,14 +665,14 @@ exports.commands = {
                             if (siteTop.topCharacter.timesGotten > top.topCharacter.timesGotten)
                                 top.topCharacter = siteTop.topCharacter;
                         }
-                        messageOut = "```Stats for all sites";
-                        messageOut += "\nSearches: " + totalSearches;
-                        messageOut += "\nChickens: " + totalChickens;
-                        messageOut += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
-                        messageOut += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
-                        messageOut += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
-                        messageOut += "```";
-                        message.channel.send(messageOut);
+                        response = "```Stats for all sites";
+                        response += "\nSearches: " + totalSearches;
+                        response += "\nChickens: " + totalChickens;
+                        response += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
+                        response += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
+                        response += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
+                        response += "```";
+                        message.channel.send(response);
                     }
                 });
             } else {
@@ -641,14 +692,14 @@ exports.commands = {
                                     var site = data.searchstats.sites[cmd[0]];
                                     var top = getTopTags(site, cmd[0]);
 
-                                    var messageOut = "```Stats for " + message.author.username + " on " + cmd[0];
-                                    messageOut += "\nSearches: " + site.searches;
-                                    messageOut += "\nChickens: " + site.chickens;
-                                    messageOut += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
-                                    messageOut += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
-                                    messageOut += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
-                                    messageOut += "```";
-                                    message.channel.send(messageOut);
+                                    var response = "```Stats for " + message.author.username + " on " + cmd[0];
+                                    response += "\nSearches: " + site.searches;
+                                    response += "\nChickens: " + site.chickens;
+                                    response += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
+                                    response += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
+                                    response += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
+                                    response += "```";
+                                    message.channel.send(response);
                                     break;
                                 } else {
                                     message.channel.send("No stats found for " + cmd[0]);
@@ -675,14 +726,14 @@ exports.commands = {
                             if (siteTop.topCharacter.timesGotten > top.topCharacter.timesGotten)
                                 top.topCharacter = siteTop.topCharacter;
                         }
-                        messageOut = "```Stats for " + message.author.username;
-                        messageOut += "\nSearches: " + totalSearches;
-                        messageOut += "\nChickens: " + totalChickens;
-                        messageOut += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
-                        messageOut += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
-                        messageOut += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
-                        messageOut += "```";
-                        message.channel.send(messageOut);
+                        response = "```Stats for " + message.author.username;
+                        response += "\nSearches: " + totalSearches;
+                        response += "\nChickens: " + totalChickens;
+                        response += "\nTop artist: " + top.topArtist.name + "(" + top.topArtist.timesGotten + ")";
+                        response += "\nTop character: " + top.topCharacter.name + "(" + top.topCharacter.timesGotten + ")";
+                        response += "\nTop copyright: " + top.topCopyright.name + "(" + top.topCopyright.timesGotten + ")";
+                        response += "```";
+                        message.channel.send(response);
                     }
                 });
             }
