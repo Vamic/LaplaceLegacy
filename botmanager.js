@@ -4,6 +4,7 @@ const Discord = require("discord.js");
 const fs = require('fs'); //Used to check if the startpoint points to a start
 
 var botManagerName = "BotManager";
+var botManagerPaused = false;
 const bots = {
     laplace: {              //Object name is used in commands, recommended to be the same as name property but lowercase
         name: "Laplace",    //Display name in reports and console
@@ -221,7 +222,7 @@ function start(bot) {
         bot.start_time = Date.now();
         bot.process = fork(settings.startpoint, [], {
             execArgv: [],
-            stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+            stdio: [process.stdin, process.stdout, 'pipe', 'ipc'] //Give it its own stderr so we can listen to it
         });
         setup(bot);
         var restarting = bot.restarting;
@@ -255,7 +256,7 @@ function restart(bot) {
 
 const commands = ["start", "stop", "restart"];
 function attemptCommand(botname, command) {
-    if (bots[botname]) {
+    if (bots[botname] && !botManagerPaused) {
         switch (command) {
             case commands[0]:
                 bots[botname].quick_restarts = 0;
@@ -270,11 +271,30 @@ function attemptCommand(botname, command) {
                 break;
         }
     } else if (botname === botManagerName.toLowerCase()) {
-        reportInfo("Shutting down", "Will shut down in a second.");
-        for (var bot in bots) {
-            stop(bots[bot]);
+        switch (command) {
+            case commands[0]:
+                reportInfo("??", "?????");
+                break;
+            case commands[1]:
+                reportInfo("Shutting down", "Will shut down in a second.");
+                for (var bot in bots) {
+                    stop(bots[bot]);
+                }
+                setTimeout(() => process.exit(), 1000);
+                break;
+            case commands[2]:
+                reportInfo("Can't do that.", botManagerName + " doesn't have a way to restart yet.");
+                break;
+            case "pause":
+                reportInfo("Paused command handling", botManagerName + " will not respond until `unpause` is run.");
+                botManagerPaused = true;
+                break;
+            case "unpause":
+            case "resume":
+                reportInfo("Resumed command handling", botManagerName + " will begin normal operation.");
+                botManagerPaused = false;
+                break;
         }
-        setTimeout(() => process.exit(), 1000);
     }
 }
 
