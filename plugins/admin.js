@@ -2,7 +2,7 @@
 
 exports.commands = {
     kill: {
-        commands: ["!kill", "-kill", "!die", "-die", "!quit", "-quit", "!exit", "-exit"]
+        commands: ["!kill", "-kill", "!die", "-die", "!quit", "-quit", "!exit", "-exit"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (message.channel.type !== "dm")
