@@ -2,7 +2,7 @@
 
 exports.commands = {
     kill: {
-        commands: ["!kill", "!die", "!quit", "!exit"],
+        commands: ["!kill", "-kill", "!die", "-die", "!quit", "-quit", "!exit", "-exit"]
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (message.channel.type !== "dm")
@@ -11,14 +11,14 @@ exports.commands = {
         }
     },
     crash: {
-        commands: ["!crash"],
+        commands: ["!crash", "-crash"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             throw "Manual crash from admin.";
         }
     },
     say: {
-        commands: ["!say"],
+        commands: ["!say", "-say"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (message.channel.type !== "dm")
@@ -27,7 +27,7 @@ exports.commands = {
         }
     },
     listPlugins: {
-        commands: ["!plugins"],
+        commands: ["!plugins", "-plugins"],
         requirements: [bot.requirements.isAdmin, bot.requirements.guild],
         exec: function (command, message) {
             message.delete();
@@ -44,7 +44,7 @@ exports.commands = {
         }
     },
     togglePlugins: {
-        commands: ["!enable", "!disable"],
+        commands: ["!enable", "-enable", "!disable", "-disable"],
         requirements: [bot.requirements.isAdmin, bot.requirements.guild],
         exec: function (command, message) {
             message.delete();
@@ -68,7 +68,7 @@ exports.commands = {
         }
     },
     reloadPlugins: {
-        commands: ["!reload", "!reloadPlugin", "!reloadPlugins"],
+        commands: ["!reload", "-reload", "!reloadPlugin", "-reloadPlugin", "!reloadPlugins", "-reloadPlugins"],
         requirements: [bot.requirements.isAdmin],
         exec: function (command, message) {
             if (message.channel.type !== "dm")
