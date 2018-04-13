@@ -255,6 +255,7 @@ function restart(bot) {
 }
 
 const commands = ["start", "stop", "restart"];
+const hiddencommands = ["pause", "unpause", "resume"];
 function attemptCommand(botname, command) {
     if (bots[botname] && !botManagerPaused) {
         switch (command) {
@@ -271,29 +272,34 @@ function attemptCommand(botname, command) {
                 break;
         }
     } else if (botname === botManagerName.toLowerCase()) {
-        switch (command) {
-            case commands[0]:
-                reportInfo("??", "?????");
-                break;
-            case commands[1]:
-                reportInfo("Shutting down", "Will shut down in a second.");
-                for (var bot in bots) {
-                    stop(bots[bot]);
-                }
-                setTimeout(() => process.exit(), 1000);
-                break;
-            case commands[2]:
-                reportInfo("Can't do that.", botManagerName + " doesn't have a way to restart yet.");
-                break;
-            case "pause":
-                reportInfo("Paused command handling", botManagerName + " will not respond until `unpause` is run.");
-                botManagerPaused = true;
-                break;
-            case "unpause":
-            case "resume":
-                reportInfo("Resumed command handling", botManagerName + " will begin normal operation.");
-                botManagerPaused = false;
-                break;
+        if (!botManagerPaused) {
+            switch (command) {
+                case commands[0]:
+                    reportInfo("??", "?????");
+                    break;
+                case commands[1]:
+                    reportInfo("Shutting down", "Will shut down in a second.");
+                    for (var bot in bots) {
+                        stop(bots[bot]);
+                    }
+                    setTimeout(() => process.exit(), 1000);
+                    break;
+                case commands[2]:
+                    reportInfo("Can't do that.", botManagerName + " doesn't have a way to restart yet.");
+                    break;
+                case hiddencommands[0]:
+                    reportInfo("Paused command handling", botManagerName + " will not respond until `unpause` is run.");
+                    botManagerPaused = true;
+                    break;
+            }
+        } else {
+            switch (command) {
+                case hiddencommands[1]:
+                case hiddencommands[2]:
+                    reportInfo("Resumed command handling", botManagerName + " will begin normal operation.");
+                    botManagerPaused = false;
+                    break;
+            }
         }
     }
 }
@@ -339,7 +345,7 @@ client.on('ready', () => {
                 }
                 else if (messagePieces.length === 2) {
                     for (i in messagePieces) {
-                        if (commands.indexOf(messagePieces[i]) > -1) {
+                        if (commands.indexOf(messagePieces[i]) > -1 || hiddencommands.indexOf(messagePieces[i]) > -1) {
                             command = messagePieces.splice(i, 1)[0];
                             botname = messagePieces[0];
                             attemptCommand(botname, command);
