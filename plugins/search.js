@@ -301,7 +301,7 @@ function gbSearch(info, args) {
         url += "+-game_cg";
     if (args.indexOf("comic") === -1)
         url += "+-comic";
-
+    
     bot.util.httpGetJson(url, function (err, posts) {
         if (err) {
             //if we got an empty response there were no posts with those tags
@@ -506,52 +506,127 @@ exports.commands = {
                 channel: message.channel,
                 user: message.author.id
             };
-            if (firstArg === "imfeelinglucky" || firstArg === "ifl") {
-                bot.datastore.get("user_" + message.author.id, function (err, data) {
-                    if (err)
-                        return;
 
-                    if (!data.searchstats || !data.searchstats.sites) {
-                        return message.channel.send("No stats found.");
-                    }
+            bot.datastore.get("user_" + message.author.id, function (err, data) {
+                if (err)
+                    return bot.error(err);
 
-                    var sites = data.searchstats.sites;
-                    var site = "";
-                    //No additional arguments, get a random site
-                    if (args.length) {
-                        //Check each site for the provided argument
-                        for (var j in cmds) {
-                            var cmd = cmds[j];
-                            if (contains(cmd, args[0])) {
-                                site = cmd[0];
+                var fail = false;
+                if (data.search && data.search.blacklist && data.search.blacklist.length > 0) {
+                    fail = data.search.blacklist.some((t) => args.indexOf(t) > -1);
+                    args.push("-" + data.search.blacklist.join("-"));
+                }
+
+                if (firstArg === "imfeelinglucky" || firstArg === "ifl") {
+                        if (!data.searchstats || !data.searchstats.sites) {
+                            return message.channel.send("No stats found.");
+                        }
+
+                        var sites = data.searchstats.sites;
+                        var site = "";
+                        //No additional arguments, get a random site
+                        if (args.length) {
+                            //Check each site for the provided argument
+                            for (var j in cmds) {
+                                var cmd = cmds[j];
+                                if (contains(cmd, args[0])) {
+                                    site = cmd[0];
+                                }
                             }
                         }
-                    }
-                    //No site, get a random one
-                    if (!site) {
-                        var keys = Object.keys(sites);
-                        site = keys[Math.floor(Math.random() * keys.length)];
-                    }
-                    //Get tag
-                    var tags = Object.keys(sites[site].tags).map((tag) => sites[site].tags[tag].timesSearched ? tag : null).filter(Boolean);
-                    if (tags.length === 0) tags = [""];
-                    var tag = [tags[Math.floor(Math.random() * tags.length)]];
+                        //No site, get a random one
+                        if (!site) {
+                            var keys = Object.keys(sites);
+                            site = keys[Math.floor(Math.random() * keys.length)];
+                        }
+                        //Get tag
+                        var tags = Object.keys(sites[site].tags).map((tag) => sites[site].tags[tag].timesSearched ? tag : null).filter(Boolean);
+                        if (tags.length === 0) tags = [""];
+                        var tag = [tags[Math.floor(Math.random() * tags.length)]];
 
-                    //Search
-                    if (contains(cmds.gelbooru, site))
-                        return gbSearch(info, tag);
-                });
-            } else if (contains(cmds.gelbooru, firstArg)) {
-                return gbSearch(info, args);
-            } else {
-                var sites = "";
-                for (var cmd in cmds)
-                    sites += cmd + " ";
-                message.channel.send("Available search targets are `" + sites + "`\nOr you can try `imfeelinglucky`");
-            }
+                        //Search
+                        if (contains(cmds.gelbooru, site))
+                            return gbSearch(info, tag);
+                } else if (contains(cmds.gelbooru, firstArg)) {
+                    if (fail) return message.channel.send("How about you don't search for a blacklisted tag?");
+                    return gbSearch(info, args);
+                } else {
+                    var sites = "";
+                    for (var cmd in cmds)
+                        sites += cmd + " ";
+                    message.channel.send("Available search targets are `" + sites + "`\nOr you can try `imfeelinglucky`");
+                }
+            });
         }
     },
     blacklisttag: {
+        commands: ["!blacklist"],
+        description: "Remove tags from your search results automatically",
+        exec: function (command, message) {
+            var args = command.arguments;
+            bot.datastore.get("user_" + message.author.id, function (err, data) {
+                if (err)
+                    return;
+
+                if (!data.search) {
+                    data.search = {
+                        blacklist: []
+                    };
+                }
+
+                if (!data.search.blacklist) {
+                    data.search.blacklist = [];
+                }
+
+                var i;
+                var blacklist = data.search.blacklist;
+                var arg = args.shift();
+                if (!arg) {
+                    if (blacklist.length > 0) {
+                        return message.channel.send("`" + blacklist.join(" ") + "`");
+                    } else {
+                        return message.channel.send("Empty blacklist.");
+                    }
+                }
+                else if (arg === "remove" && args.length > 0) {
+                    if (blacklist.length > 0) {
+                        var removed = [];
+                        for (i in args) {
+                            arg = args[i];
+                            if (blacklist.indexOf(arg) > -1) {
+                                removed.push(blacklist.splice(blacklist.indexOf(arg), 1)[0]);
+                            }
+                        }
+                        if (removed.length === 0) {
+                            return message.channel.send((args.length === 1 ? "That tag isn't" : "Those tags aren't" ) + " on your blacklist.");
+                        } else {
+                            message.channel.send("Removed tag" + (removed.length === 1 ? "" : "s") + " `" + removed.join(" ") + "` from your blacklist.");
+                        }
+                    } else {
+                        return message.channel.send("There are no tags in your blacklist.");
+                    }
+                } else {
+                    var added = [];
+                    args = [arg].concat(args);
+                    for (i in args) {
+                        arg = args[i];
+                        if (blacklist.indexOf(arg) === -1) {
+                            blacklist.push(arg);
+                            added.push(arg);
+                        }
+                    }
+                    if (added.length === 0) {
+                        return message.channel.send((args.length === 1 ? "That tag is" : "Those tags are") + " already on your blacklist.");
+                    } else {
+                        message.channel.send("Added tag" + (added.length === 1 ? "" : "s") + " `" + added.join(" ") + "` to your blacklist.");
+                    }
+                }
+
+                bot.datastore.set("user_" + message.author.id, data);
+            });
+        }
+    },
+    removesearchedtag: {
         commands: ["!ssremovetag", "!sstagremove", "!removetag", "!tagremove"],
         description: "Remove tags from your search stats",
         exec: function (command, message) {
