@@ -589,16 +589,23 @@ exports.commands = {
                 else {
                     sites = Object.values(data.searchstats.sites);
                 }
+                var response = [];
                 while (args.length) {
                     var tag = args.shift();
                     for (var i in sites) {
                         if (sites[i].tags[tag]) {
                             sites[i].tags[tag].timesSearched = 0;
+                            response.push(tag);
                         }
                     }
                 }
+                var last;
+                if (response.length > 1) {
+                    last = response.pop();
+                }
 
                 bot.datastore.set("user_" + message.author.id, data);
+                message.channel.send("Removed `" + response.join(", ") + (last ? " and " + last : "") + "`");
             });
         }
     },
