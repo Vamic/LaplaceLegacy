@@ -512,14 +512,16 @@ exports.commands = {
                     return bot.error(err);
 
                 var fail = false;
+                var blacklist_addition;
                 if (data.search && data.search.blacklist && data.search.blacklist.length > 0) {
                     fail = data.search.blacklist.some((t) => args.indexOf(t) > -1);
-                    args.push("-" + data.search.blacklist.join("-"));
+                    blacklist_addition = "-" + data.search.blacklist.join("+-");
+                    args.push(blacklist_addition);
                 }
 
                 if (firstArg === "imfeelinglucky" || firstArg === "ifl") {
                         if (!data.searchstats || !data.searchstats.sites) {
-                            return message.channel.send("No stats found.");
+                            return message.channel.send("No stats found. Do some searches first.");
                         }
 
                         var sites = data.searchstats.sites;
@@ -542,7 +544,7 @@ exports.commands = {
                         //Get tag
                         var tags = Object.keys(sites[site].tags).map((tag) => sites[site].tags[tag].timesSearched ? tag : null).filter(Boolean);
                         if (tags.length === 0) tags = [""];
-                        var tag = [tags[Math.floor(Math.random() * tags.length)]];
+                        var tag = [tags[Math.floor(Math.random() * tags.length)], blacklist_addition].filter(Boolean);
 
                         //Search
                         if (contains(cmds.gelbooru, site))
