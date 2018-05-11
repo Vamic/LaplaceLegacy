@@ -14,6 +14,25 @@ if(!Array.prototype.rand) {
 }
 
 const general = {
+    yesnoquestion : {
+        min: 1,
+        max: 3,
+        regex: /^(is|should|have|do(es)?|could|was)(n(´|`|'|’)?t)? /i,
+        responses: [
+            "Yea",
+            "Sure",
+            "Yeh",
+            "Yes",
+            "No",
+            "No",
+            "Nope",
+            "Nah"
+        ],
+        respond: (msg, responses) => {
+            const response = responses.rand();
+            msg.channel.send(response);
+        } 
+    },
     choicequestion : {
         min: 1,
         max: 3,
