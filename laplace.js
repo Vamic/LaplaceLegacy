@@ -83,7 +83,16 @@ function reloadPlugin(pluginName, shush) {
             //If no commands are defined, use the name of the property
             if (!command.commands)
                 command.commands = [i];
-            else if (command.commands[0] === "") {
+
+            //Initialize requirements
+            if (!command.requirements) command.requirements = [];
+
+            //Commands can be triggered by bots OR users
+            if (command.requirements.indexOf(requirements.isBot) === -1)
+                command.requirements.push(requirements.isUser);
+
+            //Command that only requires the requirements met, often including custom requirements
+            if (command.commands[0] === "") {
                 if (!command.requirements) continue;
                 rCommands[i] = {
                     source: pluginName,
@@ -93,9 +102,6 @@ function reloadPlugin(pluginName, shush) {
                 };
                 continue;
             }
-            if (!command.requirements) command.requirements = [];
-            if (command.requirements.indexOf(requirements.isBot) === -1)
-                command.requirements.push(requirements.isUser);
 
             if (helpCommands[pluginName]) {
                 helpCommands[pluginName][command.commands[0]] = {
@@ -440,22 +446,7 @@ client.on('ready', () => {
     callHooks("ready");
 });
 
-client.on('message', msg => {
-    if (Object.keys(rCommands).length) {
-        for (var i in rCommands) {
-            var rCmd = rCommands[i];
-            if (msg.guild && disabled[msg.guild.id] && disabled[msg.guild.id][rCmd.source])
-                continue;
-            var reqs = checkRequirements(rCmd.requirements, msg);
-            if (reqs[0]) {
-                rCmd.exec(msg);
-                return;
-            }
-        }
-    }
-    if (msg.author.bot) return;
-    //msg.mentions.MessageMentions.everyone
-    //
+function checkCommands(msg) {
     var msgCommand = msg.content.split(" ")[0].split(":")[0].toLowerCase();
     var foundCmd, cmdUsed, softCmd, softCmdUsed;
 
@@ -483,7 +474,7 @@ client.on('message', msg => {
     }
 
     if (foundCmd) {
-        reqs = checkRequirements(foundCmd.requirements, msg);
+        var reqs = checkRequirements(foundCmd.requirements, msg);
         if (!reqs[0]) {
             if (reqs[1] === "isUser" || reqs[1] === "isBot") return;
             return msg.reply("Nope, failed requirement: " + reqs[1]);
@@ -504,6 +495,31 @@ client.on('message', msg => {
             modifiers: modifiers
         };
         foundCmd.exec(data, msg);
+    }
+}
+
+client.on('message', msg => {
+    if (!msg.author.bot) {
+        checkCommands(msg);
+    }
+
+    //Catches messages that match custom requirements
+    //example: message from another bot with embed with specific title
+    if (Object.keys(rCommands).length) {
+        for (var i in rCommands) {
+            var rCmd = rCommands[i];
+            if (msg.guild && disabled[msg.guild.id] && disabled[msg.guild.id][rCmd.source])
+                continue;
+            var reqs = checkRequirements(rCmd.requirements, msg);
+            if (reqs[0]) {
+                rCmd.exec(msg);
+                return;
+            }
+        }
+    }
+    
+    if (msg.author.bot) {
+        checkCommands(msg);
     }
 });
 

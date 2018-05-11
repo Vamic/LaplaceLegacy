@@ -53,6 +53,15 @@ function reportInfo(title, desc) {
     return _report(e);
 }
 
+process.on("uncaughtException", (err) => {
+    reportError(botManagerName + " crashed.", err);
+    for (var bot in bots) {
+        stop(bots[bot]);
+    }
+    setTimeout(() => process.exit(), 1000);
+});
+
+
 function isAlive(bot) {
     return bot.process && !bot.process.killed;
 }

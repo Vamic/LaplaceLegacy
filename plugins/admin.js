@@ -75,8 +75,9 @@ exports.commands = {
                 message.delete();
 
             //Reload all plugins
-            if (command.command === "!reloadPlugins" ||
-                command.command === "!reload" && command.arguments.length === 0) {
+            command.command = command.command.substr(1);
+            if (command.command === "reloadPlugins" ||
+                command.command === "reload" && command.arguments.length === 0) {
                 bot.admin.reloadPlugins(function (err, result) {
                     if (err) {
                         message.reply("One or more plugins failed to load.").then(m => m.delete(5000));
