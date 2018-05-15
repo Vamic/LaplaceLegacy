@@ -1,5 +1,5 @@
 @echo off
 
-node app.js
+node laplace.js
 
 pause

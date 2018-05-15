@@ -16,8 +16,8 @@ if(!Array.prototype.rand) {
 const general = {
     yesnoquestion : {
         min: 1,
-        max: 3,
-        regex: /^(is|should|have|do(es)?|could|was)(n(´|`|'|’)?t)? /i,
+        max: 100,
+        regex: /^(?:am|are|is|should|have|do(?:es)?|could|can|was)(?:n(?:´|`|'|’)?t)? | (?:(?:am|are|shall|will|can|did|has|is|should|ha(?:ve|d)|do(?:es)?|could|was|would)(?:(?:n(?:´|`|'|’)?t)?)|(?:ca|wo)n(?:´|`|'|’)?t) \w+\??$/igm,
         responses: [
             "Yea",
             "Sure",
@@ -35,8 +35,8 @@ const general = {
     },
     choicequestion : {
         min: 1,
-        max: 3,
-        regex: /(\w+ ?)*(, ?| or )(\w+ ?)+\??/,
+        max: 100,
+        regex: /^(\w+ ?)*(, ?| ?or )(\w+ ?)+\??$/gi,
         responses: [
             "Totally ",
             "Probably ",
@@ -52,7 +52,7 @@ const general = {
     wassaaaa : {
         min: 1,
         max: 3,
-        regex: /^(wh?at?('|`|´| i)?s?s ?(u|a)p|sup)\??$/,
+        regex: /^(?:wh?at?(?:'|`|´| i)?s?s ?(?:u|a)p|sup)\??$/,
         responses: [
             "I wish I were a bird.",
             "Just chillin', relaxin' all cool. You?"
@@ -65,7 +65,7 @@ const general = {
     thxm8 : {
         min: 1,
         max: 2,
-        regex: /^(th((a|e)nk)(s|e)|th(a|e)nk you|thx)$/,
+        regex: /^(?:th(?:(?:a|e)nk)(?:s|e)|th(?:a|e)nk you|thx)$/,
         responses: [
             "No problem",
             "You're welcome",
@@ -80,7 +80,7 @@ const general = {
     greeting : {
         min: 1,
         max: 1,
-        regex: /^(h?e(l|nl|y)l?o|h(ey|i)|yo)$/,
+        regex: /^(?:h?e(?:l|nl|y)l?o|h(?:ey|i)|yo)$/,
         responses: [
             "Hello",
             "Hey",
@@ -109,9 +109,9 @@ const general = {
     }
 }
 
-const lenientMathRequirements = /\+|\*|%|\/|-|\^|>|<|=|!|[0-9]i?|\(|\)|\.|,|\[|]|deg|(det|sin|cos)/;
+const lenientMathRequirements = /\+|\*|%|\/|-|\^|>|<|=|!|\(|\)|\.|,|\[|]|deg|(det|sin|cos)/;
 const lenientMathBlacklist = /'|`|´|"|(?!det|sin|cos\b)\b\w+ *\(|^\w+$/gi;
-const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|\(|\)|\.|,|\[|]|deg|(det|sin|cos)\(|((?:\w+ )?to(?: \w+)?)/gi;
+const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:(?:\w+ )?to(?: \w+)?)/gi;
 
 function isLaplaceMention(word) {
     return word.toLowerCase().indexOf("laplace") > -1
@@ -130,10 +130,15 @@ function mentionsLaplace(msg) {
 
 function isMath(msg, cb) {
     if(!isNaN(msg.content)) return false;
-    const input = msg.content.split(" ").filter(notLaplaceMention).join(" ");
-    if(mentionsLaplace(msg)) {
+    let input = msg.content.split(" ").filter(notLaplaceMention).join(" ");
+    
+    /*
+    if(input.indexOf("!math")) {
+        input = input.replace("!math", "");
         return !lenientMathBlacklist.test(input) && lenientMathRequirements.test(input);
     }
+    */
+    
     const notMath = input.replace(strictMathWhitelist, "");
     return notMath.length === 0;
 }
@@ -145,7 +150,8 @@ function isGeneral(msg, cb) {
             const obj = general[i];
             if(parts.length < obj.min) continue;
             let success = false;
-            for(let i = 1; i <= obj.max; i++) {
+            let maxWords = parts.length > obj.max ? obj.max : parts.length;
+            for(let i = 1; i <= maxWords; i++) {
                 const words = parts.slice(0, i).join(" ");
                 const success = obj.regex.test(words.toLowerCase());
                 if(success) {
@@ -182,7 +188,7 @@ exports.commands = {
                     result = Math.round(split[0] * 100) / 100 + " " + split[1];
                 }
                 else if(typeof result === 'number') 
-                    result = Math.round(result * 100) / 100;
+                    result = Math.round(result * 10000) / 10000;
                 const response = "`" + input + "` is **" + result + "**";
                 const suffix = typeof result === 'number' ? "   _quick maffs_" : "";
                 message.channel.send(response.replace(/\s\s+/g, ' ') + suffix);
