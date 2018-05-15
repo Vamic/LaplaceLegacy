@@ -109,8 +109,6 @@ const general = {
     }
 }
 
-const lenientMathRequirements = /\+|\*|%|\/|-|\^|>|<|=|!|\(|\)|\.|,|\[|]|deg|(det|sin|cos)/;
-const lenientMathBlacklist = /'|`|´|"|(?!det|sin|cos\b)\b\w+ *\(|^\w+$/gi;
 const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:(?:\w+ )?to(?: \w+)?)/gi;
 
 function isLaplaceMention(word) {
@@ -131,14 +129,6 @@ function mentionsLaplace(msg) {
 function isMath(msg, cb) {
     if(!isNaN(msg.content)) return false;
     let input = msg.content.split(" ").filter(notLaplaceMention).join(" ");
-    
-    /*
-    if(input.indexOf("!math")) {
-        input = input.replace("!math", "");
-        return !lenientMathBlacklist.test(input) && lenientMathRequirements.test(input);
-    }
-    */
-    
     const notMath = input.replace(strictMathWhitelist, "");
     return notMath.length === 0;
 }
@@ -166,6 +156,31 @@ function isGeneral(msg, cb) {
 }
 
 exports.commands = {
+    advancedmaffs: {
+        commands: ["!math"],
+        requirements: [bot.requirements.isUser],
+        exec: function (command, message) {
+            let input = command.arguments.filter(notLaplaceMention).join(" ");
+            try {
+                let result = math.eval(input);
+                if(result && result.entries) {
+                    if(!result.entries.length) return;
+                    result = result.entries[0];
+                }
+                if(typeof result === 'object') {
+                    const split = (result.toString()).split(" ");
+                    result = Math.round(split[0] * 100) / 100 + " " + split[1] || "";
+                }
+                else if(typeof result === 'number') 
+                    result = Math.round(result * 10000) / 10000;
+                const response = "`" + input + "` is **" + result + "**";
+                const suffix = typeof result === 'number' ? "   _advanced maffs_" : "";
+                message.channel.send(response.replace(/\s\s+/g, ' ') + suffix);
+            } catch (e) {
+                message.channel.send("Bzz: " + e);
+            }
+        }
+    },
     quickmaffs: {
         commands: [""],
         requirements: [bot.requirements.isUser, isMath],
