@@ -17,7 +17,7 @@ const general = {
     yesnoquestion : {
         min: 1,
         max: 100,
-        regex: /^(?:am|are|is|should|have|do(?:es)?|could|can|was)(?:n(?:´|`|'|’)?t)? | (?:(?:am|are|shall|will|can|did|has|is|should|ha(?:ve|d)|do(?:es)?|could|was|would)(?:(?:n(?:´|`|'|’)?t)?)|(?:ca|wo)n(?:´|`|'|’)?t) \w+\??$/igm,
+        regex: /^(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:n(?:´|`|'|’)?t)? | (?:(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:(?:n(?:´|`|'|’)?t)?)|(?:ca|wo)n(?:´|`|'|’)?t) \w+\??$/igm,
         responses: [
             "Yea",
             "Sure",
