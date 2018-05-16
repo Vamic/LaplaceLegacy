@@ -210,31 +210,37 @@ function getStreamOptions(id) {
 }
 
 function initiateSongInfo(song, cb) {
-    if (song.display && song.display.embed) cb(null, song);
-    else song.service.getSongInfo(song.streamURL, function (err, info) {
-        if (!info) info = {};
-
-        var vc = bot.voiceConnections.get(song.guild.id);
-        if (vc && vc.dispatcher)
-            info.currentTime = vc.dispatcher.time / 1000;
-        else
-            info.currentTime = 0;
-        info.addedBy = song.adder;
-
-        song.info = info;
-
-        if (err) {
-            song.info = {};
-            song.info.addedBy = song.adder;
-            song.info.url = song.streamURL;
-            song.info.title = song.streamURL;
-            song.display = { embed: new bot.RichEmbed().setAuthor("Unknown").setTitle(song.streamURL) };
-        } else {
-            services[song.type].setSongDisplay(song);
+    return new Promise(resolve => {
+        if (song.display && song.display.embed) {
+            if(typeof cb === 'function') cb(null, song);
+            resolve(song);
         }
-        
-        setSongDisplayDescription(song);
-        cb(err, song);
+        else song.service.getSongInfo(song.streamURL, function (err, info) {
+            if (!info) info = {};
+            
+            var vc = bot.voiceConnections.get(song.guild.id);
+            if (vc && vc.dispatcher)
+                info.currentTime = vc.dispatcher.time / 1000;
+            else
+                info.currentTime = 0;
+            info.addedBy = song.adder;
+    
+            song.info = info;
+    
+            if (err) {
+                song.info = {};
+                song.info.addedBy = song.adder;
+                song.info.url = song.streamURL;
+                song.info.title = song.streamURL;
+                song.display = { embed: new bot.RichEmbed().setAuthor("Unknown").setTitle(song.streamURL) };
+            } else {
+                services[song.type].setSongDisplay(song);
+            }
+            
+            setSongDisplayDescription(song);
+            if(typeof cb === 'function') cb(err, song);
+            resolve(song);
+        });
     });
 }
 
@@ -368,34 +374,30 @@ function listenToPlaylistEvents(playlist) {
     });
 }
 
-function queueSongs(id, input, service, cb) {
-    bot.guilds.get(id).playlist.add(input, [services[service]]).then(songs => cb(songs));
+async function queueSongs(id, input, service) {
+    return bot.guilds.get(id).playlist.add(input, [services[service]]);
 }
 
-function reQueue(id, data) {
-    var queue = data.songs;
-    var channel = data.channel;
-    var queued = 0;
-    for (var i in queue) {
-        var song = queue[i];
-        queueSongs(id, song.url, song.type, function (songs) {
-            queued++;
-            if (songs.length) {
-                songs[0].seek = song.seek;
-                songs[0].adder = song.adder;
-            } else {
-                bot.error("Couldn't requeue " + song.url);
-            }
-        });
-    }
-    var check = setInterval(function () {
-        if (queued === queue.length) {
-            clearInterval(check);
-            var guild = bot.guilds.get(id);
-            var voiceChannel = guild.channels.get(channel);
-            startPlaying(id, guild.playlist, voiceChannel);
+async function reQueue(id, data) {
+    let queue = data.songs;
+    let channel = data.channel;
+    let guild = bot.guilds.get(id);
+
+    let promises = queue.map(async (song) => {
+        let songs = await queueSongs(id, song.url, song.type);
+        if (songs.length) {
+            songs[0].seek = song.seek;
+            songs[0].adder = song.adder;
+            songs[0].guild = guild;
+        } else {
+            bot.error("Couldn't requeue " + song.url);
         }
-    }, 1000);
+    });
+
+    await Promise.all(promises);
+    
+    var voiceChannel = guild.channels.get(channel);
+    startPlaying(id, guild.playlist, voiceChannel);
 }
 
 exports.commands = {
@@ -500,7 +502,7 @@ exports.commands = {
             var count = 0;
 
             for (type in foundServices) {
-                queueSongs(message.guild.id, foundServices[type], type, function (songs) {
+                queueSongs(message.guild.id, foundServices[type], type).then(songs  => {
                     totalSongs = totalSongs.concat(songs);
                     count++;
                     if (count === Object.keys(foundServices).length) {
@@ -585,70 +587,52 @@ exports.commands = {
             "!queue"
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
-        exec: function (command, message) {
+        exec: async function (command, message) {
             var playlist = message.guild.playlist;
-            if (!playlist.current) return bot.error("[DJ-showcurrent] Error: No Current song.");
+            if (!playlist.current) return bot.error("[DJ-showqueue] Error: No Current song.");
             var vc = bot.voiceConnections.get(message.guild.id);
-            if (!vc.dispatcher) return bot.error("[DJ-showcurrent] Error: No Dispatcher.");
+            if (!vc.dispatcher) return bot.error("[DJ-showqueue] Error: No Dispatcher.");
             
             if (playlist.current.display) {
                 message.delete(DELETE_TIME);
                 playlist.current.info.currentTime = vc.dispatcher.time / 1000;
                 setSongDisplayDescription(playlist.current);
-
-                _sendQueue(message);
             } else {
                 message.delete(DELETE_TIME);
-                initiateSongInfo(playlist.current, function (err) {
-                    if(err) bot.error(err);
-                    _sendQueue(message);
-                });
+                await initiateSongInfo(playlist.current);
             }
-            function _sendQueue(message) {
-                var response = playlist.current.display;
+            
+            var response = playlist.current.display;
 
-                var count = 0;
-                var overflow = 0;
+            var overflow = 0;
 
-                var waiting = 0;
+            var responseArr = [];
 
-                var responseArr = [];
+            let nextSongs = playlist.slice(playlist.pos + 1);
 
-                for (var i = playlist.pos + 1; i < playlist.length; i++) {
-                    count++;
-                    if (count > 9) {
-                        overflow = playlist.length - i - 1;
-                        if (overflow > 1)
-                            break;
-                        overflow = 0;
-                    }
-                    var song = playlist[i];
-                    waiting++;
-                    initiateSongInfo(song, function (err, returnedSong) {
-                        if(err) bot.error(err);
-                        waiting--;
-                        responseArr.push("[" + returnedSong.info.title + "](" + returnedSong.info.url + ") added by " + returnedSong.adder);
-                    });
+            if(nextSongs.length > 10) {
+                overflow = nextSongs.slice(0, 9).length;
+                nextSongs = nextSongs.splice(0, 9);
+            }
+            
+            let songs = await Promise.all(nextSongs.map(initiateSongInfo));
+
+            for(let song of songs) {
+                responseArr.push("[" + song.info.title + "](" + song.info.url + ") added by " + song.adder);
+            }
+            if (overflow > 0) {
+                responseArr.push(" . . . and " + overflow + " more.");
+            }
+            if (responseArr.length) {
+                var queueField = response.embed.fields.map((field) => field.name === "Queue" ? field : null).filter(Boolean);
+                if (queueField.length) {
+                    queueField[0].value = responseArr.join("\n");
+                } else {
+                    response.embed.addField("Queue", responseArr.join("\n"));
                 }
-                var interval = setInterval(function () {
-                    if (waiting === 0) {
-                        if (overflow > 0) {
-                            responseArr.push(" . . . and " + overflow + " more.");
-                        }
-                        if (responseArr.length) {
-                            var queueField = response.embed.fields.map((field) => field.name === "Queue" ? field : null).filter(Boolean);
-                            if (queueField.length) {
-                                queueField[0].value = responseArr.join("\n");
-                            } else {
-                                response.embed.addField("Queue", responseArr.join("\n"));
-                            }
-                        }
-                        message.channel.send(response).then(m => m.delete(DELETE_TIME * 3));
-                        clearInterval(interval);
-                        return;
-                    }
-                }, 300);
             }
+            message.channel.send(response).then(m => m.delete(DELETE_TIME * 3));
+            return;
         }
     },
     showcurrent: {
