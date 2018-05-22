@@ -44,8 +44,7 @@ if (!fs.existsSync(ytdlBinary)) {
 const keys = bot.secrets.keys;
 const ytService = new cassette.YouTubeService(keys.youtube);
 const scService = new cassette.SoundcloudService(keys.soundcloud);
-const DirectService = require("./services/direct/Service.js");
-const dService = new DirectService.default(ytdlBinary);
+const dService = new cassette.DirectService(ytdlBinary);
 
 var volumes = {
     //<GUILD_ID> : <0-1>
@@ -59,71 +58,6 @@ var listening = {
 
 const DELETE_TIME = 15000;
 const DEFAULT_VOLUME = 50;
-
-ytService.regex = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/i;
-scService.regex = /https?:\/\/(www\.)*soundcloud.com\/.*?\/./i;
-//bcService.regex = /https?:\/\/(.*?)\.bandcamp.com\/track\/./i;
-
-ytService.type = "youtube";
-scService.type = "soundcloud";
-
-ytService.getSongInfo = function (url, cb) {
-    ytdl.getInfo(url, { filter: "audioonly" }, function (err, info) {
-        if (err) cb(err);
-        else {
-            cb(null, {
-                metadataType: "youtube",
-                imgURL: info.thumbnail_url,
-                title: info.title,
-                duration: info.length_seconds,
-                url: info.video_url,
-                icon: "https://cdn1.iconfinder.com/data/icons/logotypes/32/youtube-256.png"
-            });
-        }
-    });
-};
-
-ytService.getSeekTo = function (url) {
-    var lookFor = ["&t=", "?t="];
-    for (var i in lookFor) {
-        var key = lookFor[i];
-        var start = url.indexOf(key);
-        if (start === -1) continue;
-        start += key.length;
-        var time = "";
-        var char = "";
-        for (var j = start; j < url.length; j++) {
-            char = url[j];
-            if (isNaN(char))
-                break;
-            time += char;
-        }
-        return time;
-    }
-    return 0;
-};
-
-scService.getSongInfo = function (url, cb) {
-    url = url.replace("/stream", "?client_id=" + keys.soundcloud);
-    bot.util.httpGetJson(url, function (err, info) {
-        if (err) cb(err);
-        else {
-            cb(null, {
-                metadataType: "soundcloud",
-                imgURL: info.artwork_url,
-                title: info.title,
-                duration: info.duration / 1000,
-                url: info.permalink_url,
-                genre: [info.genre],
-                icon: "https://cdn2.iconfinder.com/data/icons/social-icon-3/512/social_style_3_soundCloud-128.png"
-            });
-        }
-    });
-};
-
-scService.getSeekTo = function (url) {
-    return dService.getSeekTo(url);
-};
 
 dService.setSongDisplay = setSongDisplay;
 scService.setSongDisplay = setSongDisplay;
@@ -142,7 +76,7 @@ function saveCurrentPlaylist(id, cb) {
     if (!storedPlaylists[id]) storedPlaylists[id] = {};
     storedPlaylists[id].songs = playlist.map((song) => (
         {
-            url: song.streamURL,
+            url: song.URL,
             seek: song.seek,
             adder: song.adder,
             type: song.type
@@ -210,37 +144,39 @@ function getStreamOptions(id) {
 }
 
 function initiateSongInfo(song, cb) {
-    return new Promise(resolve => {
+    console.log(song.info);
+    return new Promise(async (resolve) => {
         if (song.display && song.display.embed) {
             if(typeof cb === 'function') cb(null, song);
             resolve(song);
         }
-        else song.service.getSongInfo(song.streamURL, function (err, info) {
-            if (!info) info = {};
-            
-            var vc = bot.voiceConnections.get(song.guild.id);
-            if (vc && vc.dispatcher)
-                info.currentTime = vc.dispatcher.time / 1000;
-            else
-                info.currentTime = 0;
-            info.addedBy = song.adder;
-    
-            song.info = info;
-    
-            if (err) {
+        else {
+            let error = null;
+            try {
+                if(!song.info || !song.info.full) {
+                    song.info = await song.service.getSongInfo(song.URL);
+                }
+                services[song.type].setSongDisplay(song);
+            } catch (err) {
+                error = err;
                 song.info = {};
-                song.info.addedBy = song.adder;
-                song.info.url = song.streamURL;
+                song.info.url = song.URL;
                 song.info.title = song.streamURL;
                 song.display = { embed: new bot.RichEmbed().setAuthor("Unknown").setTitle(song.streamURL) };
-            } else {
-                services[song.type].setSongDisplay(song);
             }
-            
+
+            song.info.addedBy = song.adder;
+
+            var vc = bot.voiceConnections.get(song.guild.id);
+            if (vc && vc.dispatcher)
+                song.info.currentTime = vc.dispatcher.time / 1000;
+            else
+                song.info.currentTime = 0;
+
             setSongDisplayDescription(song);
-            if(typeof cb === 'function') cb(err, song);
+            if(typeof cb === 'function') cb(error, song);
             resolve(song);
-        });
+        }
     });
 }
 
@@ -268,9 +204,17 @@ function setSongDisplay(song) {
     var embed = new bot.RichEmbed();
     song.display = {};
 
-    if (tags.metadataType === "youtube") embed.setColor([150, 50, 50]); 
-    if (tags.metadataType === "soundcloud") embed.setColor([150,80, 0]);
-    if (tags.metadataType === "ID3") embed.setColor([75, 75, 75]);
+    if (tags.metadataType === "youtube") {
+        embed.setColor([150, 50, 50]); 
+        tags.icon = "https://cdn1.iconfinder.com/data/icons/logotypes/32/youtube-256.png"
+    }
+    if (tags.metadataType === "soundcloud") {
+        embed.setColor([150,80, 0]); 
+        tags.icon = "https://cdn2.iconfinder.com/data/icons/social-icon-3/512/social_style_3_soundCloud-128.png"
+    }
+    if (tags.metadataType === "ID3") {
+        embed.setColor([75, 75, 75]); 
+    }
 
     if (tags.metadataType === "youtube" || tags.metadataType === "soundcloud") {
         embed.setAuthor(tags.metadataType[0].toUpperCase() + tags.metadataType.substr(1), tags.icon);
@@ -279,7 +223,7 @@ function setSongDisplay(song) {
         embed.setAuthor("Direct");
         var title = tags.title || tags.url.split("/").slice(-1)[0];
         embed.setTitle(title);
-        if (tags.artist.length) {
+        if (tags.artist && tags.artist.length) {
             var artisttext = tags.artist.splice(0, 1)[0];
             if (tags.artist.length)
                 artisttext += "ft. " + tags.artist.join(" and ");
@@ -287,15 +231,15 @@ function setSongDisplay(song) {
         }
         if (tags.album) {
             var albumtext = tags.album;
-            if (tags.albumartist.length)
+            if (tags.albumartist && tags.albumartist.length)
                 albumtext += " ft. " + tags.albumartist.join(", ");
             if (tags.year)
                 albumtext += " (" + tags.year + ")";
             embed.addField("Album", albumtext, true);
-            if (tags.track.no) {
+            if (tags.track && tags.track.no) {
                 var tracktext = tags.track.no + "/" + tags.track.of;
-                if (tags.disk.no) {
-                    var disktext = tags.track.no + "/" + tags.track.of;
+                if (tags.disk && tags.disk.no) {
+                    var disktext = tags.disk.no + "/" + tags.disk.of;
                     tracktext += " on Disk " + disktext;
                 }
                 embed.addField("Track", tracktext, true);
@@ -518,11 +462,6 @@ exports.commands = {
                         var song = songs[i];
                         playlist[playlist.indexOf(song)].adder = message.member.displayName;
                         playlist[playlist.indexOf(song)].guild = message.guild;
-                        var input = foundServices[songs[i].type];
-                        if (isValidURL(input)) 
-                            playlist[playlist.indexOf(song)].seek = parseInt(services[songs[i].type].getSeekTo(input));
-                        else
-                            playlist[playlist.indexOf(song)].seek = 0;
                     }
 
                     if (!playlist.playing) startPlaying(message.guild.id, playlist, message.member.voiceChannel);
@@ -611,8 +550,9 @@ exports.commands = {
             let nextSongs = playlist.slice(playlist.pos + 1);
 
             if(nextSongs.length > 10) {
-                overflow = nextSongs.slice(0, 9).length;
-                nextSongs = nextSongs.splice(0, 9);
+                const temp = nextSongs.splice(0, 9);
+                overflow = nextSongs.length;
+                nextSongs = temp;
             }
             
             let songs = await Promise.all(nextSongs.map(initiateSongInfo));

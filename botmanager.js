@@ -1,23 +1,42 @@
 ﻿const fork = require('child_process').fork;
-const settings = require('./secrets.json').botmanager;
+const settings = require('./settings/botmanager.json');
 const Discord = require("discord.js");
 const fs = require('fs'); //Used to check if the startpoint points to a start
 
-var botManagerName = "BotManager";
+var botManagerName = settings.name || "Botmanager";
 var botManagerPaused = false;
-const bots = {
-    laplace: {              //Object name is used in commands, recommended to be the same as name property but lowercase
-        name: "Laplace",    //Display name in reports and console
-        restarting: false,  //Makes the log quieter when restarting
+const bots = {};
+for(var bot of settings.bots) {
+    if (!bot.name || bot[bot.name] || bot.name === settings.name) {
+        error("Skipping bot: No name provided.");
+        continue;
+    }
+    if (!bot.token) { 
+        error("Skipping [" + bot.name + "] : No token provided.");
+        continue;
+    }
+    
+    if (!fs.existsSync(bot.startpoint)) {
+        error("Skipping [" + bot.name + "] : Startpoint doesn't point to a file.");
+        continue;
+    }
+
+    bots[bot.name.toLowerCase()] = {
+        name: bot.name,     //Display name in reports and console
+        token: bot.token,
+        startpoint: bot.startpoint,
+        autostart: bot.autostart,
+        env: bot.env,
+        max_restarts: isNaN(bot.max_restarts) ? 2 : bot.max_restarts,       //Amount of quick_restarts before bot stops restarting automatically
+        restart_delay: isNaN(bot.restart_delay) ? 1000 : bot.restart_delay, //Amount of milliseconds before an auto restart happens
+        min_uptime: isNaN(bot.min_uptime) ? 10000 : bot.min_uptime,         //Milliseconds before bot is considered successfully started
         quick_restarts: 0,  //Amount of restarts done automatically within the min_uptime time limit in a row
-        max_restarts: 2,    //Amount of quick_restarts before bot stops restarting automatically
-        restart_delay: 1000, //Amount of milliseconds before an auto restart happens
         start_time: 0,      //Last time started, used with min_uptime to determine uptime
-        min_uptime: 10000,  //Milliseconds before bot is considered successfully started
         listening: false,   //If we're listening to the process events already
+        restarting: false,  //Makes the log quieter when restarting
         process: null,      //The child process from forking
     }
-};
+}
 
 const client = new Discord.Client();
 var reportChannel; //Discord.JS Channel where reports are sent
@@ -229,7 +248,8 @@ function setup(bot) {
 function start(bot) {
     if (!isAlive(bot)) {
         bot.start_time = Date.now();
-        bot.process = fork(settings.startpoint, [], {
+        bot.process = fork(bot.startpoint, [], {
+            env: bot.env ? bot.env : {},
             execArgv: [],
             stdio: [process.stdin, process.stdout, 'pipe', 'ipc'] //Give it its own stderr so we can listen to it
         });
@@ -315,23 +335,20 @@ function attemptCommand(botname, command) {
 
 client.on('ready', () => {
     log("Logged in as " + client.user.username + "#" + client.user.discriminator);
-    botManagerName = client.user.username;
+
+    //Defaults to the username of the discord account if no name is set in settings
+    if (!settings.name)
+        botManagerName = client.user.username;
 
     var i, botname, command;
 
     if (!settings.reportchannel) {
         return error("No report channel specified.");
     }
-    else if (!settings.startpoint) {
-        return error("No startpoint found for the bot.");
-    }
     else {
         reportChannel = client.channels.get(settings.reportchannel);
         if (!reportChannel) {
             return error("Report channel couldn't be found.");
-        }
-        if (!fs.existsSync(settings.startpoint)) {
-            return error("Startpoint doesn't point to a file.");
         }
 
         log("Settings are in order.");
@@ -366,10 +383,9 @@ client.on('ready', () => {
     });
 
     log("Ready.");
-    if (settings.autostart) {
-        for (i in bots) {
-            start(bots[i]);
-        }
+    
+    for (i in bots) {
+        if(bots[i].autostart) start(bots[i]);
     }
 });
 

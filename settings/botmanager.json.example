@@ -1,0 +1,29 @@
+{
+    "name": "botmanager-name",                      
+    "token": "botmanager-token-here",               
+    "reportchannel": "channel-id",                  //Where the botmanager will be controlled from
+    "bots": [ 
+        {
+            "name": "bot-name",                     //Cannot be duplicate with botmanager's name
+            "startpoint": "path-to-the-.js-file",
+            "autostart": true,
+            "token": "bot-token",
+
+            //Optional settings
+
+            "max_restarts": 2,           //Amount of restarts in a row before bot stops restarting automatically
+            "restart_delay": 1000,       //Amount of milliseconds before an auto restart happens
+            "min_uptime": 10000,         //Milliseconds before bot is considered successfully started
+            "env": {                     //Environment variables passed to the bot
+                "ENV_VAR_NAME" : VALUE,
+                "ENV_VAR_NAME" : VALUE
+            }
+        },
+        {
+            "name": "bot-name",
+            "startpoint": "path-to-the-.js-file",
+            "autostart": false,
+            "token": "bot-token"
+        }
+    ]
+}

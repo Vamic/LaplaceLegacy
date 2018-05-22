@@ -6,7 +6,7 @@ const request = require('request');
 const urlf = require('url');
 
 //Juicy secrets, no looking
-const secrets = require('./secrets.json'); 
+const secrets = require('./settings/secrets.json'); 
 
 const client = new Discord.Client();
 
@@ -499,6 +499,12 @@ function checkCommands(msg) {
 }
 
 client.on('message', msg => {
+    if (process.env["BOT_TESTING"]) {
+        if(!msg.guild || msg.guild.id != process.env["BOT_TEST_SERVER"])
+            return;
+        msg.content = msg.content.substr(1);
+    }
+
     if (!msg.author.bot) {
         checkCommands(msg);
     }

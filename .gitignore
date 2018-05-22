@@ -297,7 +297,7 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
-secrets.json
+settings/*.json
 *.gif
 *.png
 *.jpg
@@ -305,3 +305,4 @@ secrets.json
 plugins/djextension.js
 plugins/services/extension/
 *.exe
+tmp/
