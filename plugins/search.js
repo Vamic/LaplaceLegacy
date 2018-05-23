@@ -307,6 +307,7 @@ function gbSearch(info, args) {
             //if we got an empty response there were no posts with those tags
             if (err === "Empty response body.") {
                 return updateStats(cmds.gelbooru[0], args, [], info.user, true, function (err, data) {
+                    args = args.filter(a => a[0] != "-");
                     info.channel.send("Nobody here but us chickens!" + (args.length === 1 ? " (" + args[0] + ")" : ""));
                 });
             } else {

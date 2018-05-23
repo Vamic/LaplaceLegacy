@@ -109,7 +109,7 @@ const general = {
     }
 }
 
-const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:(?:\w+ )?to(?: \w+)?)/gi;
+const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:\w*? to \w*)/gi;
 
 function isLaplaceMention(word) {
     return word.toLowerCase().indexOf("laplace") > -1
