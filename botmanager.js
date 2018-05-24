@@ -1,10 +1,11 @@
-﻿const fork = require('child_process').fork;
+﻿const { fork, spawn } = require('child_process');
 const settings = require('./settings/botmanager.json');
 const Discord = require("discord.js");
 const fs = require('fs'); //Used to check if the startpoint points to a start
 
 var botManagerName = settings.name || "Botmanager";
 var botManagerPaused = false;
+var git_result;
 const bots = {};
 for(var bot of settings.bots) {
     if (!bot.name || bot[bot.name] || bot.name === settings.name) {
@@ -40,37 +41,6 @@ for(var bot of settings.bots) {
 
 const client = new Discord.Client();
 var reportChannel; //Discord.JS Channel where reports are sent
-
-function log(text) {
-    //Make botmanager messages easy to distinguish (Yellow)
-    console.log("\x1b[33m[" + botManagerName + ".log] " + text + "\x1b[0m");
-}
-function error(text) {
-    //Make errors red and spooky
-    console.log("\x1b[31m[" + botManagerName +".err]\x1b[0m" + text);
-}
-
-function _report(embed) {
-    return reportChannel.send(embed);
-}
-
-function reportError(title, desc) {
-    let e = new Discord.RichEmbed();
-    e.setColor('#DB1111');
-    e.setTitle(title);
-    e.setDescription(desc);
-    e.setFooter(botManagerName + ": Bot monitoring");
-    return _report(e);
-}
-
-function reportInfo(title, desc) {
-    let e = new Discord.RichEmbed();
-    e.setColor('#0FBA4D');
-    e.setTitle(title);
-    e.setDescription(desc);
-    e.setFooter(botManagerName + ": Bot monitoring");
-    return _report(e);
-}
 
 process.on("uncaughtException", (err) => {
     reportError(botManagerName + " crashed.", err);
@@ -364,17 +334,27 @@ client.on('ready', () => {
     
     client.on("message", message => {
         if (message.channel === reportChannel) {
-            var messagePieces = message.content.split(" ");
-            if (messagePieces.length <= 2) {
-                if (messagePieces[0] === "help") {
+            var pieces = message.content.split(" ");
+            if (pieces.length <= 3) {
+                if (pieces[0] === "help") {
                     reportInfo("Help", "[botname] [command]\n`Commands: " + commands.join(" ") + "\nBots: " + Object.keys(bots).join(" ") + "`");
                 }
-                else if (messagePieces.length === 2) {
-                    for (i in messagePieces) {
-                        if (commands.indexOf(messagePieces[i]) > -1 || hiddencommands.indexOf(messagePieces[i]) > -1) {
-                            command = messagePieces.splice(i, 1)[0];
-                            botname = messagePieces[0];
+                else if (pieces[0] === "git") {
+                    if(pieces.length < 2)
+                        message.channel.send("gud");
+                    else if(pieces[1]  === "pull") {
+                        const branch = pieces[2] ? pieces[2] : "";
+                        
+                        gitPull(branch);
+                    }
+                }
+                else if (pieces.length === 2) {
+                    for (i in pieces) {
+                        if (commands.indexOf(pieces[i]) > -1 || hiddencommands.indexOf(pieces[i]) > -1) {
+                            command = pieces.splice(i, 1)[0];
+                            botname = pieces[0];
                             attemptCommand(botname, command);
+                            break; 
                         }
                     }
                 }
@@ -388,6 +368,67 @@ client.on('ready', () => {
         if(bots[i].autostart) start(bots[i]);
     }
 });
+
+function gitPull(branch) {
+    const args = ['pull', 'origin'];
+    if (typeof branch === "string" && branch.length > 0) args.push(branch);
+    const git = spawn('git', args, {
+            execArgv: [],
+            stdio: [process.stdin, 'pipe', 'pipe', 'ipc']
+        });
+    git_result = [];
+
+    git.stdout.on('data', function(data){
+        git_result.push(data);
+        log(data);
+    });
+
+    git.stderr.on('data', function(data){
+        reportError("[git.stderr]", data);
+        error(data);
+    });
+
+    git.on('error', function (err) {
+        reportError("Git got an error.", err);
+        error(err);
+    });
+    
+    git.on('close', function() {
+        reportInfo("Git finished", git_result.join("\n"));
+        log("Git finished:\n" + git_result.join("\n"));
+    });
+}
+
+function log(text) {
+    //Make botmanager messages easy to distinguish (Yellow)
+    console.log("\x1b[33m[" + botManagerName + ".log] " + text + "\x1b[0m");
+}
+function error(text) {
+    //Make errors red and spooky
+    console.log("\x1b[31m[" + botManagerName +".err]\x1b[0m" + text);
+}
+
+function _report(embed) {
+    return reportChannel.send(embed);
+}
+
+function reportError(title, desc = "\u200b") {
+    let e = new Discord.RichEmbed();
+    e.setColor('#DB1111');
+    e.setTitle(title);
+    e.setDescription(desc);
+    e.setFooter(botManagerName + ": Bot monitoring");
+    return _report(e);
+}
+
+function reportInfo(title, desc = "\u200b") {
+    let e = new Discord.RichEmbed();
+    e.setColor('#0FBA4D');
+    e.setTitle(title);
+    e.setDescription(desc);
+    e.setFooter(botManagerName + ": Bot monitoring");
+    return _report(e);
+}
 
 if (settings && settings && settings.token) {
     client.login(settings.token);
