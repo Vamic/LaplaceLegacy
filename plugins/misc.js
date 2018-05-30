@@ -43,6 +43,31 @@ exports.commands = {
             bot.log(command.modifiers);
         }
     },
+    reacttomessage: {
+        commands: ["!react"],
+        requirements: [bot.requirements.guild],
+        exec: async function (command, message) {
+            const args = command.arguments;
+            if (args.length < 2)
+                return message.channel.send("!react message_id emoji emoji2 etc");
+            //get message
+            try {
+                const targetMessage = await message.channel.fetchMessage(args.shift());
+                const emojis = [];
+                for(const arg of args) {
+                    const regexResult = /:(\d+)>$/.exec(arg);
+                    const emoji = regexResult ? await bot.emojis.get(regexResult[1]): arg;
+                    emojis.push(emoji);
+                }
+                if (!emojis.length) throw "no emojis";
+                for(const emoji of emojis) {
+                    await targetMessage.react(emoji);
+                }
+            } catch (e) {
+                bot.error(e);
+            }
+        }
+    },
     poll: {
         commands: ["!poll"],
         usage: "!poll:time question goes here | choice1/choice2/...",

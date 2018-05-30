@@ -59,14 +59,14 @@ var listening = {
 const DELETE_TIME = 15000;
 const DEFAULT_VOLUME = 50;
 
-dService.setSongDisplay = setSongDisplay;
 scService.setSongDisplay = setSongDisplay;
 ytService.setSongDisplay = setSongDisplay;
+dService.setSongDisplay = setSongDisplay;
 
 const services = module.exports.services ? module.exports.services : {};
-services[dService.type] = dService;
 services[ytService.type] = ytService;
 services[scService.type] = scService;
+services[dService.type] = dService;
 
 var storedPlaylists = { playing: [] };
 function saveCurrentPlaylist(id, cb) {
@@ -143,8 +143,7 @@ function getStreamOptions(id) {
     };
 }
 
-function initiateSongInfo(song, cb) {
-    console.log(song.info);
+function initiateSongInfo(song, requiresFull = true) {
     return new Promise(async (resolve) => {
         if (song.display && song.display.embed) {
             if(typeof cb === 'function') cb(null, song);
@@ -153,7 +152,7 @@ function initiateSongInfo(song, cb) {
         else {
             let error = null;
             try {
-                if(!song.info || !song.info.full) {
+                if(!song.info || (!song.info.full && requiresFull)) {
                     song.info = await song.service.getSongInfo(song.URL);
                 }
                 services[song.type].setSongDisplay(song);
@@ -342,6 +341,7 @@ async function reQueue(id, data) {
     
     var voiceChannel = guild.channels.get(channel);
     startPlaying(id, guild.playlist, voiceChannel);
+    clearPlaylistSave(id);
 }
 
 exports.commands = {
@@ -392,11 +392,10 @@ exports.commands = {
 
             var search = "";
 
-            for (var i in command.arguments) {
-                var arg = command.arguments[i];
+            for (const arg of command.arguments) {
                 if (isValidURL(arg)) {
                     var found = false;
-                    for (var type in services) {
+                    for (const type in services) {
                         if (services[type].regex.test(arg)) {
                             if (services[type]) {
                                 if(!foundServices[type])
@@ -475,7 +474,7 @@ exports.commands = {
             "!dj s",
             "!skip"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice],
+        requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             message.channel.send("Skipped.").then(m => m.delete(DELETE_TIME));
             if (!message.guild.playlist.hasNext()) message.guild.playlist.destroy();
@@ -494,7 +493,7 @@ exports.commands = {
             "!dj p",
             "!pause"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice],
+        requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             message.channel.send("Paused.").then(m => m.delete(DELETE_TIME));
             message.guild.playlist.pause();
@@ -508,7 +507,7 @@ exports.commands = {
             "!dj r",
             "!resume"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice],
+        requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             message.channel.send("Resumed.").then(m => m.delete(DELETE_TIME));
             message.guild.playlist.resume();
@@ -525,24 +524,17 @@ exports.commands = {
             "!dj list",
             "!queue"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice],
+        requirements: [bot.requirements.guild],
         exec: async function (command, message) {
             var playlist = message.guild.playlist;
-            if (!playlist.current) return bot.error("[DJ-showqueue] Error: No Current song.");
+            if (!playlist.length) {
+                return message.channel.send("No songs in queue.");
+            }
             var vc = bot.voiceConnections.get(message.guild.id);
             if (!vc.dispatcher) return bot.error("[DJ-showqueue] Error: No Dispatcher.");
             
-            if (playlist.current.display) {
-                message.delete(DELETE_TIME);
-                playlist.current.info.currentTime = vc.dispatcher.time / 1000;
-                setSongDisplayDescription(playlist.current);
-            } else {
-                message.delete(DELETE_TIME);
-                await initiateSongInfo(playlist.current);
-            }
+            message.delete(DELETE_TIME);
             
-            var response = playlist.current.display;
-
             var overflow = 0;
 
             var responseArr = [];
@@ -555,7 +547,7 @@ exports.commands = {
                 nextSongs = temp;
             }
             
-            let songs = await Promise.all(nextSongs.map(initiateSongInfo));
+            let songs = await Promise.all(nextSongs.map(song => initiateSongInfo(song, false)));
 
             for(let song of songs) {
                 responseArr.push("[" + song.info.title + "](" + song.info.url + ") added by " + song.adder);
@@ -563,15 +555,14 @@ exports.commands = {
             if (overflow > 0) {
                 responseArr.push(" . . . and " + overflow + " more.");
             }
-            if (responseArr.length) {
-                var queueField = response.embed.fields.map((field) => field.name === "Queue" ? field : null).filter(Boolean);
-                if (queueField.length) {
-                    queueField[0].value = responseArr.join("\n");
-                } else {
-                    response.embed.addField("Queue", responseArr.join("\n"));
-                }
-            }
-            message.channel.send(response).then(m => m.delete(DELETE_TIME * 3));
+
+            var embed = new bot.RichEmbed();
+
+            embed.setTitle("Coming up soon . . .");
+            
+            embed.setDescription(responseArr.join("\n"));
+                
+            message.channel.send(embed).then(m => m.delete(DELETE_TIME * 10));
             return;
         }
     },
@@ -595,13 +586,6 @@ exports.commands = {
 
                 var display = playlist.current.display;
 
-                //Remove Queue if its in there
-                var queueField = display.embed.fields.map((field) => field.name === "Queue" ? field : null).filter(Boolean);
-                if (queueField.length) {
-                    var index = display.embed.fields.indexOf(queueField[0]);
-                    display.embed.fields.splice(index, 1);
-                }
-
                 message.channel.send(display).then(m => m.delete(DELETE_TIME * 3));
             } else {
                 initiateSongInfo(playlist.current, function (err) {
@@ -616,7 +600,7 @@ exports.commands = {
             "!dj shuffle",
             "!shuffle"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice],
+        requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             message.guild.playlist.shuffle();
             message.channel.send("Shuffled all songs.").then(m => m.delete(DELETE_TIME));
@@ -631,7 +615,7 @@ exports.commands = {
             "!volume",
             "!vol"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice],
+        requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             if (!isNaN(command.arguments[0])) {
                 setVolume(message.guild.id, command.arguments[0]);
@@ -647,7 +631,7 @@ exports.commands = {
             "!dj clear",
             "!clear"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice],
+        requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             message.guild.playlist.destroy();
             message.channel.send("Cleared all songs.").then(m => m.delete(DELETE_TIME));
