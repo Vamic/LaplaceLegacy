@@ -114,10 +114,11 @@ function clearPlaylistSave(id, cb) {
 
 function loadLastPlaylists(cb) {
     fs.readFile("./tmp/dj/queues.json", function (err, data) {
-        if (err) {
-            storedPlaylists = { playing: [] };
-        } else {
+        try {
+            if (err) throw err;
             storedPlaylists = JSON.parse(data);
+        } catch (e) {
+            storedPlaylists = { playing: [] };
         }
         cb();
     });
