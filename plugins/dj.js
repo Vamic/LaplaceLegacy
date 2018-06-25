@@ -146,8 +146,7 @@ function getStreamOptions(id) {
 
 function initiateSongInfo(song, requiresFull = true) {
     return new Promise(async (resolve) => {
-        if (song.display && song.display.embed) {
-            if(typeof cb === 'function') cb(null, song);
+        if (song.display && song.display.embed && (!requiresFull || requiresFull && song.info.full)) {
             resolve(song);
         }
         else {
@@ -174,7 +173,6 @@ function initiateSongInfo(song, requiresFull = true) {
                 song.info.currentTime = 0;
 
             setSongDisplayDescription(song);
-            if(typeof cb === 'function') cb(error, song);
             resolve(song);
         }
     });
@@ -576,24 +574,17 @@ exports.commands = {
             "!current"
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
-        exec: function (command, message) {
+        exec: async function (command, message) {
             message.delete(DELETE_TIME);
             var playlist = message.guild.playlist;
             var vc = bot.voiceConnections.get(message.guild.id);
             if (!vc.dispatcher) return bot.error("[DJ-showcurrent] Error: No dispatcher.");
             if (playlist.current.display) {
-                playlist.current.info.currentTime = vc.dispatcher.time / 1000;
                 setSongDisplayDescription(playlist.current);
-
-                var display = playlist.current.display;
-
-                message.channel.send(display).then(m => m.delete(DELETE_TIME * 3));
             } else {
-                initiateSongInfo(playlist.current, function (err) {
-                    message.channel.send(playlist.current.display).then(m => m.delete(DELETE_TIME * 3));
-                    if(err) bot.error(err);
-                });
+                await initiateSongInfo(playlist.current, true);
             }
+            message.channel.send(playlist.current.display).then(m => m.delete(DELETE_TIME * 3));
         }
     },
     shufflesongs: {
