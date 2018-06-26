@@ -25,6 +25,10 @@ var sscmds = {
 };
 var delay = 300; //Delay between requests to APIs, lets hope they dont disable us anymore
 
+var lastSearches = {
+    //<discord_id> : [<args>]
+};
+
 function getTags(site, unknownTags, knownTags, callback) {
     //Check our saved tags so we dont have to look up every single tag every single time
     if (!storedTags[site]) {
@@ -491,6 +495,11 @@ exports.commands = {
         description: "Search for stuff",
         exec: function (command, message) {
             var args = command.arguments;
+            if (!args.length) {
+                args = lastSearches[message.author.id];
+            } else {
+                lastSearches[message.author.id] = args;
+            }
             if (!args || args.length < 1)
                 return;
             args = args.filter(Boolean);
