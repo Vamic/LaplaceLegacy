@@ -41,7 +41,11 @@ var requirements = {
 
 var log = function (msg, type) {
     if (!type) type = "log";
-    console.log("[Laplace." + type + "] " + msg);
+    if(typeof msg === "string")
+        return console.log("[Laplace." + type + "] " + msg);
+        
+    console.log("[Laplace." + type + "]");
+    console.log(msg);
 };
 var warn = function (msg) {
     log(msg, "warn");
