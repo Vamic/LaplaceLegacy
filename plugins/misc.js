@@ -35,6 +35,16 @@ var buildPollMessage = function (question, user, data) {
     return result;
 };
 
+var toRegionalIndicator = function(character) {
+    if (character && /^[a-zA-Z0-9]$/.test(character)){
+        if (/^\d$/.test(character)){
+            return String.fromCharCode(character.charCodeAt(0), 0x20E3);
+        }
+        return String.fromCodePoint(0x1F1E6 + character.charCodeAt(0) - 97);
+    }
+    return null;
+}
+
 exports.commands = {
     testCommand: {
         commands: ["!test"],
@@ -55,11 +65,22 @@ exports.commands = {
                 const targetMessage = await message.channel.fetchMessage(args.shift());
                 const emojis = [];
                 for(const arg of args) {
-                    const regexResult = /:(\d+)>$/.exec(arg);
-                    const emoji = regexResult ? await bot.emojis.get(regexResult[1]): arg;
-                    emojis.push(emoji);
+                    const isWord = /^[a-zA-Z0-9]+$/.test(arg);
+                    if (isWord) {
+                        for(var i = 0 ; i < arg.length; i++) {
+                            const emoji = toRegionalIndicator(arg[i]);
+                            if(!emoji || emojis.indexOf(emoji) > -1) continue;
+                            emojis.push(emoji);
+                        }
+                    } else {
+                        const regexResult = /:(\d+)>$/.exec(arg);
+                        const emoji = regexResult ? await bot.emojis.get(regexResult[1]) : arg;
+                        if(emojis.indexOf(emoji) > -1) continue;
+                        emojis.push(emoji);
+                    }
                 }
                 if (!emojis.length) throw "no emojis";
+                if (emojis.length > 10) throw "too many emojis cmon now";
                 for(const emoji of emojis) {
                     await targetMessage.react(emoji);
                 }
