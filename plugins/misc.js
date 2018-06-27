@@ -40,7 +40,7 @@ var toRegionalIndicator = function(character) {
         if (/^\d$/.test(character)){
             return String.fromCharCode(character.charCodeAt(0), 0x20E3);
         }
-        return String.fromCodePoint(0x1F1E6 + character.charCodeAt(0) - 97);
+        return String.fromCodePoint(0x1F185 + character.charCodeAt(0));
     }
     return null;
 }
@@ -49,8 +49,11 @@ exports.commands = {
     testCommand: {
         commands: ["!test"],
         exec: function (command, message) {
-            bot.log(command.arguments);
-            bot.log(command.modifiers);
+            var url = "https://i.imgur.com/qRS5WHk.gifv";
+            url = "https://cdn.discordapp.com/attachments/230828612318658560/449214032814276608/butterfly.webp";
+            var em = new bot.RichEmbed().setImage(url).setDescription(url);
+            console.log(em);
+            message.channel.send(em);
         }
     },
     reacttomessage: {

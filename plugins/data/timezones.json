@@ -1,0 +1,3880 @@
+[
+  {
+    "abbreviaton": "A",
+    "name": "Alpha Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ACDT",
+    "name": "Australian Central Daylight Time ",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10:30",
+    "offset": 10.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CDT",
+    "name": "Central Daylight Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10:30",
+    "offset": 10.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CDST",
+    "name": "Central Daylight Savings Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10:30",
+    "offset": 10.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ACST",
+    "name": "Australian Central Standard Time ",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +9:30",
+    "offset": 9.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CST",
+    "name": "Central Standard Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +9:30",
+    "offset": 9.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ACT",
+    "name": "Acre Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ACT",
+    "name": "Australian Central Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +9:30 / +10:30",
+    "offset": 9.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ACWST",
+    "name": "Australian Central Western Standard Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +8:45",
+    "offset": 8.75,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ADT",
+    "name": "Arabia Daylight Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AST",
+    "name": "Arabia Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ADT",
+    "name": "Atlantic Daylight Time ",
+    "locations": [
+      "North America",
+      "Atlantic"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ADST",
+    "name": "Atlantic Daylight Saving Time",
+    "locations": [
+      "North America",
+      "Atlantic"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AST",
+    "name": "Atlantic Summer Time ",
+    "locations": [
+      "North America",
+      "Atlantic"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HAA",
+    "name": "Heure Avancée de l'Atlantique (French)",
+    "locations": [
+      "North America",
+      "Atlantic"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AEDT",
+    "name": "Australian Eastern Daylight Time ",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EDT",
+    "name": "Eastern Daylight Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EDST",
+    "name": "Eastern Daylight Saving Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AEST",
+    "name": "Australian Eastern Standard Time ",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EST",
+    "name": "Eastern Standard Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AET",
+    "name": "Australian Eastern Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AET",
+    "name": "Australian Eastern Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10:00 / +11:00",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AFT",
+    "name": "Afghanistan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4:30",
+    "offset": 4.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AKDT",
+    "name": "Alaska Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ADST",
+    "name": "Alaska Daylight Saving Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AKST",
+    "name": "Alaska Standard Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -9",
+    "offset": -9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AT",
+    "name": "Alaska Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -9",
+    "offset": -9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ALMT",
+    "name": "Alma-Ata Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AMST",
+    "name": "Amazon Summer Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AMST",
+    "name": "Armenia Summer Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AMDT",
+    "name": "Armenia Daylight Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AMT",
+    "name": "Amazon Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AMT",
+    "name": "Armenia Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ANAST",
+    "name": "Anadyr Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ANAT",
+    "name": "Anadyr Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AQTT",
+    "name": "Aqtobe Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ART",
+    "name": "Argentina Time",
+    "locations": [
+      "Antarctica",
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AST",
+    "name": "Arabia Standard Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AST",
+    "name": "Arabic Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AST",
+    "name": "Al Manamah Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AST",
+    "name": "Atlantic Standard Time ",
+    "locations": [
+      "North America",
+      "Atlantic",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AT",
+    "name": "Atlantic Time ",
+    "locations": [
+      "North America",
+      "Atlantic",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AST",
+    "name": "Tiempo Estándar del Atlántico (Spanish)",
+    "locations": [
+      "North America",
+      "Atlantic",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HNA",
+    "name": "Heure Normale de l'Atlantique (French)",
+    "locations": [
+      "North America",
+      "Atlantic",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AT",
+    "name": "Atlantic Time",
+    "locations": [
+      "North America",
+      "Atlantic"
+    ],
+    "utc_relation": "UTC -4:00 / -3:00",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AWDT",
+    "name": "Australian Western Daylight Time ",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WDT",
+    "name": "Western Daylight Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WST",
+    "name": "Western Summer Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AWST",
+    "name": "Australian Western Standard Time ",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WST",
+    "name": "Western Standard Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WAT",
+    "name": "Western Australia Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AZOST",
+    "name": "Azores Summer Time ",
+    "locations": [
+      "Atlantic"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AZODT",
+    "name": "Azores Daylight Time",
+    "locations": [
+      "Atlantic"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AZOT",
+    "name": "Azores Time ",
+    "locations": [
+      "Atlantic"
+    ],
+    "utc_relation": "UTC -1",
+    "offset": -1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AZOST",
+    "name": "Azores Standard Time",
+    "locations": [
+      "Atlantic"
+    ],
+    "utc_relation": "UTC -1",
+    "offset": -1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "AZST",
+    "name": "Azerbaijan Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AZT",
+    "name": "Azerbaijan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "AoE",
+    "name": "Anywhere on Earth",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -12",
+    "offset": -12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "B",
+    "name": "Bravo Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BNT",
+    "name": "Brunei Darussalam Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BDT",
+    "name": "Brunei Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "BOT",
+    "name": "Bolivia Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BRST",
+    "name": "Brasília Summer Time ",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BST",
+    "name": "Brazil Summer Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "BST",
+    "name": "Brazilian Summer Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "BRT",
+    "name": "Brasília Time ",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BT",
+    "name": "Brazil Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "BT",
+    "name": "Brazilian Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "BST",
+    "name": "Bangladesh Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BST",
+    "name": "Bougainville Standard Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BST",
+    "name": "British Summer Time ",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "BDT",
+    "name": "British Daylight Time",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "BDST",
+    "name": "British Daylight Saving Time",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "BTT",
+    "name": "Bhutan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "C",
+    "name": "Charlie Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CAST",
+    "name": "Casey Time",
+    "locations": [
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CAT",
+    "name": "Central Africa Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CCT",
+    "name": "Cocos Islands Time",
+    "locations": [
+      "Indian Ocean"
+    ],
+    "utc_relation": "UTC +6:30",
+    "offset": 6.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CDT",
+    "name": "Central Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CDST",
+    "name": "Central Daylight Saving Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NACDT",
+    "name": "North American Central Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HAC",
+    "name": "Heure Avancée du Centre (French)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CDT",
+    "name": "Cuba Daylight Time",
+    "locations": [
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CEST",
+    "name": "Central European Summer Time ",
+    "locations": [
+      "Europe",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CEDT",
+    "name": "Central European Daylight Time",
+    "locations": [
+      "Europe",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ECST",
+    "name": "European Central Summer Time ",
+    "locations": [
+      "Europe",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MESZ",
+    "name": "Mitteleuropäische Sommerzeit (German)",
+    "locations": [
+      "Europe",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CET",
+    "name": "Central European Time ",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ECT",
+    "name": "European Central Time",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CET",
+    "name": "Central Europe Time ",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MEZ",
+    "name": "Mitteleuropäische Zeit (German)",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CHADT",
+    "name": "Chatham Island Daylight Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13:45",
+    "offset": 13.75,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CDT",
+    "name": "Chatham Daylight Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13:45",
+    "offset": 13.75,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CHAST",
+    "name": "Chatham Island Standard Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12:45",
+    "offset": 12.75,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CHOST",
+    "name": "Choibalsan Summer Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CHODT",
+    "name": "Choibalsan Daylight Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CHODST",
+    "name": "Choibalsan Daylight Saving Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CHOT",
+    "name": "Choibalsan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CHUT",
+    "name": "Chuuk Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CIDST",
+    "name": "Cayman Islands Daylight Saving Time",
+    "locations": [
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CIST",
+    "name": "Cayman Islands Standard Time ",
+    "locations": [
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CIT",
+    "name": "Cayman Islands Time",
+    "locations": [
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CKT",
+    "name": "Cook Island Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -10",
+    "offset": -10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CLST",
+    "name": "Chile Summer Time ",
+    "locations": [
+      "South America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CLDT",
+    "name": "Chile Daylight Time",
+    "locations": [
+      "South America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CLT",
+    "name": "Chile Standard Time ",
+    "locations": [
+      "South America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CT",
+    "name": "Chile Time",
+    "locations": [
+      "South America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CLST",
+    "name": "Chile Standard Time",
+    "locations": [
+      "South America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "COT",
+    "name": "Colombia Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CST",
+    "name": "Central Standard Time ",
+    "locations": [
+      "North America",
+      "Central America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CT",
+    "name": "Central Time",
+    "locations": [
+      "North America",
+      "Central America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NACST",
+    "name": "North American Central Standard Time ",
+    "locations": [
+      "North America",
+      "Central America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CST",
+    "name": "Tiempo Central Estándar (Spanish)",
+    "locations": [
+      "North America",
+      "Central America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HNC",
+    "name": "Heure Normale du Centre (French)",
+    "locations": [
+      "North America",
+      "Central America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "CST",
+    "name": "China Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CST",
+    "name": "Cuba Standard Time",
+    "locations": [
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CT",
+    "name": "Central Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -6:00 / -5:00",
+    "offset": -6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CVT",
+    "name": "Cape Verde Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC -1",
+    "offset": -1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "CXT",
+    "name": "Christmas Island Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ChST",
+    "name": "Chamorro Standard Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GST",
+    "name": "Guam Standard Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "D",
+    "name": "Delta Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "DAVT",
+    "name": "Davis Time",
+    "locations": [
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "DDUT",
+    "name": "Dumont-d'Urville Time",
+    "locations": [
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "E",
+    "name": "Echo Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EASST",
+    "name": "Easter Island Summer Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EADT",
+    "name": "Easter Island Daylight Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EAST",
+    "name": "Easter Island Standard Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EAT",
+    "name": "Eastern Africa Time ",
+    "locations": [
+      "Africa",
+      "Indian Ocean"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EAT",
+    "name": "East Africa Time",
+    "locations": [
+      "Africa",
+      "Indian Ocean"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ECT",
+    "name": "Ecuador Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EDT",
+    "name": "Eastern Daylight Time ",
+    "locations": [
+      "North America",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EDST",
+    "name": "Eastern Daylight Savings Time",
+    "locations": [
+      "North America",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NAEDT",
+    "name": "North American Eastern Daylight Time ",
+    "locations": [
+      "North America",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HAE",
+    "name": "Heure Avancée de l'Est (French)",
+    "locations": [
+      "North America",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EDT",
+    "name": "Tiempo de verano del Este (Spanish)",
+    "locations": [
+      "North America",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EEST",
+    "name": "Eastern European Summer Time ",
+    "locations": [
+      "Europe",
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EEDT",
+    "name": "Eastern European Daylight Time ",
+    "locations": [
+      "Europe",
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "OESZ",
+    "name": "Osteuropäische Sommerzeit (German)",
+    "locations": [
+      "Europe",
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EET",
+    "name": "Eastern European Time ",
+    "locations": [
+      "Europe",
+      "Asia",
+      "Africa"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "OEZ",
+    "name": "Osteuropäische Zeit (German)",
+    "locations": [
+      "Europe",
+      "Asia",
+      "Africa"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EGST",
+    "name": "Eastern Greenland Summer Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EGST",
+    "name": "East Greenland Summer Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EGT",
+    "name": "East Greenland Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -1",
+    "offset": -1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EGT",
+    "name": "Eastern Greenland Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -1",
+    "offset": -1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "EST",
+    "name": "Eastern Standard Time ",
+    "locations": [
+      "North America",
+      "Caribbean",
+      "Central America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ET",
+    "name": "Eastern Time ",
+    "locations": [
+      "North America",
+      "Caribbean",
+      "Central America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NAEST",
+    "name": "North American Eastern Standard Time ",
+    "locations": [
+      "North America",
+      "Caribbean",
+      "Central America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ET",
+    "name": "Tiempo del Este (Spanish)",
+    "locations": [
+      "North America",
+      "Caribbean",
+      "Central America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HNE",
+    "name": "Heure Normale de l'Est (French)",
+    "locations": [
+      "North America",
+      "Caribbean",
+      "Central America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ET",
+    "name": "Eastern Time",
+    "locations": [
+      "North America",
+      "Caribbean"
+    ],
+    "utc_relation": "UTC -5:00 / -4:00",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "F",
+    "name": "Foxtrot Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "FET",
+    "name": "Further-Eastern European Time",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "FJST",
+    "name": "Fiji Summer Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "FJDT",
+    "name": "Fiji Daylight Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "FJT",
+    "name": "Fiji Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "FKST",
+    "name": "Falkland Islands Summer Time ",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "FKDT",
+    "name": "Falkland Island Daylight Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "FKT",
+    "name": "Falkland Island Time ",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "FKST",
+    "name": "Falkland Island Standard Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "FNT",
+    "name": "Fernando de Noronha Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "G",
+    "name": "Golf Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GALT",
+    "name": "Galapagos Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GAMT",
+    "name": "Gambier Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -9",
+    "offset": -9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GAMT",
+    "name": "Gambier Islands Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -9",
+    "offset": -9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "GET",
+    "name": "Georgia Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GFT",
+    "name": "French Guiana Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GILT",
+    "name": "Gilbert Island Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GMT",
+    "name": "Greenwich Mean Time ",
+    "locations": [
+      "Europe",
+      "Africa",
+      "North America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "UTC",
+    "name": "Coordinated Universal Time",
+    "locations": [
+      "Europe",
+      "Africa",
+      "North America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "GT",
+    "name": "Greenwich Time",
+    "locations": [
+      "Europe",
+      "Africa",
+      "North America",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "GST",
+    "name": "Gulf Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GST",
+    "name": "South Georgia Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GYT",
+    "name": "Guyana Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "H",
+    "name": "Hotel Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HDT",
+    "name": "Hawaii-Aleutian Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -9",
+    "offset": -9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HADT",
+    "name": "Hawaii Daylight Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -9",
+    "offset": -9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HKT",
+    "name": "Hong Kong Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HOVST",
+    "name": "Hovd Summer Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HOVDT",
+    "name": "Hovd Daylight Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HOVDST",
+    "name": "Hovd Daylight Saving Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HOVT",
+    "name": "Hovd Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HST",
+    "name": "Hawaii Standard Time ",
+    "locations": [
+      "North America",
+      "Pacific"
+    ],
+    "utc_relation": "UTC -10",
+    "offset": -10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HAST",
+    "name": "Hawaii-Aleutian Standard Time",
+    "locations": [
+      "North America",
+      "Pacific"
+    ],
+    "utc_relation": "UTC -10",
+    "offset": -10,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "I",
+    "name": "India Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ICT",
+    "name": "Indochina Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IDT",
+    "name": "Israel Daylight Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IOT",
+    "name": "Indian Chagos Time",
+    "locations": [
+      "Indian Ocean"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IRDT",
+    "name": "Iran Daylight Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4:30",
+    "offset": 4.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IRST",
+    "name": "Iran Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4:30",
+    "offset": 4.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "IDT",
+    "name": "Iran Daylight Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +4:30",
+    "offset": 4.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "IRKST",
+    "name": "Irkutsk Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IRKT",
+    "name": "Irkutsk Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IRST",
+    "name": "Iran Standard Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +3:30",
+    "offset": 3.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IT",
+    "name": "Iran Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +3:30",
+    "offset": 3.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "IST",
+    "name": "India Standard Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5:30",
+    "offset": 5.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IT",
+    "name": "India Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5:30",
+    "offset": 5.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "IST",
+    "name": "Indian Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5:30",
+    "offset": 5.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "IST",
+    "name": "Irish Standard Time ",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "IST",
+    "name": "Irish Summer Time",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "IST",
+    "name": "Israel Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "JST",
+    "name": "Japan Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "K",
+    "name": "Kilo Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "KGT",
+    "name": "Kyrgyzstan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "KOST",
+    "name": "Kosrae Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "KRAST",
+    "name": "Krasnoyarsk Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "KRAT",
+    "name": "Krasnoyarsk Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "KST",
+    "name": "Korea Standard Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "KST",
+    "name": "Korean Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "KT",
+    "name": "Korea Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "KUYT",
+    "name": "Kuybyshev Time ",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SAMST",
+    "name": "Samara Summer Time",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "L",
+    "name": "Lima Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "LHDT",
+    "name": "Lord Howe Daylight Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "LHST",
+    "name": "Lord Howe Standard Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +10:30",
+    "offset": 10.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "LINT",
+    "name": "Line Islands Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +14",
+    "offset": 14,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "M",
+    "name": "Mike Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MAGST",
+    "name": "Magadan Summer Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MAGST",
+    "name": "Magadan Island Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MAGT",
+    "name": "Magadan Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MAGT",
+    "name": "Magadan Island Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MART",
+    "name": "Marquesas Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -9:30",
+    "offset": -9.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MAWT",
+    "name": "Mawson Time",
+    "locations": [
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MDT",
+    "name": "Mountain Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MDST",
+    "name": "Mountain Daylight Saving Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NAMDT",
+    "name": "North American Mountain Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HAR",
+    "name": "Heure Avancée des Rocheuses (French)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MHT",
+    "name": "Marshall Islands Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MMT",
+    "name": "Myanmar Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6:30",
+    "offset": 6.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MSD",
+    "name": "Moscow Daylight Time ",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "Moscow Summer Time",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MSK",
+    "name": "Moscow Standard Time ",
+    "locations": [
+      "Europe",
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MCK",
+    "name": "Moscow Time",
+    "locations": [
+      "Europe",
+      "Asia"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MST",
+    "name": "Mountain Standard Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MT",
+    "name": "Mountain Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NAMST",
+    "name": "North American Mountain Standard Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HNR",
+    "name": "Heure Normale des Rocheuses (French)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "MT",
+    "name": "Mountain Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7:00 / -6:00",
+    "offset": -7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MUT",
+    "name": "Mauritius Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MVT",
+    "name": "Maldives Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MYT",
+    "name": "Malaysia Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "MST",
+    "name": "Malaysian Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "N",
+    "name": "November Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -1",
+    "offset": -1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NCT",
+    "name": "New Caledonia Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NDT",
+    "name": "Newfoundland Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -2:30",
+    "offset": -2.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HAT",
+    "name": "Heure Avancée de Terre-Neuve (French)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -2:30",
+    "offset": -2.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NFT",
+    "name": "Norfolk Time ",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NFT",
+    "name": "Norfolk Island Time",
+    "locations": [
+      "Australia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NOVST",
+    "name": "Novosibirsk Summer Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "OMSST",
+    "name": "Omsk Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NOVT",
+    "name": "Novosibirsk Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "OMST",
+    "name": "Omsk Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NPT",
+    "name": "Nepal Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5:45",
+    "offset": 5.75,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NRT",
+    "name": "Nauru Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NST",
+    "name": "Newfoundland Standard Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -3:30",
+    "offset": -3.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HNT",
+    "name": "Heure Normale de Terre-Neuve (French)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -3:30",
+    "offset": -3.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NUT",
+    "name": "Niue Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -11",
+    "offset": -11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NZDT",
+    "name": "New Zealand Daylight Time",
+    "locations": [
+      "Pacific",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NZST",
+    "name": "New Zealand Standard Time",
+    "locations": [
+      "Pacific",
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "O",
+    "name": "Oscar Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "OMSST",
+    "name": "Omsk Summer Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "NOVST",
+    "name": "Novosibirsk Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "OMST",
+    "name": "Omsk Standard Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "OMST",
+    "name": "Omsk Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NOVT",
+    "name": "Novosibirsk Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ORAT",
+    "name": "Oral Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "P",
+    "name": "Papa Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PDT",
+    "name": "Pacific Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PDST",
+    "name": "Pacific Daylight Saving Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NAPDT",
+    "name": "North American Pacific Daylight Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HAP",
+    "name": "Heure Avancée du Pacifique (French)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "PET",
+    "name": "Peru Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PETST",
+    "name": "Kamchatka Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PETT",
+    "name": "Kamchatka Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PETT",
+    "name": "Petropavlovsk-Kamchatski Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "PGT",
+    "name": "Papua New Guinea Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PHOT",
+    "name": "Phoenix Island Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PHT",
+    "name": "Philippine Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PST",
+    "name": "Philippine Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "PKT",
+    "name": "Pakistan Standard Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PKT",
+    "name": "Pakistan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "PMDT",
+    "name": "Pierre & Miquelon Daylight Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PMST",
+    "name": "Pierre & Miquelon Standard Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PONT",
+    "name": "Pohnpei Standard Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PST",
+    "name": "Pacific Standard Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PT",
+    "name": "Pacific Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "NAPST",
+    "name": "North American Pacific Standard Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "PT",
+    "name": "Tiempo del Pacífico (Spanish)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "HNP",
+    "name": "Heure Normale du Pacifique (French)",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "PST",
+    "name": "Pitcairn Standard Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PT",
+    "name": "Pacific Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -8:00 / -7:00",
+    "offset": -8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PWT",
+    "name": "Palau Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PYST",
+    "name": "Paraguay Summer Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PYT",
+    "name": "Paraguay Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PYT",
+    "name": "Pyongyang Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8:30",
+    "offset": 8.5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "PYST",
+    "name": "Pyongyang Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8:30",
+    "offset": 8.5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "Q",
+    "name": "Quebec Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "QYZT",
+    "name": "Qyzylorda Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "R",
+    "name": "Romeo Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -5",
+    "offset": -5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "RET",
+    "name": "Reunion Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ROTT",
+    "name": "Rothera Time",
+    "locations": [
+      "Antarctica"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "S",
+    "name": "Sierra Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -6",
+    "offset": -6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SAKT",
+    "name": "Sakhalin Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SAMT",
+    "name": "Samara Time ",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SAMT",
+    "name": "Samara Standard Time",
+    "locations": [
+      "Europe"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "SAST",
+    "name": "South Africa Standard Time ",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SAST",
+    "name": "South African Standard Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "SBT",
+    "name": "Solomon Islands Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SBT",
+    "name": "Solomon Island Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "SCT",
+    "name": "Seychelles Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +4",
+    "offset": 4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SGT",
+    "name": "Singapore Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SST",
+    "name": "Singapore Standard Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "SRET",
+    "name": "Srednekolymsk Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SRT",
+    "name": "Suriname Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SST",
+    "name": "Samoa Standard Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -11",
+    "offset": -11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "SYOT",
+    "name": "Syowa Time",
+    "locations": [
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "T",
+    "name": "Tango Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -7",
+    "offset": -7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TAHT",
+    "name": "Tahiti Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC -10",
+    "offset": -10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TFT",
+    "name": "French Southern and Antarctic Time ",
+    "locations": [
+      "Indian Ocean"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "KIT",
+    "name": "Kerguelen (Islands) Time",
+    "locations": [
+      "Indian Ocean"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "TJT",
+    "name": "Tajikistan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TKT",
+    "name": "Tokelau Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TLT",
+    "name": "East Timor Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TMT",
+    "name": "Turkmenistan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TOST",
+    "name": "Tonga Summer Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +14",
+    "offset": 14,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TOT",
+    "name": "Tonga Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TRT",
+    "name": "Turkey Time",
+    "locations": [
+      "Asia",
+      "Europe"
+    ],
+    "utc_relation": "UTC +3",
+    "offset": 3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "TVT",
+    "name": "Tuvalu Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "U",
+    "name": "Uniform Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -8",
+    "offset": -8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ULAST",
+    "name": "Ulaanbaatar Summer Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ULAST",
+    "name": "Ulan Bator Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "ULAT",
+    "name": "Ulaanbaatar Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ULAT",
+    "name": "Ulan Bator Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "UTC",
+    "name": "Coordinated Universal Time",
+    "locations": [
+      "Worldwide"
+    ],
+    "utc_relation": "UTC",
+    "offset": null,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "UYST",
+    "name": "Uruguay Summer Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "UYT",
+    "name": "Uruguay Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "UZT",
+    "name": "Uzbekistan Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "V",
+    "name": "Victor Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -9",
+    "offset": -9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "VET",
+    "name": "Venezuelan Standard Time ",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "HLV",
+    "name": "Hora Legal de Venezuela (Spanish)",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -4",
+    "offset": -4,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "VLAST",
+    "name": "Vladivostok Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "VLAT",
+    "name": "Vladivostok Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "VOST",
+    "name": "Vostok Time",
+    "locations": [
+      "Antarctica"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "VUT",
+    "name": "Vanuatu Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "EFATE",
+    "name": "Efate Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +11",
+    "offset": 11,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "W",
+    "name": "Whiskey Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -10",
+    "offset": -10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WAKT",
+    "name": "Wake Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WARST",
+    "name": "Western Argentine Summer Time",
+    "locations": [
+      "South America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WAST",
+    "name": "West Africa Summer Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +2",
+    "offset": 2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WAT",
+    "name": "West Africa Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WEST",
+    "name": "Western European Summer Time ",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WEDT",
+    "name": "Western European Daylight Time ",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WESZ",
+    "name": "Westeuropäische Sommerzeit (German)",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WET",
+    "name": "Western European Time ",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "GMT",
+    "name": "Greenwich Mean Time ",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WEZ",
+    "name": "Westeuropäische Zeit (German)",
+    "locations": [
+      "Europe",
+      "Africa"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WFT",
+    "name": "Wallis and Futuna Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +12",
+    "offset": 12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WGST",
+    "name": "Western Greenland Summer Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WGST",
+    "name": "West Greenland Summer Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -2",
+    "offset": -2,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WGT",
+    "name": "West Greenland Time ",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WGT",
+    "name": "Western Greenland Time",
+    "locations": [
+      "North America"
+    ],
+    "utc_relation": "UTC -3",
+    "offset": -3,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WIB",
+    "name": "Western Indonesian Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WIB",
+    "name": "Waktu Indonesia Barat",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +7",
+    "offset": 7,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WIT",
+    "name": "Eastern Indonesian Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WIT",
+    "name": "Waktu Indonesia Timur",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WITA",
+    "name": "Central Indonesian Time ",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WITA",
+    "name": "Waktu Indonesia Tengah",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +8",
+    "offset": 8,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WST",
+    "name": "West Samoa Time ",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "ST",
+    "name": "Samoa Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +13",
+    "offset": 13,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "WST",
+    "name": "Western Sahara Summer Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +1",
+    "offset": 1,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WT",
+    "name": "Western Sahara Standard Time ",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "WT",
+    "name": "Western Sahara Time",
+    "locations": [
+      "Africa"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": true
+  },
+  {
+    "abbreviaton": "X",
+    "name": "X-ray Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -11",
+    "offset": -11,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "Y",
+    "name": "Yankee Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC -12",
+    "offset": -12,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "YAKST",
+    "name": "Yakutsk Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "YAKT",
+    "name": "Yakutsk Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +9",
+    "offset": 9,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "YAPT",
+    "name": "Yap Time",
+    "locations": [
+      "Pacific"
+    ],
+    "utc_relation": "UTC +10",
+    "offset": 10,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "YEKST",
+    "name": "Yekaterinburg Summer Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +6",
+    "offset": 6,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "YEKT",
+    "name": "Yekaterinburg Time",
+    "locations": [
+      "Asia"
+    ],
+    "utc_relation": "UTC +5",
+    "offset": 5,
+    "alternate": false
+  },
+  {
+    "abbreviaton": "Z",
+    "name": "Zulu Time Zone",
+    "locations": [
+      "Military"
+    ],
+    "utc_relation": "UTC +0",
+    "offset": 0,
+    "alternate": false
+  }
+]
