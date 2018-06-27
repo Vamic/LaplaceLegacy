@@ -1,9 +1,9 @@
 var bot = module.parent.exports;
 
 // Lists
-var memes = require("./chatsayings/meme.json");
-var balls = require("./chatsayings/8ball.json");
-var wisdoms = require("./chatsayings/wisdom.json");
+var memes = require("./data/meme.json");
+var balls = require("./data/8ball.json");
+var wisdoms = require("./data/wisdom.json");
 var seedrandom = require('seedrandom');
 
 // Commands
