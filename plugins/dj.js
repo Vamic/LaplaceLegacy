@@ -460,6 +460,7 @@ exports.commands = {
                         var song = songs[i];
                         playlist[playlist.indexOf(song)].adder = message.member.displayName;
                         playlist[playlist.indexOf(song)].guild = message.guild;
+                        song.streamURL = encodeURI(song.streamURL);
                     }
 
                     if (!playlist.playing) startPlaying(message.guild.id, playlist, message.member.voiceChannel);
