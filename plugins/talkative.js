@@ -146,7 +146,6 @@ function isMath(msg) {
     if(!isNaN(msg.content)) return false;
     let input = msg.content.split(" ").filter(notLaplaceMention).join(" ");
     const notMath = input.replace(strictMathWhitelist, "");
-    console.log(notMath);
     return notMath.length === 0;
 }
 
