@@ -124,7 +124,7 @@ const general = {
     }
 }
 
-const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:\w*? to \w*)/i;
+const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:\w*? to \w*)/gi;
 const timezoneRegex = /^((?:1[0-2]|0?\d)(?::[0-5][0-9])? ?[AP]M |24:00 |(?:2[0-3]|[01]?[0-9])(?::[0-5][0-9])?)? ?([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d) to ([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d)$/i;
 
 function isLaplaceMention(word) {
@@ -146,13 +146,16 @@ function isMath(msg) {
     if(!isNaN(msg.content)) return false;
     let input = msg.content.split(" ").filter(notLaplaceMention).join(" ");
     const notMath = input.replace(strictMathWhitelist, "");
+    console.log(notMath);
     return notMath.length === 0;
 }
 
 function isTimezone(msg) {
     let input = msg.content.split(" ").filter(notLaplaceMention).join(" ");
     const parts = timezoneRegex.exec(input.toUpperCase());
-    return parts && tzAbbrevations.indexOf(parts[2]) > -1 && tzAbbrevations.indexOf(parts[3]) > -1;
+    return parts &&
+        (tzAbbrevations.indexOf(parts[2]) > -1 || /(?:GMT|UTC) ?[+-][01]?\d/i.test(parts[2])) &&
+        (tzAbbrevations.indexOf(parts[3]) > -1 || /(?:GMT|UTC) ?[+-][01]?\d/i.test(parts[3]));
 }
 
 function isGeneral(msg, cb) {
