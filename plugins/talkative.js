@@ -113,7 +113,7 @@ const general = {
 }
 
 const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:\w*? to \w*)/i;
-const timezoneRegex = /^((?:1[0-2]|0?\d)(?::[0-5][0-9])? ?[AP]M |24:00 |(?:2[0-3]|[01][0-9])(?::[0-5][0-9])?)? ?([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d) to ([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d)$/i;
+const timezoneRegex = /^((?:1[0-2]|0?\d)(?::[0-5][0-9])? ?[AP]M |24:00 |(?:2[0-3]|[01]?[0-9])(?::[0-5][0-9])?)? ?([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d) to ([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d)$/i;
 
 function isLaplaceMention(word) {
     return word.toLowerCase().indexOf("laplace") > -1
