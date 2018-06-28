@@ -17,15 +17,12 @@ exports.commands = {
             for(const mod of command.modifiers) {
                 if (/^hira(?:gana)?$/.test(mod))
                     type = "hiragana"
-                if (/^kana$/.test(mod))
-                    type = "kana"
                 else if (/^kata(?:kana)?$/.test(mod))
                     type = "katakana"
-
                 if(/^oku(?:rigana)?$/.test(mod))
                     mode = "okurigana"
             }
-            const result = kuroshiro.toRomaji(command.arguments.join(" "), {to: type, mode});
+            const result = kuroshiro.convert(command.arguments.join(" "), {to: type, mode});
             let responseType = type[0].toUpperCase() + type.slice(1);
             responseType += (mode != "spaced") ? " (" + mode + ")" : "";
             return message.channel.send(responseType + ": " + result);

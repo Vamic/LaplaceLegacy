@@ -20,7 +20,7 @@ const general = {
     yesnoquestion: {
         min: 1,
         max: 100,
-        regex: /^(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:n(?:´|`|'|’)?t)? | (?:(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:(?:n(?:´|`|'|’)?t)?)|(?:ca|wo)n(?:´|`|'|’)?t) \w+\??$/igm,
+        regex: /^(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:n(?:´|`|'|’)?t)? | (?:(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:(?:n(?:´|`|'|’)?t)?)|(?:ca|wo)n(?:´|`|'|’)?t) \w+\??$/i,
         responses: [
             "Yea",
             "Sure",
@@ -39,7 +39,7 @@ const general = {
     choicequestion: {
         min: 1,
         max: 100,
-        regex: /^(\w+ ?)*(, ?| ?or )(\w+ ?)+\??$/gi,
+        regex: /^(\w+ ?)*(, ?| ?or )(\w+ ?)+\??$/i,
         responses: [
             "Totally ",
             "Probably ",
@@ -55,7 +55,7 @@ const general = {
     wassaaaa: {
         min: 1,
         max: 3,
-        regex: /^(?:wh?at?(?:'|`|´| i)?s?s ?(?:u|a)p|sup)\??$/,
+        regex: /^(?:wh?at?(?:'|`|´| i)?s?s ?(?:u|a)p|sup)\??$/i,
         responses: [
             "I wish I were a bird.",
             "Just chillin', relaxin' all cool. You?"
@@ -68,7 +68,7 @@ const general = {
     thxm8: {
         min: 1,
         max: 2,
-        regex: /^(?:th(?:(?:a|e)nk)(?:s|e)|th(?:a|e)nk you|thx)$/,
+        regex: /^(?:th(?:(?:a|e)nk)(?:s|e)|th(?:a|e)nk you|thx)$/i,
         responses: [
             "No problem",
             "You're welcome",
@@ -83,7 +83,7 @@ const general = {
     greeting: {
         min: 1,
         max: 1,
-        regex: /^(?:h?e(?:l|nl|y)l?o|h(?:ey|i)|yo)$/,
+        regex: /^(?:h?e(?:l|nl|y)l?o|h(?:ey|i)|yo)$/i,
         responses: [
             "Hello",
             "Hey",
@@ -98,12 +98,24 @@ const general = {
     love: {
         min: 3,
         max: 3,
-        regex: /^i love you$/,
+        regex: /^i love you$/i,
         responses: [
             "Thank you.",
             "uwu",
             "That's nice.",
             "I know."
+        ],
+        respond: (msg, responses) => {
+            const response = responses.rand();
+            msg.channel.send(response);
+        }
+    },
+    love: {
+        min: 2,
+        max: 2,
+        regex: /^fuck you$/i,
+        responses: [
+            "Fuck you."
         ],
         respond: (msg, responses) => {
             const response = responses.rand();
