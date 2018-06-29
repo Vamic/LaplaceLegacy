@@ -40,7 +40,7 @@ exports.commands = {
                 response.push(char + plugins[i] + char);
             }
 
-            message.channel.send("Plugins:\n" + response.join("\n")).then(m => m.delete(15000));
+            message.channel.send("Plugins:\n" + response.join("\n"));
         }
     },
     togglePlugins: {
@@ -70,7 +70,7 @@ exports.commands = {
     reloadPlugins: {
         commands: ["!reload", "-reload", "!reloadPlugin", "-reloadPlugin", "!reloadPlugins", "-reloadPlugins"],
         requirements: [bot.requirements.isAdmin],
-        exec: function (command, message) {
+        exec: async function (command, message) {
             if (message.channel.type !== "dm")
                 message.delete();
 
@@ -78,13 +78,13 @@ exports.commands = {
             command.command = command.command.substr(1);
             if (command.command === "reloadPlugins" ||
                 command.command === "reload" && command.arguments.length === 0) {
-                bot.admin.reloadPlugins(function (err, result) {
-                    if (err) {
-                        message.reply("One or more plugins failed to load.").then(m => m.delete(5000));
-                    } else {
-                        message.reply("Plugins successfully reloaded.").then(m => m.delete(5000));
-                    }
-                });
+                try{
+                    await bot.admin.reloadPlugins();
+                    message.reply("Plugins successfully reloaded.").then(m => m.delete(5000));
+                } catch(error) {
+                    if(typeof error == "string") message.reply(error).then(m => m.delete(5000));
+                    else throw error;
+                }
             } else if (command.arguments.length > 0) {
                 //Reloading specified plugins, probably should be in reloadPlugins
                 var successes = 0;

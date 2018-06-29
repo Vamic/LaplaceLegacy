@@ -202,52 +202,51 @@ function disablePlugin(pluginName, guildID) {
 }
 
 
-function reloadPlugins(callback) {
-    fs.readdir('plugins', function (err, files) {
-        if (err) {
-            error("Couldn't load plugins.");
-            error(err);
-            if (callback)
-                callback("Couldn't load one or more plugins", false);
-        }
-        try {
-            var success = true;
-            var successCount = 0;
-            var failCount = 0;
-            //Reset plugin variables
-            module.exports.admin.plugins = plugins = [];
-            commands = {};
-
-            //Load plugins
-            for (var i in files) {
-                //Load .js files
-                if (files[i].length > 3 && files[i].endsWith(".js")) {
-                    //Get filename
-                    var plugin = files[i].substr(0, files[i].length - 3);
-                    if (!disabled[plugin]) {
-                        var currentSuccess = reloadPlugin(plugin, true);
-                        success = currentSuccess && success;
-                        if (currentSuccess) successCount++;
-                        else failCount++;
+function reloadPlugins() {
+    return new Promise((resolve, reject) => {
+        fs.readdir('plugins', function (err, files) {
+            if (err) {
+                error("Couldn't load plugins.");
+                error(err);
+                reject("Couldn't read plugins directory.");
+            }
+            try {
+                var success = true;
+                var successCount = 0;
+                var failCount = 0;
+                //Reset plugin variables
+                module.exports.admin.plugins = plugins = [];
+                commands = {};
+    
+                //Load plugins
+                for (var i in files) {
+                    //Load .js files
+                    if (files[i].length > 3 && files[i].endsWith(".js")) {
+                        //Get filename
+                        var plugin = files[i].substr(0, files[i].length - 3);
+                        if (!disabled[plugin]) {
+                            var currentSuccess = reloadPlugin(plugin, true);
+                            success = currentSuccess && success;
+                            if (currentSuccess) successCount++;
+                            else failCount++;
+                        }
                     }
                 }
+                log("Reloaded " + successCount + " plugins, " + (success ? "none failed." : failCount + " failed."));
+                if(!success)
+                    return reject("Couldn't load some plugins. " + failCount + " failed.");
+                return resolve();
+            } catch (err) {
+                error("Couldn't load plugins.");
+                error(err);
+                reject("Couldn't load one or more plugins");
             }
-            log("Reloaded " + successCount + " plugins, " + (success ? "none failed." : failCount + " failed."));
-            if(!success && callback)
-                callback("Couldn't load one or more plugins", false);
-            else if (callback)
-                callback(null, true);
-        } catch (err) {
-            error("Couldn't load plugins.");
-            error(err);
-            if (callback)
-                callback("Couldn't load one or more plugins", false);
-        }
+        });
     });
 }
 
 //Load em up
-reloadPlugins();
+reloadPlugins().catch(error);
 
 function callHooks(hook) {
     log("Calling hook: \"" + hook + "\"");
@@ -257,132 +256,127 @@ function callHooks(hook) {
 }
 
 
-function getDatastore(key, callback) {
+async function getDatastore(key) {
     if (datastore[key]) {
-        log("Returning cached Datastore for " + key);
-        callback(null, JSON.parse(JSON.stringify(datastore[key]))); // Make sure object is cloned
+        //log("Returning cached Datastore for " + key);
+        return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
     } else {
         var url = datastoreURL + "get?key=" + datastoreKey + "&datakey=" + key;
-        httpGetJson(url, function (err, data) {
-            if (err) {
-                error("Error getting Datastore for " + key + ": " + err.message);
-                callback(err);
-                return;
-            }
-
+        try {
+            let data = await httpGetJson(url, true);
             log("Got Datastore for " + key);
             datastore[key] = data;
-            callback(null, JSON.parse(JSON.stringify(datastore[key]))); // Make sure object is cloned
-        }, true);
+            return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
+        } catch(err) {
+            error("Error getting Datastore for " + key + ": " + err.message);
+            throw err;
+        }
     }
 }
 
-function setDatastore(key, data, callback) {
+async function setDatastore(key, data) {
     var sdata = JSON.stringify(data);
     datastore[key] = JSON.parse(sdata); // Make sure object is cloned
     sdata = Buffer(sdata);
-    httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, function (err) {
-        if (err) {
-            error("Error setting Datastore for " + key + ": " + err.message);
-            if (callback) callback(err);
-            return;
-        }
-        log("Set Datastore for " + key);
-        if (callback) callback();
-    }, true);
+    try {
+        let data = await httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, true);
+        //log("Set Datastore for " + key);
+        return data;
+    } catch(err) {
+        error("Error setting Datastore for " + key + ": " + err.message);
+        throw err;
+    }
 }
 
 function removePossiblyDangerousInformation(str) {
     return str.replace(/([?&]k(?:ey)*=).*?([&])/g, "$1[API KEY]$2");
 }
 
-function httpGet(url, callback, silent, headers, _retries) {
-    if (!silent) log("[HTTP GET]" +
-        (_retries ? " (retry #" + _retries + ") " : " ") +
-        removePossiblyDangerousInformation(url));
-
-    if (!headers) headers = {};
-
-    request({
-        url: url,
-        headers: headers
-    }, function (err, response, body) {
-        if (err) {
-            var retries = _retries ? _retries : 0;
-            error("[HTTP GET] " + removePossiblyDangerousInformation(url) +
-                " (" + retries + "/3 retries) error: " + err.message);
-            if (retries === 3) {
-                error("[HTTP GET] Failed: " + err.message + "(" + err + ")");
-                callback(err);
-            } else {
-                httpGet(url, callback, silent, headers, retries + 1);
+function httpGet(url, silent, headers, _retries) {
+    return new Promise((resolve, reject) => {
+        if (!silent) log("[HTTP GET]" +
+            (_retries ? " (retry #" + _retries + ") " : " ") +
+            removePossiblyDangerousInformation(url));
+    
+        if (!headers) headers = {};
+    
+        request({
+            url: url,
+            headers: headers
+        }, function (err, response, body) {
+            if (err) {
+                var retries = _retries ? _retries : 0;
+                error("[HTTP GET] " + removePossiblyDangerousInformation(url) +
+                    " (" + retries + "/3 retries) error: " + err.message);
+                if (retries === 3) {
+                    error("[HTTP GET] Failed: " + err.message + "(" + err + ")");
+                    reject(err);
+                } else {
+                    return httpGet(url, silent, headers, retries + 1);
+                }
             }
-            return;
-        }
-
-        callback(null, body);
+    
+            resolve(body);
+        });
     });
 }
 
-function httpGetJson(url, callback, silent, headers) {
-    httpGet(url, function (err, data) {
-        if (err) {
-            callback(err);
-            return;
-        }
-        if (!silent) log("[JSON PARSE] " + removePossiblyDangerousInformation(url));
-        var jsondata;
-        try {
-            jsondata = JSON.parse(data);
-        } catch (ex) {
-            if (data === "")
-                callback("Empty response body."); //Used in search for gelbooru because no hits = nothing in response
-            else
-                callback(ex);
-            return;
-        }
-        callback(null, jsondata);
-    }, silent, headers);
-}
+async function httpGetJson(url, silent, headers) {
+    let data = await httpGet(url, silent, headers);
 
-function httpPost(url, data, callback, silent, headers) {
-    var purl = urlf.parse(url);
-    if (!silent) log("[HTTP POST] " + removePossiblyDangerousInformation(url));
-    var post_options = {
-        hostname: purl.hostname,
-        port: 80,
-        path: purl.path,
-        method: 'POST',
-        headers: {
-            "User-Agent": "node.js",
-            "Content-Type": "text/plain",
-            "Content-Length": data.length
-        }
-    };
-
-    if (headers) {
-        for (var i in headers) {
-            post_options.headers[i] = headers[i];
-        }
+    if (!silent) log("[JSON PARSE] " + removePossiblyDangerousInformation(url));
+    var jsondata;
+    try {
+        jsondata = JSON.parse(data);
+    } catch (ex) {
+        if (data === "")
+            throw("Empty response body."); //Used in search for gelbooru because no hits = nothing in response
+        else
+            throw(ex);
     }
+    return jsondata;
+}
 
-    var req = http.request(post_options, function (res) {
-        var body = "";
-        res.on("data", function (chunk) {
-            body += chunk;
+function httpPost(url, data, silent, headers) {
+    return new Promise((resolve, reject) => {
+        var purl = urlf.parse(url);
+        if (!silent) log("[HTTP POST] " + removePossiblyDangerousInformation(url));
+        var post_options = {
+            hostname: purl.hostname,
+            port: 80,
+            path: purl.path,
+            method: 'POST',
+            headers: {
+                "User-Agent": "node.js",
+                "Content-Type": "text/plain",
+                "Content-Length": data.length
+            }
+        };
+    
+        if (headers) {
+            for (var i in headers) {
+                post_options.headers[i] = headers[i];
+            }
+        }
+    
+        var req = http.request(post_options, function (res) {
+            var body = "";
+            res.on("data", function (chunk) {
+                body += chunk;
+            });
+            res.on("end", function () {
+                resolve(body);
+            });
         });
-        res.on("end", function () {
-            callback(null, body);
+    
+        req.on("error", function (err) {
+            error("[HTTP POST] " + removePossiblyDangerousInformation(url) + " error: " + err.message);
+            reject(err);
         });
+    
+        req.write(data);
+        req.end();
     });
-
-    req.on("error", function (err) {
-        error("[HTTP POST] " + removePossiblyDangerousInformation(url) + " error: " + err.message);
-        callback(err);
-    });
-
-    req.write(data);
-    req.end();
 }
 
 function checkRequirements(requirements, message) {
@@ -498,6 +492,7 @@ function checkCommands(msg) {
             arguments: args,
             modifiers: modifiers
         };
+        log(cmdUsed + " triggered by " + msg.author.username + " with \"" + msg.content + "\"");
         foundCmd.exec(data, msg);
     }
 }
@@ -522,6 +517,7 @@ client.on('message', msg => {
                 continue;
             var reqs = checkRequirements(rCmd.requirements, msg);
             if (reqs[0]) {
+                log(i + " triggered by " + msg.author.username + " with \"" + msg.content + "\"");
                 rCmd.exec(msg);
                 return;
             }
