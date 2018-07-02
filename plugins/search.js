@@ -45,7 +45,7 @@ async function getTags(site, unknownTags, knownTags) {
         //Gelbooru
         if (site === cmds.gelbooru[0]) {
             //Check next tag while removing it from unknown
-            var nextTag = unknownTags.splice(0, 1)[0];
+            var nextTag = unknownTags.shift();
             //Check if we already have it saved
             if (storedTags[site][nextTag]) {
                 knownTags[nextTag] = {
@@ -96,7 +96,7 @@ async function getTags(site, unknownTags, knownTags) {
     }
 }
 
-async function updateStats(site, searchedTags, resultTags, user, chicken, callback) {
+async function updateStats(site, searchedTags, resultTags, user, chicken) {
     //Get the stats
     let data = await bot.datastore.get("search_stats").catch(bot.error);
     if(!data) return;
@@ -292,15 +292,29 @@ function limitTags(arr, limit) {
 }
 
 async function gbSearch(info, args) {
-    args = args.map(a => encodeURIComponent(a));
-    var url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=rating:safe+sort:random+-spoilers+" + args.join("+");
+    const url = "https://gelbooru.com/index.php";
+
     //Exclude unless searched for
     if (args.indexOf("game_cg") === -1)
-        url += "+-game_cg";
+        args.push("-game_cg");
     if (args.indexOf("comic") === -1)
-        url += "+-comic";
+        args.push("-comic");
 
-    let posts = await bot.util.httpGetJson(url).catch(async (err) => {
+    //Encode tags
+    args = args.map(a => encodeURIComponent(a));
+    //Add to parameters
+    var base_params = "?page=dapi&s=post&q=index&tags=rating:safe+sort:random+-spoilers+" + args.join("+");
+    
+    let response = await bot.util.httpGetXml(url + base_params + "&limit=0").catch(async (err) => {
+        bot.error(err);
+        info.channel.send("something broke when fetching the post count");
+    });
+    
+    if (!response) return;
+    
+    let pid = Math.floor((Math.random() * Math.min(20000, response.posts.count[0])));
+
+    let posts = await bot.util.httpGetJson(url + base_params + `&json=1&limit=1&pid=${pid}`).catch(async (err) => {
         //if we got an empty response there were no posts with those tags
         if (err === "Empty response body.") {
             await updateStats(cmds.gelbooru[0], args, [], info.user, true);
@@ -491,7 +505,7 @@ exports.commands = {
             if (!args || args.length < 1)
                 return;
             args = args.filter(Boolean);
-            var firstArg = args.splice(0, 1)[0];
+            var firstArg = args.shift();
             //Stop brian from putting NTR all over the chat
             var brian = "112480170048274432";
             if (args.indexOf("netorare") !== -1 && message.author.id === brian ||
@@ -688,7 +702,7 @@ exports.commands = {
         exec: async function (command, message) {
             var args = command.arguments;
 
-            var firstArg = args.splice(0, 1)[0];
+            var firstArg = args.shift();
 
             if (contains(sscmds.global, firstArg)) {
                 let data = await bot.datastore.get("search_stats").catch(bot.error);

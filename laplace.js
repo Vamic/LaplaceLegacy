@@ -337,6 +337,20 @@ async function httpGetJson(url, silent, headers) {
     return jsondata;
 }
 
+async function httpGetXml(url, silent, headers) {
+    let data = await httpGet(url, silent, headers);
+
+    var { parseString } = require("xml2js").Parser({ mergeAttrs: true });
+
+    if (!silent) log("[XML PARSE] " + removePossiblyDangerousInformation(url));
+    return new Promise((resolve, reject) => {
+        parseString(data, (err, res) => {
+            if(err) reject(err);
+            else resolve(res);
+        });
+    });
+}
+
 function httpPost(url, data, silent, headers) {
     return new Promise((resolve, reject) => {
         var purl = urlf.parse(url);
@@ -404,6 +418,7 @@ module.exports = {
     util: {
         httpGet: httpGet,
         httpGetJson: httpGetJson,
+        httpGetXml: httpGetXml,
         httpPost: httpPost
     },
     datastore: {
@@ -472,10 +487,10 @@ function checkCommands(msg) {
     }
 
     if (foundCmd) {
-        var reqs = checkRequirements(foundCmd.requirements, msg);
-        if (!reqs[0]) {
-            if (reqs[1] === "isUser" || reqs[1] === "isBot") return;
-            return msg.reply("Nope, failed requirement: " + reqs[1]);
+        var [passes, requirement] = checkRequirements(foundCmd.requirements, msg);
+        if (!passes) {
+            if (requirement === "isUser" || requirement === "isBot") return;
+            return msg.reply("Nope, failed requirement: " + requirement);
         }
         var content = msg.content.replace(cmdUsed, "");
 
@@ -515,8 +530,8 @@ client.on('message', msg => {
             var rCmd = rCommands[i];
             if (msg.guild && disabled[msg.guild.id] && disabled[msg.guild.id][rCmd.source])
                 continue;
-            var reqs = checkRequirements(rCmd.requirements, msg);
-            if (reqs[0]) {
+            var [passes, requirement] = checkRequirements(rCmd.requirements, msg);
+            if (passes) {
                 log(i + " triggered by " + msg.author.username + " with \"" + msg.content + "\"");
                 rCmd.exec(msg);
                 return;

@@ -223,7 +223,7 @@ function setSongDisplay(song) {
         var title = tags.title || tags.url.split("/").slice(-1)[0];
         embed.setTitle(title);
         if(tags.artist && tags.artist.length) {
-            var artisttext = tags.artist.splice(0, 1)[0];
+            var artisttext = tags.artist.shift();
             if(tags.artist.length)
                 artisttext += "ft. " + tags.artist.join(" and ");
             embed.addField("Artist", artisttext, true);
