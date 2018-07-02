@@ -39,7 +39,7 @@ async function getTags(site, unknownTags, knownTags) {
         } else {
             storedTags[site] = {};
         }
-        return await getTags(site, unknownTags, knownTags);
+        return getTags(site, unknownTags, knownTags);
     //Check if we still have tags to look up
     } else if (unknownTags.length > 0) {
         //Gelbooru
@@ -52,7 +52,8 @@ async function getTags(site, unknownTags, knownTags) {
                     name: nextTag,
                     type: storedTags[site][nextTag].type
                 };
-                return await getTags(site, unknownTags, knownTags);
+                
+                return getTags(site, unknownTags, knownTags);
             }
             //We don't have the tag so look it up
 
@@ -61,8 +62,9 @@ async function getTags(site, unknownTags, knownTags) {
                 bot.error("Error while getting the tag from gelbooru.");
                 bot.error(err);
             });
-            if(!tags)
-                return await getTags(site, unknownTags, knownTags);
+            
+            if(!tags || !tags.length)
+                return getTags(site, unknownTags, knownTags);
             //Add the tag to our known tags and storage
             if (tags.length && tags[0].tag === nextTag) {
                 knownTags[nextTag] = {
@@ -74,21 +76,22 @@ async function getTags(site, unknownTags, knownTags) {
                 };
             }
             //Continue checking after a delay, just to be safe
-            return setTimeout(async function () {
-                return await getTags(site, unknownTags, knownTags);
-            }, delay);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return getTags(site, unknownTags, knownTags);
         } else {
             throw "Unknown site provided.";
         }
     //We have stored tags and we dont need to look any more up so save what we have then return the tags
     } else {
-        fs.writeFile("tmp/" + site + ".tags.json", JSON.stringify(storedTags[site]), function (err) {
-            if (err) {
-                bot.error(err);
-                throw err;
-            } else {
-                return knownTags;
-            }
+        return new Promise((resolve,reject) => {
+            fs.writeFile("tmp/" + site + ".tags.json", JSON.stringify(storedTags[site]), function (err) {
+                if (err) {
+                    bot.error(err);
+                    reject(err);
+                } else {
+                    resolve(knownTags);
+                }
+            });
         });
     }
 }
@@ -153,6 +156,7 @@ async function updateStats(site, searchedTags, resultTags, user, chicken, callba
     //Add the tags to stats
     for (i in foundTags) {
         var tag = foundTags[i];
+        
         if (tag.type > 0) {
             //To be here it has to have at least been gotten once
             data.sites[site].tags[tag.name] = {
@@ -288,7 +292,8 @@ function limitTags(arr, limit) {
 }
 
 async function gbSearch(info, args) {
-    var url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=rating:safe+sort:random+-spoilers+" + encodeURIComponent(args.join("+")).replace(/%2B/g,"+");
+    args = args.map(a => encodeURIComponent(a));
+    var url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=rating:safe+sort:random+-spoilers+" + args.join("+");
     //Exclude unless searched for
     if (args.indexOf("game_cg") === -1)
         url += "+-game_cg";
@@ -300,10 +305,10 @@ async function gbSearch(info, args) {
         if (err === "Empty response body.") {
             await updateStats(cmds.gelbooru[0], args, [], info.user, true);
             args = args.filter(a => a[0] != "-");
-            return info.channel.send("Nobody here but us chickens!" + (args.length === 1 ? " (" + args[0] + ")" : ""));
+            info.channel.send("Nobody here but us chickens!" + (args.length === 1 ? " (" + args[0] + ")" : ""));
         } else {
             bot.error(err);
-            return info.channel.send("something broke when fetching the images");
+            info.channel.send("something broke when fetching the images");
         }
     });
     if (!posts) return;
@@ -331,7 +336,6 @@ async function gbSearch(info, args) {
         //Not handled yet
         if (!handled) {
             //Send message
-            console.log("Unhandled");
             info.channel.send("[" + id + "+" + score + "p]" + imgUrl).then(function (msg) {
                 sentMessage = msg;
             });
@@ -342,7 +346,6 @@ async function gbSearch(info, args) {
     setTimeout(async function () {
         let data = await updateStats(site, args, tags, info.user, false);
         if (!data) {
-            console.log("uh oh");
             return;
         }
         handled = true;
@@ -390,11 +393,9 @@ async function gbSearch(info, args) {
 
         //If timeout hasnt been triggered we need to send a new message
         if (!timeOutTriggered) {
-            console.log("eeee");
             info.channel.send(result);
             //Otherwise edit the sent message
         } else {
-            console.log("dsfdsfdsf");
             var editDelay = 0;
             if (!sentMessage) //Somehow timeout has triggered but message hasnt been set yet
                 editDelay = 2500;
@@ -511,8 +512,7 @@ exports.commands = {
             var blacklist_addition;
             if (data.search && data.search.blacklist && data.search.blacklist.length > 0) {
                 fail = data.search.blacklist.some((t) => args.indexOf(t) > -1);
-                blacklist_addition = "-" + data.search.blacklist.join("+-");
-                args.push(blacklist_addition);
+                args = args.concat(data.search.blacklist.map(b => "-" + b));
             }
 
             if (firstArg === "imfeelinglucky" || firstArg === "ifl") {
