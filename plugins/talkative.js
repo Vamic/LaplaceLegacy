@@ -124,7 +124,8 @@ const general = {
     }
 }
 
-const strictMathWhitelist = /\+|\*|%|\/|-|\^|>|<|=|!| |[0-9]i?|ph?i|e|\(|\)|\.|,|\[|]|(?:format|deg|sqrt|det|sin|cos)\(|(?:\w*? to \w*)/gi;
+const isOperatorMath = /^(\d+i?|e|ph?i) ?([<>=]=|[-+*%/^><!]) ?(\d+i?|e|ph?i)/i;
+const isConversionMath = /(?:(?:\d+'\d{1,2}"?|^\d* ?\w+) to \w+)/;
 const timezoneRegex = /^((?:1[0-2]|0?\d)(?::[0-5][0-9])? ?[AP]M |24:00 |(?:2[0-3]|[01]?[0-9])(?::[0-5][0-9])?)? ?([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d) to ([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d)$/i;
 
 function isLaplaceMention(word) {
@@ -145,8 +146,7 @@ function mentionsLaplace(msg) {
 function isMath(msg) {
     if(!isNaN(msg.content)) return false;
     let input = msg.content.split(" ").filter(notLaplaceMention).join(" ");
-    const notMath = input.replace(strictMathWhitelist, "");
-    return notMath.length === 0;
+    return isOperatorMath.test(input) || isConversionMath.test(input);
 }
 
 function isTimezone(msg) {
@@ -325,13 +325,23 @@ exports.commands = {
         commands: [""],
         requirements: [bot.requirements.isUser, isMath],
         exec: function (message) {
-            let input = message.content.split(" ").filter(notLaplaceMention).join(" ");
-            if(!mentionsLaplace(message)) {
-                const notMath = input.replace(strictMathWhitelist, "");
-                if(notMath.length) return bot.error("quickmaffs triggered even though its not math");
+            let oinput;
+            let input = oinput = message.content.split(" ").filter(notLaplaceMention).join(" ");
+            let isConversion = isConversionMath.test(input);
+            let isOperator = isOperatorMath.test(input);
+            if(!isOperator && !isConversion) return bot.error("quickmaffs triggered even though its not math");
+
+            if(isConversion) {
+                let numericalFeet = /(\d+'\d{1,2})"?/;
+                if(numericalFeet.test(input))
+                {
+                    let feet = numericalFeet.exec(input)[1].split("'");
+                    feet = Number(feet[0]) + feet[1]/12;
+                    input = input.replace(numericalFeet, `${feet} feet`);
+                }
+                input = input.replace(/c (to|in) f/gi, "celsius to fahrenheit")
+                    .replace(/f (to|in) c/gi, "fahrenheit to celsius");
             }
-            input = input.replace(/c (to|in) f/gi, "celsius to fahrenheit")
-                .replace(/f (to|in) c/gi, "fahrenheit to celsius")
             try {
                 let result = math.eval(input);
                 if(result && result.entries) {
@@ -344,7 +354,7 @@ exports.commands = {
                 }
                 else if(typeof result === 'number')
                     result = Math.round(result * 10000) / 10000;
-                const response = "`" + input + "` is **" + result + "**";
+                const response = "`" + oinput + "` is **" + result + "**";
                 const suffix = typeof result === 'number' ? "   _quick maffs_" : "";
                 message.channel.send(response.replace(/\s\s+/g, ' ') + suffix);
             } catch(e) {
