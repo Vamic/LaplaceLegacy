@@ -209,8 +209,9 @@ function setup(bot) {
         });
 
         bot.process.stderr.on('data', err => {
-            error("[stderr] " + bot.name + " got an error." + err);
             reportError(bot.name + " got an error.", err);
+            error("[stderr]");
+            error(err);
         });
     }
 }

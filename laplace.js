@@ -510,6 +510,7 @@ function checkCommands(msg) {
         log(cmdUsed + " triggered by " + msg.author.username + " with \"" + msg.content + "\"");
         foundCmd.exec(data, msg);
     }
+    return foundCmd;
 }
 
 client.on('message', msg => {
@@ -520,7 +521,8 @@ client.on('message', msg => {
     }
 
     if (!msg.author.bot) {
-        checkCommands(msg);
+        if(checkCommands(msg))
+            return;
     }
 
     //Catches messages that match custom requirements

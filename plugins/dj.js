@@ -89,12 +89,7 @@ async function saveCurrentPlaylist(id) {
     else if(!playlist.playing && storedPlaylists.playing.indexOf(id) > -1)
         storedPlaylists.playing.splice(storedPlaylists.playing.indexOf(id));
 
-    fs.writeFile("./tmp/dj/queues.json", JSON.stringify(storedPlaylists), function (err, data) {
-        if(err) {
-            throw err;
-        }
-        return data;
-    });
+    fs.writeFileSync("./tmp/dj/queues.json", JSON.stringify(storedPlaylists));
 }
 
 async function clearPlaylistSave(id) {
@@ -103,13 +98,8 @@ async function clearPlaylistSave(id) {
 
     if(storedPlaylists.playing.indexOf(id) > -1)
         storedPlaylists.playing.splice(storedPlaylists.playing.indexOf(id));
-
-    fs.writeFile("./tmp/dj/queues.json", JSON.stringify(storedPlaylists), function (err, data) {
-        if(err) {
-            throw err;
-        }
-        return data;
-    });
+        
+    fs.writeFileSync("./tmp/dj/queues.json", JSON.stringify(storedPlaylists));
 }
 
 function loadLastPlaylists() {
