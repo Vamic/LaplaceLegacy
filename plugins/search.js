@@ -23,7 +23,7 @@ var cmds = {
 var sscmds = {
     global: ["global", "g"]
 };
-var delay = 500; //Delay between requests to APIs, lets hope they dont disable us anymore
+var delay = 300; //Delay between requests to APIs, lets hope they dont disable us anymore
 
 var lastSearches = {
     //<discord_id> : [<args>]
@@ -305,21 +305,30 @@ async function gbSearch(info, args) {
     //Add to parameters
     var base_params = "?page=dapi&s=post&q=index&tags=rating:safe+sort:random+-spoilers+" + args.join("+");
     
+    //XML response has the "count" property so we can see how many results there are for these tags
     let response = await bot.util.httpGetXml(url + base_params + "&limit=0").catch(async (err) => {
         bot.error(err);
         info.channel.send("something broke when fetching the post count");
     });
     
     if (!response) return;
+    if (response.posts.count[0] === "0") {
+        await updateStats(cmds.gelbooru[0], args, [], info.user, true);
+        args = args.filter(a => a[0] != "-");
+        info.channel.send("Nobody here but us chickens!" + (args.length === 1 ? " (" + args[0] + ")" : ""));
+        return;
+    }
     
-    let pid = Math.floor((Math.random() * Math.min(20000, response.posts.count[0])));
+    //Pick a random image between 0 and 20000, more than 20000 gives an error
+    let pid = Math.floor((Math.random() * Math.min(20001, response.posts.count[0])));
 
+    //Get the random image
     let posts = await bot.util.httpGetJson(url + base_params + `&json=1&limit=1&pid=${pid}`).catch(async (err) => {
         //if we got an empty response there were no posts with those tags
         if (err === "Empty response body.") {
             await updateStats(cmds.gelbooru[0], args, [], info.user, true);
             args = args.filter(a => a[0] != "-");
-            info.channel.send("Nobody here but us chickens!" + (args.length === 1 ? " (" + args[0] + ")" : ""));
+            info.channel.send("Nobody here but us chickens! <@95611335676526592>" + (args.length === 1 ? " (" + args[0] + ")" : ""));
         } else {
             bot.error(err);
             info.channel.send("something broke when fetching the images");
