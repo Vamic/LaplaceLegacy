@@ -459,6 +459,10 @@ client.on('ready', () => {
     callHooks("ready");
 });
 
+client.on("error", (data) => {
+    error(data.error);
+});
+
 function checkCommands(msg) {
     var msgCommand = msg.content.split(" ")[0].split(":")[0].toLowerCase();
     var foundCmd, cmdUsed, softCmd, softCmdUsed;

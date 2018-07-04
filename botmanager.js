@@ -363,6 +363,10 @@ client.on('ready', () => {
         }
     });
 
+    client.on("error", (data) => {
+        error(data.error);
+    });
+
     log("Ready.");
     
     for (i in bots) {
