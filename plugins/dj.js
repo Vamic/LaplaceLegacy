@@ -42,7 +42,7 @@ if(!fs.existsSync(ytdlBinary)) {
 // Services
 
 const keys = bot.secrets.keys;
-const ytService = new cassette.YouTubeService(keys.youtube);
+const ytService = new cassette.YouTubeService(keys.google);
 const scService = new cassette.SoundcloudService(keys.soundcloud);
 const dService = new cassette.DirectService(ytdlBinary);
 
@@ -98,7 +98,7 @@ async function clearPlaylistSave(id) {
 
     if(storedPlaylists.playing.indexOf(id) > -1)
         storedPlaylists.playing.splice(storedPlaylists.playing.indexOf(id));
-        
+
     fs.writeFileSync("./tmp/dj/queues.json", JSON.stringify(storedPlaylists));
 }
 
