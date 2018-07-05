@@ -11,6 +11,7 @@
     "discord.js": "^11.3.2",
     "discord.js-music": "^2.1.0",
     "ffmpeg-binaries": "3.2.2-3",
+    "google-translate": "^2.2.0",
     "kuroshiro": "^0.2.3",
     "mathjs": "^4.2.2",
     "musicmetadata": "^2.0.5",
