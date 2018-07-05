@@ -247,11 +247,13 @@ function stop(bot) {
 }
 
 function restart(bot) {
-    bot.restarting = true;
-    if (!isAlive(bot))
-        start(bot);
-    else
+    if (isAlive(bot)){
+        bot.restarting = true;
         stop(bot);
+    }
+    else {
+        reportInfo(bot.name + " is not on.", "Tried to restart a bot that is not on, use `start "+ bot.name +"` to turn it on.");
+    }
 }
 
 const commands = ["start", "stop", "restart"];
