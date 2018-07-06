@@ -39,6 +39,13 @@ if(!fs.existsSync(ytdlBinary)) {
     });
 }
 
+//Because there's not really a way to check if direct files are live or not
+const hardcodedLivestreams = [
+    "listen.moe/stream",
+    "r-a-d.io/main.mp3",
+    "twitch.tv"
+]
+
 // Services
 
 const keys = bot.secrets.keys;
@@ -72,12 +79,12 @@ var storedPlaylists = { playing: [] };
 async function saveCurrentPlaylist(id) {
     var playlist = bot.guilds.get(id).playlist;
     var tempSeek = playlist.current.seek;
-    playlist.current.seek = getSongTime(playlist.current);
+    playlist.current.seek = Math.floor(getSongTime(playlist.current));
     if(!storedPlaylists[id]) storedPlaylists[id] = {};
     storedPlaylists[id].songs = playlist.map((song) => (
         {
             url: song.URL,
-            seek: song.seek,
+            seek: song.live ? 0 : song.seek,
             adder: song.adder,
             type: song.type
         }
@@ -141,18 +148,17 @@ function initiateSongInfo(song, requiresFull = true) {
             resolve(song);
         }
         else {
-            let error = null;
             try {
                 if(!song.info || (!song.info.full && requiresFull)) {
                     song.info = await song.service.getSongInfo(song.URL);
                 }
                 services[song.type].setSongDisplay(song);
             } catch(err) {
-                error = err;
+                if(err.message.indexOf("not id3v2") == -1) bot.error(err);
                 song.info = {};
                 song.info.url = song.URL;
                 song.info.title = song.streamURL;
-                song.display = { embed: new bot.RichEmbed().setAuthor("Unknown").setTitle(song.streamURL) };
+                song.display = { embed: new bot.RichEmbed().setAuthor(song.live ? "Livestream" : "Unknown").setTitle(song.streamURL) };
             }
 
             song.info.addedBy = song.adder;
@@ -180,11 +186,9 @@ function getSongTime(song) {
 
 function setSongDisplayDescription(song) {
     song.info.currentTime = getSongTime(song);
-    var playtime = toHHMMSS(song.info.currentTime) + "/";
+    var playtime = toHHMMSS(song.info.currentTime);
     if(song.info.duration > 0)
-        playtime += toHHMMSS(song.info.duration);
-    else
-        playtime += "?";
+        playtime += "/" + toHHMMSS(song.info.duration);
     song.display.embed.setDescription(playtime + " added by " + song.info.addedBy + "\n" + song.info.url);
 }
 
@@ -206,7 +210,7 @@ function setSongDisplay(song) {
     }
 
     if(tags.metadataType === "youtube" || tags.metadataType === "soundcloud") {
-        embed.setAuthor(tags.metadataType[0].toUpperCase() + tags.metadataType.substr(1), tags.icon);
+        embed.setAuthor(tags.metadataType[0].toUpperCase() + tags.metadataType.substr(1) + (song.live ? " [LIVE]" : ""), tags.icon);
         embed.setTitle(tags.title || tags.url);
     } else if(tags.metadataType === "ID3") {
         embed.setAuthor("Direct");
@@ -322,6 +326,9 @@ async function reQueue(id, data) {
             songs[0].seek = song.seek;
             songs[0].adder = song.adder;
             songs[0].guild = guild;
+            if(songs[0].type == "direct") {
+                songs[0].live = Boolean(hardcodedLivestreams.find(u => songs[0].streamURL.indexOf(u) > -1));
+            }
         } else {
             bot.error("Couldn't requeue " + song.url);
         }
@@ -451,6 +458,9 @@ exports.commands = {
                     playlist[playlist.indexOf(song)].adder = message.member.displayName;
                     playlist[playlist.indexOf(song)].guild = message.guild;
                     song.streamURL = encodeURI(song.streamURL);
+                    if(type == "direct") {
+                        song.live = Boolean(hardcodedLivestreams.find(u => song.streamURL.indexOf(u) > -1));
+                    }
                 }
 
                 if(!playlist.playing) startPlaying(message.guild.id, playlist, message.member.voiceChannel);
