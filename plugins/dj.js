@@ -317,7 +317,7 @@ async function reQueue(id, data) {
     let guild = bot.guilds.get(id);
 
     let promises = queue.map(async (song) => {
-        let songs = await queueSongs(id, song.url, song.type);
+        let songs = await queueSongs(id, song.url, song.type).catch(bot.error);
         if(songs.length) {
             songs[0].seek = song.seek;
             songs[0].adder = song.adder;

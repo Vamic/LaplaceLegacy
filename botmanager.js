@@ -183,7 +183,7 @@ function setup(bot) {
                         bot.quick_restarts++;
                     else
                         bot.quick_restarts = 0;
-                    setTimeout(() => restart(bot), bot.restart_delay);
+                    setTimeout(() => restart(bot, true), bot.restart_delay);
                     if (!status_handled) {
                         var message = formatCrashResponse(bot);
                         handleStatusMessage("initial", bot, {
@@ -246,13 +246,16 @@ function stop(bot) {
     }
 }
 
-function restart(bot) {
+function restart(bot, force) {
     if (isAlive(bot)){
         bot.restarting = true;
         stop(bot);
     }
     else {
-        reportInfo(bot.name + " is not on.", "Tried to restart a bot that is not on, use `start "+ bot.name +"` to turn it on.");
+        if(force)
+            start(bot);
+        else
+            reportInfo(bot.name + " is not on.", "Tried to restart a bot that is not on, use `start "+ bot.name +"` to turn it on.");
     }
 }
 
