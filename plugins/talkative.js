@@ -20,19 +20,40 @@ const general = {
     yesnoquestion: {
         min: 1,
         max: 100,
-        regex: /^(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:n(?:´|`|'|’)?t)? | (?:(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:(?:n(?:´|`|'|’)?t)?)|(?:ca|wo)n(?:´|`|'|’)?t) \w+\??$/i,
-        responses: [
-            "Yea",
-            "Sure",
-            "Yeh",
-            "Yes",
-            "No",
-            "No",
-            "Nope",
-            "Nah"
+        regex: /^(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:n(?:´|`|'|’)?t)? | (?:(?:am|are|(?:sha|wi)ll|can|did|is|(sh|w|c)ould|ha(?:ve|d)|do(?:es)?|(?:h|w)as)(?:(?:n(?:´|`|'|’)?t)?)|(?:ca|wo)n(?:´|`|'|’)?t) \w+\??$|really\??/i,
+        responses: {
+            yes: [
+                "Yea",
+                "Sure",
+                "Yeh",
+                "Yes"
+            ],
+            no: [
+                "No",
+                "No",
+                "Nope",
+                "Nah"
+            ]
+        },
+        history: [
+            //{q, a, from, time}
         ],
         respond: (msg, responses) => {
-            const response = responses.rand();
+            this.history = this.history || [];
+            let input = msg.content.replace(/\?$/, "").split(" ").filter(notLaplaceMention).join(" ");
+            let response;
+            if(/^really\??$/i.test(input) && this.history.find(h => h.time + 10000 > Date.now())) {
+                response = responses.yes.rand();
+            } else {
+                response = responses.yes.concat(responses.no).rand();
+            }
+            this.history.push({
+                q: msg.content.replace(/\?$/, "").split(" ").filter(notLaplaceMention).join(" "),
+                a: response,
+                from: msg.author.id,
+                time: Date.now()
+            });
+            
             msg.channel.send(response);
         }
     },
