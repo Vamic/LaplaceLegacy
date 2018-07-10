@@ -2,7 +2,7 @@
 
 const math = require('mathjs');
 
-const timezones = require("./data/timezones.json");
+const timezones = require("./data/timezones.json").map(tz => tz.abbreviaton.length > 1 ? tz : null).filter(Boolean);
 const tzAbbrevations = timezones.map(tz => tz.abbreviaton);
 
 if(!Array.prototype.rand) {
@@ -146,7 +146,7 @@ const general = {
 }
 
 const isOperatorMath = /^-?\(?-?(\d+(?:.\d+)?i?|e|ph?i)\)? ?([<>=]=|[-+*%/^><!]) ?-?\(?-?(\d+(?:.\d+)?i?|e|ph?i)/i;
-const isConversionMath = /(?:(?:\d+'\d{1,2}"?|^\d* ?\w+) to \w+)/;
+const isConversionMath = /(?:(?:\d+'\d{1,2}"?|^\d* ?\w+) to \w+)$/;
 const timezoneRegex = /^((?:1[0-2]|0?\d)(?::[0-5][0-9])? ?[AP]M |24:00 |(?:2[0-3]|[01]?[0-9])(?::[0-5][0-9])?)? ?([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d) to ([a-zA-Z]{1,4}|(?:GMT|UTC) ?[+-][01]?\d)$/i;
 
 function isLaplaceMention(word) {
