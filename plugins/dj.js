@@ -49,9 +49,32 @@ const hardcodedLivestreams = [
 // Services
 
 const keys = bot.secrets.keys;
-const ytService = new cassette.YouTubeService(keys.google);
-const scService = new cassette.SoundcloudService(keys.soundcloud);
+const services = module.exports.services ? module.exports.services : {};
+
+//Register services in the order you want them checked, ergo dService last because it has a catchall regex
+
+if(keys) {
+    if(keys.google) {
+        const ytService = new cassette.YouTubeService(keys.google);
+        ytService.setSongDisplay = setSongDisplay;
+        services[ytService.type] = ytService;
+    } else {
+        bot.log("No Google api key, will use DirectService for Youtube videos", "dj");
+    }
+    if(keys.soundcloud) {
+        const scService = new cassette.SoundcloudService(keys.soundcloud);
+        scService.setSongDisplay = setSongDisplay;
+        services[scService.type] = scService;
+    } else {
+        bot.log("No Soundcloud api key, will use DirectService for Soundcloud songs", "dj");
+    }
+} else {
+    bot.log("No api keys, will use DirectService for all songs", "dj");
+}
+
 const dService = new cassette.DirectService(ytdlBinary);
+dService.setSongDisplay = setSongDisplay;
+services[dService.type] = dService;
 
 var volumes = {
     //<GUILD_ID> : <0-1>
@@ -65,15 +88,6 @@ var listening = {
 
 const DELETE_TIME = 15000;
 const DEFAULT_VOLUME = 50;
-
-scService.setSongDisplay = setSongDisplay;
-ytService.setSongDisplay = setSongDisplay;
-dService.setSongDisplay = setSongDisplay;
-
-const services = module.exports.services ? module.exports.services : {};
-services[ytService.type] = ytService;
-services[scService.type] = scService;
-services[dService.type] = dService;
 
 var storedPlaylists = { playing: [] };
 async function saveCurrentPlaylist(id) {
@@ -135,7 +149,7 @@ function setVolume(id, volume) {
 
 function getStreamOptions(id) {
     if(!volumes[id])
-        setVolume(id, 50);
+        setVolume(id, DEFAULT_VOLUME);
     return {
         seek: bot.guilds.get(id).playlist.current ? bot.guilds.get(id).playlist.current.seek : 0,
         volume: volumes[id]
@@ -319,6 +333,8 @@ async function reQueue(id, data) {
     let queue = data.songs;
     let channel = data.channel;
     let guild = bot.guilds.get(id);
+
+    guild.playlist.destroy();
 
     let promises = queue.map(async (song) => {
         let songs = await queueSongs(id, song.url, song.type).catch(bot.error);

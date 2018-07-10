@@ -1,7 +1,7 @@
 ﻿var bot = module.parent.exports;
 
 const kuroshiro = require("kuroshiro");
-const google = require('google-translate')(bot.secrets.keys.google);
+const google = bot.secrets.keys && bot.secrets.keys.google ? require('google-translate')(bot.secrets.keys.google) : null;
 kuroshiro.init();
 
 let languages;
@@ -36,6 +36,7 @@ exports.commands = {
     translate: {
         commands: ["!trans", "!translate"],
         usage: ["!trans rotfrukt"],
+        requirements: [() => google != null],
         exec: async function (command, message) {
             let input = command.arguments.join(" ");
             if(!input) {

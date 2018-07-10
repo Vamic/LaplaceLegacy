@@ -11,8 +11,8 @@ const secrets = require('./settings/secrets.json');
 const client = new Discord.Client();
 
 //Data storage
-var datastoreURL = secrets.datastore.url,
-    datastoreKey = secrets.datastore.key,
+var datastoreURL = secrets.datastore ? secrets.datastore.url : null,
+    datastoreKey = secrets.datastore ? secrets.datastore.key : null,
     datastore = {}; //the cache
 
 //Other
@@ -261,30 +261,35 @@ async function getDatastore(key) {
         //log("Returning cached Datastore for " + key);
         return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
     } else {
-        var url = datastoreURL + "get?key=" + datastoreKey + "&datakey=" + key;
-        try {
-            let data = await httpGetJson(url, true);
-            log("Got Datastore for " + key);
-            datastore[key] = data;
-            return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
-        } catch(err) {
-            error("Error getting Datastore for " + key + ": " + err.message);
-            throw err;
+        if(datastoreURL && datastoreKey) {
+            var url = datastoreURL + "get?key=" + datastoreKey + "&datakey=" + key;
+            try {
+                let data = await httpGetJson(url, true);
+                log("Got Datastore for " + key);
+                datastore[key] = data;
+                return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
+            } catch(err) {
+                error("Error getting Datastore for " + key + ": " + err.message);
+                throw err;
+            }
         }
+        return {};
     }
 }
 
 async function setDatastore(key, data) {
     var sdata = JSON.stringify(data);
     datastore[key] = JSON.parse(sdata); // Make sure object is cloned
-    sdata = Buffer(sdata);
-    try {
-        let data = await httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, true);
-        //log("Set Datastore for " + key);
-        return data;
-    } catch(err) {
-        error("Error setting Datastore for " + key + ": " + err.message);
-        throw err;
+    if(datastoreURL && datastoreKey) {
+        sdata = Buffer(sdata);
+        try {
+            let data = await httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, true);
+            //log("Set Datastore for " + key);
+            return data;
+        } catch(err) {
+            error("Error setting Datastore for " + key + ": " + err.message);
+            throw err;
+        }
     }
 }
 
@@ -450,6 +455,10 @@ client.on('ready', () => {
     //ditto
     module.exports.user = client.user;
 
+    if(!datastoreURL || !datastoreKey) {
+        log("No datastore specified, some plugin data will disappear after restart.", "info");
+    }
+
     commands["!help"] = {
         source: "",
         usage: "Shows this.",
@@ -493,7 +502,8 @@ function checkCommands(msg) {
     if (foundCmd) {
         var [passes, requirement] = checkRequirements(foundCmd.requirements, msg);
         if (!passes) {
-            if (requirement === "isUser" || requirement === "isBot") return;
+            log(cmdUsed + " triggered by " + msg.author.username + " with \"" + msg.content + "\" (Failed requirement '" + requirement + "') ")
+            if (!requirement || requirement === "isUser" || requirement === "isBot") return;
             return msg.reply("Nope, failed requirement: " + requirement);
         }
         var content = msg.content.replace(cmdUsed, "");
