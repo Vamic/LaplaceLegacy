@@ -204,6 +204,7 @@ async function calculateTimezoneDiff(options) {
     let result = {
         extramsg: "",
         offset: 0,
+        input_time: options.time,
         time: options.time,
         dayoffset: 0,
         from: null,
@@ -237,7 +238,9 @@ async function calculateTimezoneDiff(options) {
     let hours = Number(time.split(":")[0])
     if(/PM/i.test(options.time)) hours += 12;
     let minutes = Number(time.split(":")[1] || 0);
+    result.input_time = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes);
 
+    //Add the time difference
     hours += Math.floor(result.offset);
     minutes += (result.offset % 1) * 60;
 
@@ -300,7 +303,7 @@ exports.commands = {
                         .addField("From", result.from.abbreviaton + " (" + result.from.locations.join(", ") + ")", true);
                 }
                 else {
-                    var old_time = options.time + " " + result.from.abbreviaton;
+                    var old_time = result.input_time + " " + result.from.abbreviaton;
                     var new_time = result.time + " " + result.to.abbreviaton;
                     var previous_or_next = result.dayoffset == -1 ? "previous" : result.dayoffset == 1 ? "next" : "same";
 
