@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const http = require('http');
 const request = require('request');
 const urlf = require('url');
+const util = require('util');
 
 //Juicy secrets, no looking
 const secrets = require('./settings/secrets.json'); 
@@ -251,6 +252,17 @@ function reloadPlugins() {
     });
 }
 
+async function loadFromFile(key) {
+    if(!/^[\w,\s-]+$/.test(key)) throw "Illegal filename";
+    return JSON.parse(await util.promisify(fs.readFile)(`./tmp/${key}.json`));
+}
+
+async function saveToFile(key, data) {
+    if(!/^[\w,\s-]+$/.test(key)) throw "Illegal filename";
+    data = JSON.stringify(data);
+    return util.promisify(fs.writeFile)(`./tmp/${key}.json`, data);
+}
+
 async function getDatastore(key) {
     if (datastore[key]) {
         //log("Returning cached Datastore for " + key);
@@ -267,6 +279,12 @@ async function getDatastore(key) {
                 error("Error getting Datastore for " + key + ": " + err.message);
                 throw err;
             }
+        } else {
+            let data = await loadFromFile("datastore").catch(error);
+            if(data){
+                datastore = data;
+                return JSON.parse(JSON.stringify(datastore[key]));
+            } 
         }
         return {};
     }
@@ -285,6 +303,8 @@ async function setDatastore(key, data) {
             error("Error setting Datastore for " + key + ": " + err.message);
             throw err;
         }
+    } else {
+        return saveToFile("datastore", datastore);
     }
 }
 
@@ -426,7 +446,9 @@ module.exports = {
         httpGet: httpGet,
         httpGetJson: httpGetJson,
         httpGetXml: httpGetXml,
-        httpPost: httpPost
+        httpPost: httpPost,
+        saveToFile: saveToFile,
+        loadFromFile: loadFromFile
     },
     datastore: {
         get: getDatastore,
@@ -458,7 +480,7 @@ client.on('ready', async () => {
     module.exports.user = client.user;
 
     if(!datastoreURL || !datastoreKey) {
-        log("No datastore specified, some plugin data will disappear after restart.", "info");
+        log("No datastore specified, data saved to it will be saved locally instead.", "info");
     }
 
     //Load em up
