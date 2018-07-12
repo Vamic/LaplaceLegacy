@@ -32,23 +32,35 @@ exports.commands = {
         exec: function (command, message) {
             message.delete();
             var disabled = bot.admin.disabled[message.guild.id];
+            var extensions = bot.admin.extensions;
             var plugins = bot.admin.plugins;
             var response = [];
             if (!disabled) disabled = {};
-            for (var i in plugins) {
-                var char = disabled[plugins[i]] ? "~~" : "";
-                response.push(char + plugins[i] + char);
+            for (const plugin of plugins) {
+                //Decide the style
+                let style = disabled[plugin] ? "~~" : "**";
+                //Check if it has extensions or is an extension
+                if (Object.keys(extensions).find(e => extensions[e].includes(plugin))) {
+                    //Ignore extensions because they get listed under the extended plugin
+                    continue;
+                }
+                //Show the plugin name
+                response.push(style + plugin + style.split("").reverse().join(""));
+                //Show each extension
+                extensions[plugin] && extensions[plugin].forEach(p => {
+                    let style = "*" + (disabled[p] ? "~~" : "");
+                    response.push("   - " + style + p + style.split("").reverse().join(""));
+                });
             }
 
-            message.channel.send("Plugins:\n" + response.join("\n"));
+            message.channel.send(new bot.RichEmbed().setDescription("Plugins:\n" + response.join("\n")));
         }
     },
     togglePlugins: {
         commands: ["!enable", "-enable", "!disable", "-disable"],
         requirements: [bot.requirements.isAdmin, bot.requirements.guild],
         exec: function (command, message) {
-            message.delete();
-            if (command.arguments.length === 0) return message.reply("This command requires arguments.").then(m => m.delete(5000));
+            if (command.arguments.length === 0) return message.reply("`" + command.command + " plugin1 plugin2`").then(m => m.delete(10000));
             var i;
             var success = true;
             if (command.command === "-enable") {

@@ -155,16 +155,28 @@ function reloadPlugin(pluginName, shush) {
     }
 }
 
+function saveDisabledPlugins() {
+    return setDatastore("disabled_plugins", disabled).catch(error);
+}
+
+async function loadDisabledPlugins() {
+    let data = await getDatastore("disabled_plugins").catch(error);
+    if(!data) return;
+    disabled = data;
+}
+
 function enablePlugin(pluginName, guildID) {
     if (!disabled[guildID]) disabled[guildID] = {};
     if (!disabled[guildID][pluginName]) return true;
     try {
+        //Remove plugin from list of disabled
         delete disabled[guildID][pluginName];
-        reloadPlugin(pluginName);
         if (extensions[pluginName]) {
             for (var i in extensions[pluginName])
-                enablePlugin(extensions[pluginName][i]);
+                enablePlugin(extensions[pluginName][i], guildID);
         }
+        //Save changes
+        saveDisabledPlugins();
         return true;
     }
     catch (e) {
@@ -179,19 +191,15 @@ function disablePlugin(pluginName, guildID) {
     if (disabled[guildID][pluginName]) return true;
     if (pluginName === "admin") return false;
     try {
+        //Set the plugin to disabled
         disabled[guildID][pluginName] = true;
         if (extensions[pluginName]) {
+            //Disable each plugin extending this one
             for (var i in extensions[pluginName])
-                disablePlugin(extensions[pluginName][i]);
+                disablePlugin(extensions[pluginName][i], guildID);
         }
-
-        var extending = require("./plugins/" + pluginName + ".js").extends;
-        delete require.cache[require.resolve("./plugins/" + pluginName + ".js")];
-
-        if (extending) {
-            if (!disabled[guildID][extending])
-                reloadPlugin(extending);
-        }
+        //Save changes
+        saveDisabledPlugins();
         return true;
     }
     catch (e) {
@@ -224,12 +232,10 @@ function reloadPlugins() {
                     if (files[i].length > 3 && files[i].endsWith(".js")) {
                         //Get filename
                         var plugin = files[i].substr(0, files[i].length - 3);
-                        if (!disabled[plugin]) {
-                            var currentSuccess = reloadPlugin(plugin, true);
-                            success = currentSuccess && success;
-                            if (currentSuccess) successCount++;
-                            else failCount++;
-                        }
+                        var currentSuccess = reloadPlugin(plugin, true);
+                        success = currentSuccess && success;
+                        if (currentSuccess) successCount++;
+                        else failCount++;
                     }
                 }
                 log("Reloaded " + successCount + " plugins, " + (success ? "none failed." : failCount + " failed."));
@@ -244,17 +250,6 @@ function reloadPlugins() {
         });
     });
 }
-
-//Load em up
-reloadPlugins().catch(error);
-
-function callHooks(hook) {
-    log("Calling hook: \"" + hook + "\"");
-    for (var i in hooks[hook]) {
-        hooks[hook][i]();
-    }
-}
-
 
 async function getDatastore(key) {
     if (datastore[key]) {
@@ -406,6 +401,13 @@ function checkRequirements(requirements, message) {
     return [true];
 }
 
+function callHooks(hook) {
+    log("Calling hook: \"" + hook + "\"");
+    for (var i in hooks[hook]) {
+        hooks[hook][i]();
+    }
+}
+
 module.exports = {
     log: log,
     error: error,
@@ -438,6 +440,7 @@ module.exports = {
         disablePlugin: disablePlugin,
         plugins: plugins,
         disabled: disabled,
+        extensions: extensions,
         kill: function () {
             log("Will die in a second.");
             setTimeout(function () {
@@ -447,8 +450,7 @@ module.exports = {
     }
 };
 
-
-client.on('ready', () => {
+client.on('ready', async () => {
     log(`Logged in as ${client.user.tag}!`);
     //Set again as discord js didnt know what emojis we have until now
     module.exports.emojis = client.emojis;
@@ -458,6 +460,11 @@ client.on('ready', () => {
     if(!datastoreURL || !datastoreKey) {
         log("No datastore specified, some plugin data will disappear after restart.", "info");
     }
+
+    //Load em up
+    await reloadPlugins().catch(error);
+    await loadDisabledPlugins();
+    module.exports.admin.disabled = disabled;
 
     commands["!help"] = {
         source: "",
@@ -592,5 +599,7 @@ function helpCommand(command, message) {
     }
     message.author.send(response);
 }
+
+log("Logging in to Discord");
 
 client.login(secrets.token);
