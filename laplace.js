@@ -253,12 +253,12 @@ function reloadPlugins() {
 }
 
 async function loadFromFile(key) {
-    if(!/^[\w,\s-]+$/.test(key)) throw "Illegal filename";
+    if(!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
     return JSON.parse(await util.promisify(fs.readFile)(`./tmp/${key}.json`));
 }
 
 async function saveToFile(key, data) {
-    if(!/^[\w,\s-]+$/.test(key)) throw "Illegal filename";
+    if(!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
     data = JSON.stringify(data);
     return util.promisify(fs.writeFile)(`./tmp/${key}.json`, data);
 }
@@ -283,7 +283,7 @@ async function getDatastore(key) {
             let data = await loadFromFile("datastore").catch(error);
             if(data){
                 datastore = data;
-                return JSON.parse(JSON.stringify(datastore[key]));
+                if(datastore[key]) return JSON.parse(JSON.stringify(datastore[key]));
             } 
         }
         return {};
