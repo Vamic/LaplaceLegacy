@@ -89,6 +89,7 @@ exports.commands = {
                         await bot.datastore.set("todo_" + userId, data);
                         message.channel.send("Moved items.");
                     } catch(err) {
+                        bot.error(err);
                         message.channel.send("Couldn't save the list.");
                     }
                 } else {
@@ -100,6 +101,7 @@ exports.commands = {
                         await bot.datastore.set("todo_" + userId, data);
                         message.channel.send(`Added \`${item}\` to index ${index}.`);
                     } catch(err) {
+                        bot.error(err);
                         message.channel.send("Couldn't save the list.");
                     }
                 }
