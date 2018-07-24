@@ -159,6 +159,7 @@ function getStreamOptions(id) {
 function initiateSongInfo(song, requiresFull = true) {
     return new Promise(async (resolve) => {
         if(song.display && song.display.embed && (!requiresFull || requiresFull && song.info.full)) {
+            setSongDisplayDescription(song);
             resolve(song);
         }
         else {
@@ -596,11 +597,7 @@ exports.commands = {
             var vc = bot.voiceConnections.get(message.guild.id);
             if(!vc.dispatcher) return bot.error("[DJ-showcurrent] Error: No dispatcher.");
 
-            if(playlist.current.display) {
-                setSongDisplayDescription(playlist.current);
-            } else {
-                await initiateSongInfo(playlist.current, true);
-            }
+            await initiateSongInfo(playlist.current, true);
             
             message.channel.send(playlist.current.display).then(m => m.delete(DELETE_TIME * 3));
         }
