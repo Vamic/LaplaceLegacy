@@ -491,6 +491,7 @@ client.on('ready', async () => {
     commands["!help"] = {
         source: "",
         usage: "Shows this.",
+        requirements: [requirements.isUser],
         exec: helpCommand
     };
 

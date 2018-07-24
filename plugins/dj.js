@@ -279,7 +279,7 @@ function toHHMMSS(input) {
 }
 
 function isValidURL(str) {
-    const pattern = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/g;
+    const pattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
     return pattern.test(str);
 }
 
@@ -368,7 +368,7 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: async function (command, message) {
             message.delete(DELETE_TIME);
-            await message.member.voiceChannel.join()
+            await message.member.voiceChannel.join();
             message.channel.send("Here I am.").then(m => m.delete(DELETE_TIME));
             if(message.guild.playlist.current) {
                 message.guild.playlist.start(message.member.voiceChannel);
@@ -577,7 +577,7 @@ exports.commands = {
             responseArr.length > 0 ? embed.setDescription(responseArr.join("\n"))
                                    : embed.setDescription("The sound of silence . . .");
 
-            message.channel.send(embed).then(m => m.delete(DELETE_TIME * 10));
+            message.channel.send(embed).then(m => m.delete(DELETE_TIME*10));
             return;
         }
     },
