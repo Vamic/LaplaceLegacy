@@ -777,9 +777,9 @@ exports.commands = {
                     message.channel.send(response);
                 }
             } else {
-                let data = await bot.datastore.get("search_stats").catch(bot.error);
+                let data = await bot.datastore.get("user_" + message.author.id).catch(bot.error);
                 if(!data) return;
-            
+
                 if (!data.searchstats || !data.searchstats.sites) {
                     return message.channel.send("No stats found.");
                 }
