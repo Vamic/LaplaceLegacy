@@ -514,10 +514,10 @@ function checkCommands(msg) {
             foundCmd = commands[cmd];
             cmdUsed = cmd;
             break;
-        //If it starts with the command, followed by a space or :
+        //If it starts with the command, followed by a space or : or newline
         } else if (msg.content.toLowerCase().startsWith(cmd)) {
             var char = msg.content[cmd.length];
-            if (char === " " || char === ":") {
+            if (/ |:|\r?\n|\r/.test(char)) {
                 softCmd = commands[cmd];
                 softCmdUsed = cmd;
             }
@@ -538,8 +538,8 @@ function checkCommands(msg) {
         }
         var content = msg.content.replace(cmdUsed, "");
 
-        //Get arguments (words separated by spaces)
-        var args = content.split(" ");
+        //Get arguments (words separated by spaces or newlines)
+        var args = content.replace(/\r?\n|\r/g, " ").split(" ");
         //Take out the modifiers (words separated by : directly after the command)
         var modifiers = args.splice(0, 1)[0].split(":");
 
