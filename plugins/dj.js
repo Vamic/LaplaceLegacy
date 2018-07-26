@@ -290,7 +290,7 @@ function startPlaying(id, playlist, channel) {
         listenToPlaylistEvents(playlist);
     }
     lastChannel[id] = channel.id;
-    playlist.start(channel, getStreamOptions(id));
+    return playlist.start(channel, getStreamOptions(id));
 }
 
 function listenToPlaylistEvents(playlist) {
@@ -316,12 +316,14 @@ function listenToPlaylistEvents(playlist) {
         bot.user.setPresence({ game: {}, status: 'online' });
         clearInterval(playlist.interval);
         playlist.interval = null;
+        bot.error("Playlist error");
         bot.error(err);
     });
     playlist.events.on("streamError", function (err) {
         bot.user.setPresence({ game: {}, status: 'online' });
         clearInterval(playlist.interval);
         playlist.interval = null;
+        bot.error("Playlist streamError");
         bot.error(err);
     });
 }
@@ -369,11 +371,17 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: async function (command, message) {
             message.delete(DELETE_TIME);
-            await message.member.voiceChannel.join();
-            message.channel.send("Here I am.").then(m => m.delete(DELETE_TIME));
-            if(message.guild.playlist.current) {
-                message.guild.playlist.start(message.member.voiceChannel);
-                lastChannel[message.guild.id] = message.member.voiceChannel.id;
+            try {
+                await message.member.voiceChannel.join();
+                message.channel.send("Here I am.").then(m => m.delete(DELETE_TIME));
+                if(message.guild.playlist.current) {
+                    message.guild.playlist.start(message.member.voiceChannel);
+                    lastChannel[message.guild.id] = message.member.voiceChannel.id;
+                }
+            }
+            catch (err) {
+                bot.error(err);
+                message.channel.send("Can't do that.").then(m => m.delete(DELETE_TIME));
             }
         }
     },
@@ -399,11 +407,13 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: async function (command, message) {
             message.delete(DELETE_TIME);
-            if(command.command === "!dj queue" && command.arguments.length === 0) return exports.commands.showqueue.exec(command, message);
+            if((command.command === "!dj queue" || command.command === "!dj queue") && command.arguments.length === 0) return exports.commands.showqueue.exec(command, message);
 
             var foundServices = {};
 
             var search = "";
+
+            command.arguments = command.arguments.map(a => a.replace(/\r?\n|\r/g, ""));
 
             for(const arg of command.arguments) {
                 if(isValidURL(arg)) {
@@ -460,13 +470,6 @@ exports.commands = {
             for(type in foundServices) {
                 let songs = await queueSongs(message.guild.id, foundServices[type], type)
                 totalSongs = totalSongs.concat(songs);
-                count++;
-                if(count === Object.keys(foundServices).length) {
-                    if(totalSongs.length === 1)
-                        message.channel.send(message.member.displayName + " added song: " + totalSongs[0].title + "\n<" + totalSongs[0].streamURL + ">").then(m => m.delete(DELETE_TIME));
-                    else
-                        message.channel.send(message.member.displayName + " added " + totalSongs.length + " songs").then(m => m.delete(DELETE_TIME));
-                }
 
                 if(!songs.length) return;
 
@@ -479,8 +482,21 @@ exports.commands = {
                         song.live = Boolean(hardcodedLivestreams.find(u => song.streamURL.indexOf(u) > -1));
                     }
                 }
-
-                if(!playlist.playing) startPlaying(message.guild.id, playlist, message.member.voiceChannel);
+                
+                let success = true;
+                if(!playlist.playing) {
+                    await startPlaying(message.guild.id, playlist, message.member.voiceChannel).catch(err => success = false);
+                }
+                count++;
+                if(count === Object.keys(foundServices).length) {
+                    if(!success) {
+                        message.channel.send("Couldn't start playing music.").then(m => m.delete(DELETE_TIME));
+                    }
+                    else if(totalSongs.length === 1)
+                        message.channel.send(message.member.displayName + " added song: " + totalSongs[0].title + "\n<" + totalSongs[0].streamURL + ">").then(m => m.delete(DELETE_TIME));
+                    else
+                        message.channel.send(message.member.displayName + " added " + totalSongs.length + " songs").then(m => m.delete(DELETE_TIME));
+                }
             }
         }
     },
