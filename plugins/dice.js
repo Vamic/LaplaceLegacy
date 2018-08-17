@@ -4,6 +4,10 @@ var getRandomInt = function(min, max){
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
+var argFilter = function(arg) {
+    return /\d/.test(arg);
+}
+
 var parseRoll = function (input, results, negative) {
     //Initialize results if we're not adding to existing results
     if (!results) results = [];
@@ -86,7 +90,7 @@ exports.commands = {
         description: "Roll some dice",
         exec: function (command, message) {
             var user = message.author.username;
-            var results = rollDice(command.arguments.filter(Boolean).join(" "));
+            var results = rollDice(command.arguments.filter(argFilter).join(" "));
             //Total roll
             var final = results[0];
             //Pieces of the roll ex: (1d6 + 2d4 - 2) is 4 pieces
