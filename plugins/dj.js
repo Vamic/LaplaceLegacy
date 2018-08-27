@@ -138,7 +138,7 @@ function loadLastPlaylists() {
 
 function setVolume(id, volume) {
     if(!volume) volume = DEFAULT_VOLUME;
-    if(volume >= 0 && volume <= 100) volume = volume / 100;
+    if(volume > 0) volume = volume / 100;
     volumes[id] = volume;
     bot.log("Set volume to " + volume + " in guild:" + id);
 
@@ -204,6 +204,7 @@ function setSongDisplayDescription(song) {
     var playtime = toHHMMSS(song.info.currentTime);
     if(song.info.duration > 0)
         playtime += "/" + toHHMMSS(song.info.duration);
+    //let timestamp = song.getTimestamp(song.info.currentTime); <-TODO
     song.display.embed.setDescription(playtime + " added by " + song.info.addedBy + "\n" + song.info.url);
 }
 
@@ -594,7 +595,7 @@ exports.commands = {
             responseArr.length > 0 ? embed.setDescription(responseArr.join("\n"))
                                    : embed.setDescription("The sound of silence . . .");
 
-            message.channel.send(embed).then(m => m.delete(DELETE_TIME*10));
+            message.channel.send(embed);
             return;
         }
     },
@@ -615,7 +616,7 @@ exports.commands = {
 
             await initiateSongInfo(playlist.current, true);
             
-            message.channel.send(playlist.current.display).then(m => m.delete(DELETE_TIME * 3));
+            message.channel.send(playlist.current.display);
         }
     },
     shufflesongs: {
@@ -638,13 +639,13 @@ exports.commands = {
             "!volume",
             "!vol"
         ],
-        requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
+        requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: function (command, message) {
             if(!isNaN(command.arguments[0])) {
                 setVolume(message.guild.id, command.arguments[0]);
-                message.channel.send("Set volume to " + command.arguments[0]).then(m => m.delete(DELETE_TIME));
+                message.channel.send("Set volume to " + command.arguments[0]);
             } else {
-                message.channel.send("Volume is currently " + volumes[message.guild.id] * 100).then(m => m.delete(DELETE_TIME));
+                message.channel.send("Volume is currently " + volumes[message.guild.id] * 100);
             }
             message.delete(DELETE_TIME);
         }

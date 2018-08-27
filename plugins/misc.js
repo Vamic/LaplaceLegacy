@@ -83,7 +83,7 @@ exports.commands = {
                     }
                 }
                 if (!emojis.length) throw "no emojis";
-                if (emojis.length > 10) throw "too many emojis cmon now";
+                if (emojis.length > 15) throw "too many emojis cmon now";
                 for(const emoji of emojis) {
                     await targetMessage.react(emoji);
                 }

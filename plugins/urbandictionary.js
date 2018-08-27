@@ -13,8 +13,11 @@ exports.commands = {
                     bot.error(err);
                     message.channel.send("Something went wrong.");
             });
-            if(!data) return;
-
+            if (!data) return;
+            if (data.error) {
+                message.channel.send("Urbandictionary says " + data.error);
+                return;
+            }
             if (data.list.length < 1) {
                 message.channel.send("Not even I know what that is! Are you sure it exists? :0");
                 return;
