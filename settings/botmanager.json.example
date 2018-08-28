@@ -7,7 +7,6 @@
             "name": "bot-name",                     //Cannot be duplicate with botmanager's name
             "startpoint": "path-to-the-.js-file",
             "autostart": true,
-            "token": "bot-token",
 
             //Optional settings
 
@@ -22,8 +21,7 @@
         {
             "name": "bot-name",
             "startpoint": "path-to-the-.js-file",
-            "autostart": false,
-            "token": "bot-token"
+            "autostart": false
         }
     ]
 }

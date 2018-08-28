@@ -12,10 +12,6 @@ for(var bot of settings.bots) {
         error("Skipping bot: No name provided.");
         continue;
     }
-    if (!bot.token) { 
-        error("Skipping [" + bot.name + "] : No token provided.");
-        continue;
-    }
     
     if (!fs.existsSync(bot.startpoint)) {
         error("Skipping [" + bot.name + "] : Startpoint doesn't point to a file.");
@@ -24,7 +20,6 @@ for(var bot of settings.bots) {
 
     bots[bot.name.toLowerCase()] = {
         name: bot.name,     //Display name in reports and console
-        token: bot.token,
         startpoint: bot.startpoint,
         autostart: bot.autostart,
         env: bot.env,
