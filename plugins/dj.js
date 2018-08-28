@@ -49,7 +49,7 @@ const hardcodedLivestreams = [
 // Services
 
 const keys = bot.secrets.keys;
-const services = module.exports.services ? module.exports.services : {};
+const services = module.exports.services || {};
 
 //Register services in the order you want them checked, ergo dService last because it has a catchall regex
 
@@ -458,7 +458,7 @@ exports.commands = {
                         foundServices["direct"] = "";
                     foundServices["direct"] += search;
                 }
-            } else {
+            } else if (services["youtube"]) {
                 if(!foundServices["youtube"])
                     foundServices["youtube"] = "";
                 foundServices["youtube"] += search;

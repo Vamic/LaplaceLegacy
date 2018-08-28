@@ -558,7 +558,7 @@ function checkCommands(msg) {
 }
 
 client.on('message', msg => {
-    if (process.env["BOT_TESTING"]) {
+    if (process.env["BOT_TESTING"] == "true") {
         if(!msg.guild || msg.guild.id != process.env["BOT_TEST_SERVER"])
             return;
         msg.content = msg.content.substr(1);
