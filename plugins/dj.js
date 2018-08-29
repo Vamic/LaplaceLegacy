@@ -466,8 +466,8 @@ exports.commands = {
 
             var playlist = message.guild.playlist;
             var totalSongs = [];
-            var count = 0;
 
+            let success = true;
             for(type in foundServices) {
                 let songs = await queueSongs(message.guild.id, foundServices[type], type)
                 totalSongs = totalSongs.concat(songs);
@@ -484,21 +484,17 @@ exports.commands = {
                     }
                 }
                 
-                let success = true;
                 if(!playlist.playing) {
                     await startPlaying(message.guild.id, playlist, message.member.voiceChannel).catch(err => success = false);
                 }
-                count++;
-                if(count === Object.keys(foundServices).length) {
-                    if(!success) {
-                        message.channel.send("Couldn't start playing music.").then(m => m.delete(DELETE_TIME));
-                    }
-                    else if(totalSongs.length === 1)
-                        message.channel.send(message.member.displayName + " added song: " + totalSongs[0].title + "\n<" + totalSongs[0].streamURL + ">").then(m => m.delete(DELETE_TIME));
-                    else
-                        message.channel.send(message.member.displayName + " added " + totalSongs.length + " songs").then(m => m.delete(DELETE_TIME));
-                }
             }
+            if(!success) {
+                message.channel.send("Couldn't start playing music.").then(m => m.delete(DELETE_TIME));
+            }
+            else if(totalSongs.length === 1)
+                message.channel.send(message.member.displayName + " added song: " + totalSongs[0].title + "\n<" + totalSongs[0].streamURL + ">").then(m => m.delete(DELETE_TIME));
+            else
+                message.channel.send(message.member.displayName + " added " + totalSongs.length + " songs").then(m => m.delete(DELETE_TIME));
         }
     },
     skipcurrent: {
