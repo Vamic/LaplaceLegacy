@@ -254,7 +254,9 @@ function reloadPlugins() {
 
 async function loadFromFile(key) {
     if(!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
-    return JSON.parse(await util.promisify(fs.readFile)(`./tmp/${key}.json`));
+    let path = `./tmp/${key}.json`;
+    if(!fs.existsSync(path)) return null;
+    return JSON.parse(await util.promisify(fs.readFile)(path));
 }
 
 async function saveToFile(key, data) {
@@ -447,8 +449,8 @@ module.exports = {
         httpGetJson: httpGetJson,
         httpGetXml: httpGetXml,
         httpPost: httpPost,
-        saveToFile: saveToFile,
-        loadFromFile: loadFromFile
+        save: saveToFile,
+        load: loadFromFile
     },
     datastore: {
         get: getDatastore,

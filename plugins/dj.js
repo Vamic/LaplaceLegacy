@@ -59,18 +59,19 @@ if(keys) {
         ytService.setSongDisplay = setSongDisplay;
         services[ytService.type] = ytService;
     } else {
-        bot.log("No Google api key, will use DirectService for Youtube videos", "dj");
+        bot.log("No Google API key, will use DirectService for Youtube videos", "dj");
     }
     if(keys.soundcloud) {
         const scService = new cassette.SoundcloudService(keys.soundcloud);
         scService.setSongDisplay = setSongDisplay;
         services[scService.type] = scService;
     } else {
-        bot.log("No Soundcloud api key, will use DirectService for Soundcloud songs", "dj");
+        bot.log("No Soundcloud API key, will use DirectService for Soundcloud songs", "dj");
     }
 } else {
-    bot.log("No api keys, will use DirectService for all songs", "dj");
+    bot.log("No API keys, will use DirectService for all songs", "dj");
 }
+if(!keys || !keys.google) bot.log("No Google API key, playing songs without links is disabled", "dj");
 
 const dService = new cassette.DirectService(ytdlBinary);
 dService.setSongDisplay = setSongDisplay;
@@ -79,6 +80,7 @@ services[dService.type] = dService;
 var volumes = {
     //<GUILD_ID> : <0-1>
 };
+bot.util.load("dj-volumes").then(v => volumes = v || volumes).catch(bot.error);
 var lastChannel = {
     //<GUILD_ID> : <VOICE_CHANNEL_ID>
 };
@@ -97,7 +99,7 @@ async function saveCurrentPlaylist(id) {
     if(!storedPlaylists[id]) storedPlaylists[id] = {};
     storedPlaylists[id].songs = playlist.map((song) => (
         {
-            url: song.URL,
+            URL: song.URL,
             seek: song.live ? 0 : song.seek,
             adder: song.adder,
             type: song.type
@@ -141,7 +143,9 @@ function setVolume(id, volume) {
     if(volume > 0) volume = volume / 100;
     volumes[id] = volume;
     bot.log("Set volume to " + volume + " in guild:" + id);
+    bot.util.save("dj-volumes", volumes);
 
+    //Change vol if currently playing music
     var vc = bot.voiceConnections.get(id);
     if(!vc || !vc.dispatcher) return;
     vc.dispatcher.setVolume(volume);
@@ -151,7 +155,7 @@ function getStreamOptions(id) {
     if(!volumes[id])
         setVolume(id, DEFAULT_VOLUME);
     return {
-        seek: bot.guilds.get(id).playlist.current ? bot.guilds.get(id).playlist.current.seek : 0,
+        seek: Math.min(300, bot.guilds.get(id).playlist.current ? bot.guilds.get(id).playlist.current.seek : 0),
         volume: volumes[id]
     };
 }
@@ -164,7 +168,7 @@ function initiateSongInfo(song, requiresFull = true) {
         }
         else {
             try {
-                if(!song.info || (!song.info.full && requiresFull)) {
+                if(!song["info.title"] || (!song.info.full && requiresFull)) {
                     song.info = await song.service.getSongInfo(song.URL);
                 }
                 services[song.type].setSongDisplay(song);
@@ -341,7 +345,7 @@ async function reQueue(id, data) {
     guild.playlist.destroy();
 
     let promises = queue.map(async (song) => {
-        let songs = await queueSongs(id, song.url, song.type).catch(bot.error);
+        let songs = await queueSongs(id, song.URL, song.type).catch(bot.error);
         if(songs.length) {
             songs[0].seek = song.seek;
             songs[0].adder = song.adder;
@@ -350,7 +354,7 @@ async function reQueue(id, data) {
                 songs[0].live = Boolean(hardcodedLivestreams.find(u => songs[0].streamURL.indexOf(u) > -1));
             }
         } else {
-            bot.error("Couldn't requeue " + song.url);
+            bot.error("Couldn't requeue " + song.URL);
         }
     });
 
@@ -540,14 +544,23 @@ exports.commands = {
             "!resume"
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
-        exec: function (command, message) {
-            message.channel.send("Resumed.").then(m => m.delete(DELETE_TIME));
-            message.guild.playlist.resume();
-            if(!message.guild.playlist.playing) {
-                message.guild.playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
+        exec: async function (command, message) {
+            let playlist = message.guild.playlist;
+            if(!playlist.current) {
+                if(message.guild.playlist.hasNext()) {
+                    message.guild.playlist.next();
+                }
+                else {
+                    return message.reply("No songs in queue.");
+                }
+            }
+            playlist.resume();
+            if(!playlist.playing) {
+                await playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
                 lastChannel[message.guild.id] = message.member.voiceChannel.id;
             }
             bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
+            message.channel.send("Resumed.").then(m => m.delete(DELETE_TIME));
             message.delete(DELETE_TIME);
         }
     },
