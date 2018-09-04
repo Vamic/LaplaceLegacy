@@ -334,7 +334,12 @@ function listenToPlaylistEvents(playlist) {
 }
 
 async function queueSongs(id, input, service) {
-    return bot.guilds.get(id).playlist.add(input, [services[service]]);
+    try {
+        return await bot.guilds.get(id).playlist.add(input, [services[service]]);
+    }
+    catch(err) {
+        bot.error(err);
+    }
 }
 
 async function reQueue(id, data) {
@@ -344,9 +349,9 @@ async function reQueue(id, data) {
 
     guild.playlist.destroy();
 
-    let promises = queue.map(async (song) => {
+    for (const song of queue) {
         let songs = await queueSongs(id, song.URL, song.type).catch(bot.error);
-        if(songs.length) {
+        if(songs && songs.length) {
             songs[0].seek = song.seek;
             songs[0].adder = song.adder;
             songs[0].guild = guild;
@@ -356,9 +361,7 @@ async function reQueue(id, data) {
         } else {
             bot.error("Couldn't requeue " + song.URL);
         }
-    });
-
-    await Promise.all(promises);
+    }
 
     var voiceChannel = guild.channels.get(channel);
     startPlaying(id, guild.playlist, voiceChannel);
@@ -473,10 +476,11 @@ exports.commands = {
 
             let success = true;
             for(type in foundServices) {
-                let songs = await queueSongs(message.guild.id, foundServices[type], type);
-                totalSongs = totalSongs.concat(songs);
+                let songs = [];
+                songs = await queueSongs(message.guild.id, foundServices[type], type);
+                if(!songs || !songs.length) continue;
 
-                if(!songs.length) continue;
+                totalSongs = totalSongs.concat(songs);
 
                 for(var i in songs) {
                     var song = songs[i];
@@ -533,7 +537,8 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             message.channel.send("Paused.").then(m => m.delete(DELETE_TIME));
-            message.guild.playlist.pause();
+            let playlist = message.guild.playlist;
+            playlist.pause();
             bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
             message.delete(DELETE_TIME);
         }
@@ -605,7 +610,7 @@ exports.commands = {
             responseArr.length > 0 ? embed.setDescription(responseArr.join("\n"))
                                    : embed.setDescription("The sound of silence . . .");
 
-            message.channel.send(embed);
+            message.channel.send(embed).then(m => m.delete(DELETE_TIME*10));
             return;
         }
     },
