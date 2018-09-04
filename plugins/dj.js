@@ -473,10 +473,10 @@ exports.commands = {
 
             let success = true;
             for(type in foundServices) {
-                let songs = await queueSongs(message.guild.id, foundServices[type], type)
+                let songs = await queueSongs(message.guild.id, foundServices[type], type);
                 totalSongs = totalSongs.concat(songs);
 
-                if(!songs.length) return;
+                if(!songs.length) continue;
 
                 for(var i in songs) {
                     var song = songs[i];
@@ -492,11 +492,12 @@ exports.commands = {
                     await startPlaying(message.guild.id, playlist, message.member.voiceChannel).catch(err => success = false);
                 }
             }
+            
             if(!success) {
                 message.channel.send("Couldn't start playing music.").then(m => m.delete(DELETE_TIME));
             }
             else if(totalSongs.length === 1)
-                message.channel.send(message.member.displayName + " added song: " + totalSongs[0].title + "\n<" + totalSongs[0].streamURL + ">").then(m => m.delete(DELETE_TIME));
+                message.channel.send(message.member.displayName + " added song: " + totalSongs[0].title + "\n<" + totalSongs[0].info.url + ">").then(m => m.delete(DELETE_TIME));
             else
                 message.channel.send(message.member.displayName + " added " + totalSongs.length + " songs").then(m => m.delete(DELETE_TIME));
         }
