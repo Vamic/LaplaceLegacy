@@ -122,7 +122,7 @@ exports.commands = {
         }
     },
     me: {
-        commands: ["!me", "!me2", "!mebot", "!i", "!self", "!mee"],
+        commands: ["!me", "!me2", "!mebot", "!self", "!mee"],
         description: "Do a thing",
         usage: "<thing to do>",
         requirements: [bot.requirements.guild],

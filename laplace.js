@@ -505,20 +505,27 @@ client.on("error", (data) => {
 });
 
 function checkCommands(msg) {
-    var msgCommand = msg.content.split(" ")[0].split(":")[0].toLowerCase();
+    let input = msg.content;
+    let isAlexa = false;
+    let alexaRegex = /^(?:laplace|alexa),? /;
+    if(alexaRegex.test(input)) {
+        isAlexa = true;
+        input = input.replace(alexaRegex, "!");
+    }
+    var msgCommand = input.split(" ")[0].split(":")[0].toLowerCase();
     var foundCmd, cmdUsed, softCmd, softCmdUsed;
 
     for (var cmd in commands) {
         if (msg.guild && disabled[msg.guild.id] && disabled[msg.guild.id][commands[cmd].source])
             continue;
         //If we get an exact match
-        if (msgCommand === cmd || msg.content.toLowerCase() === cmd) {
+        if (msgCommand === cmd || input.toLowerCase() === cmd) {
             foundCmd = commands[cmd];
             cmdUsed = cmd;
             break;
         //If it starts with the command, followed by a space or : or newline
-        } else if (msg.content.toLowerCase().startsWith(cmd)) {
-            var char = msg.content[cmd.length];
+        } else if (input.toLowerCase().startsWith(cmd)) {
+            var char = input[cmd.length];
             if (/ |:|\r?\n|\r/.test(char)) {
                 softCmd = commands[cmd];
                 softCmdUsed = cmd;
@@ -535,10 +542,10 @@ function checkCommands(msg) {
         var [passes, requirement] = checkRequirements(foundCmd.requirements, msg);
         if (!passes) {
             log(cmdUsed + " triggered by " + msg.author.username + " with \"" + msg.content + "\" (Failed requirement '" + requirement + "') ")
-            if (!requirement || requirement === "isUser" || requirement === "isBot") return;
+            if (!requirement || requirement === "isUser" || requirement === "isBot" || isAlexa) return;
             return msg.reply("Nope, failed requirement: " + requirement);
         }
-        var content = msg.content.replace(cmdUsed, "");
+        var content = input.replace(cmdUsed, "");
 
         //Get arguments (words separated by spaces or newlines)
         var args = content.replace(/\r?\n|\r/g, " ").split(" ");
