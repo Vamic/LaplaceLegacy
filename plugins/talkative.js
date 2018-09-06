@@ -60,7 +60,7 @@ const general = {
     choicequestion: {
         min: 1,
         max: 100,
-        regex: /^(\w+ ?)*(, ?| ?or )(\w+ ?)+\??$/i,
+        regex: /^(\w+,? ?)*(, ?| ?or )(\w+ ?)+\??$/i,
         responses: [
             "Totally ",
             "Probably ",
@@ -131,7 +131,7 @@ const general = {
             msg.channel.send(response);
         }
     },
-    love: {
+    fuckyou: {
         min: 2,
         max: 2,
         regex: /^fuck you$/i,
@@ -184,7 +184,6 @@ function isGeneral(msg, cb) {
         for(const i in general) {
             const obj = general[i];
             if(parts.length < obj.min) continue;
-            let success = false;
             let maxWords = parts.length > obj.max ? obj.max : parts.length;
             for(let i = 1; i <= maxWords; i++) {
                 const words = parts.slice(0, i).join(" ");
