@@ -507,7 +507,7 @@ client.on("error", (data) => {
 function checkCommands(msg) {
     let input = msg.content;
     let isAlexa = false;
-    let alexaRegex = /^(?:laplace|alexa),? /;
+    let alexaRegex = /^(?:laplace|alexa),? /i;
     if(alexaRegex.test(input)) {
         isAlexa = true;
         input = input.replace(alexaRegex, "!");
