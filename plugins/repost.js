@@ -1,6 +1,6 @@
 ﻿var bot = module.parent.exports;
 
-const messagelinkRegex = /^https:\/\/discordapp\.com\/channels\/(\d+)\/(\d+)\/(\d+)$/;
+const messagelinkRegex = /discordapp\.com\/channels\/(\d+)\/(\d+)\/(\d+)$/;
 
 async function getMessageFromIDs(messageID, channelID, guildID) {
     console.log(guildID);
