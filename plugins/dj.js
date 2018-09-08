@@ -139,7 +139,7 @@ function loadLastPlaylists() {
 }
 
 function setVolume(id, volume) {
-    if(!volume) volume = DEFAULT_VOLUME;
+    if(!volume || volume < 0) volume = DEFAULT_VOLUME;
     if(volume > 0) volume = volume / 100;
     volumes[id] = volume;
     bot.log("Set volume to " + volume + " in guild:" + id);
