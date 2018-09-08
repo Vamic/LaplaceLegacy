@@ -346,7 +346,6 @@ function httpGet(url, silent, headers, _retries) {
 async function httpGetJson(url, silent, headers) {
     let data = await httpGet(url, silent, headers);
 
-    if (!silent) log("[JSON PARSE] " + removePossiblyDangerousInformation(url));
     var jsondata;
     try {
         jsondata = JSON.parse(data);
@@ -504,6 +503,58 @@ client.on("error", (data) => {
     error(data.error);
 });
 
+client.on("voiceStateUpdate", (member, update) => {
+    let action = {
+        joined : null,
+        left : null, 
+        muted : false,
+        unmuted : false,
+        deafened : false,
+        undeafened : false,
+    }
+    let guild = member.guild;
+    
+    if(update.voiceChannelID != member.voiceChannelID) {
+        if(update.voiceChannelID) 
+            action.joined = guild.channels.get(update.voiceChannelID);
+        if(member.voiceChannelID)
+            action.left = guild.channels.get(member.voiceChannelID);
+    } else {
+        if(!member.selfMute && update.selfMute || !member.serverMute && update.serverMute)
+            action.muted = true;
+        else if(member.selfMute && !update.selfMute || member.serverMute && !update.serverMute)
+            action.unmuted = true;
+            
+        if(!member.selfDeaf && update.selfDeaf || !member.serverDeaf && update.serverDeaf)
+            action.deafened = true;
+        else if(member.selfDeaf && !update.selfDeaf || member.serverDeaf && !update.serverDeaf)
+            action.undeafened = true;
+    }
+
+    let oldChannel = member.voiceChannelID ? guild.channels.get(member.voiceChannelID) : null;
+    let newChannel = update.voiceChannelID ? guild.channels.get(update.voiceChannelID) : null;
+    
+    if(member.user == client.user) {
+        //Bot state changed
+        if(guild.voiceConnection) {
+            if(!action.muted && !action.unmuted && !action.deafened && !action.undeafened)
+                log("VoiceStateUpdate: Joined voice channel \"" + oldChannel.name + "\"");
+        } else {
+            log("VoiceStateUpdate: Left voice channel \"" + oldChannel.name + "\"");
+        }
+    } else {
+        //User state changed
+        if(guild.voiceConnection) {
+            if(action.left == guild.voiceConnection.channel) {
+                console.log("User left bot's voice channel");
+            }
+            if(action.joined == guild.voiceConnection.channel) {
+                console.log("User joined bot's voice channel");
+            }
+        }
+    }
+});
+
 function checkCommands(msg) {
     let input = msg.content;
     let isAlexa = false;
@@ -634,4 +685,4 @@ function helpCommand(command, message) {
 
 log("Logging in to Discord");
 
-client.login(secrets.token);
+client.login(process.env["TOKEN"] || secrets.token);
