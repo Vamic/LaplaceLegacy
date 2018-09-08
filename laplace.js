@@ -546,10 +546,10 @@ client.on("voiceStateUpdate", (member, update) => {
         //User state changed
         if(guild.voiceConnection) {
             if(action.left == guild.voiceConnection.channel) {
-                console.log("User left bot's voice channel");
+                //console.log("User left bot's voice channel");
             }
             if(action.joined == guild.voiceConnection.channel) {
-                console.log("User joined bot's voice channel");
+                //console.log("User joined bot's voice channel");
             }
         }
     }
