@@ -210,17 +210,21 @@ exports.commands = {
                     data.lists[firstArg] = data.lists[firstArg].concat(array);
 
                     send = true;
-                    response = "Added to " + firstArg;
+                    response = array.length + " items added to " + firstArg;
 
                     //Remove item from list
                 } else if (contains(cmds.remove, args[1])) {
-                    var indexes = args.splice(2, args.length - 2);
-                    for (i = 0; i < indexes.length; i++) {
-                        if (indexes[i] > -1 && indexes[i] < data.lists[firstArg].length)
-                            response += data.lists[firstArg].splice(indexes[i], 1) + "\n";
+                    let toRemove = args.splice(2, args.length - 2).sort((a,b) => b-a);
+                    let removed = [];
+                    while(toRemove.length) {
+                        let i = toRemove.shift();
+                        if(data.lists[firstArg][i]) {
+                            removed.push(data.lists[firstArg].splice(i, 1));
+                        }
                     }
                     send = true;
-                    response = "Removed:\n" + response;
+                    console.log(removed);
+                    response = "Removed:\n" + removed.join("\n");
 
                     //Switch two items
                 } else if (contains(cmds.move, args[1])) {

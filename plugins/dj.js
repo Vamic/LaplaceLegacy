@@ -421,7 +421,8 @@ exports.commands = {
 
             var search = "";
 
-            command.arguments = command.arguments.map(a => a.replace(/\r?\n|\r/g, ""));
+            //Allow newlines to separate args
+            command.arguments = command.arguments.join(" ").replace(/\r?\n|\r/g, " ").split(" ");
 
             for(const arg of command.arguments) {
                 if(isValidURL(arg)) {
