@@ -538,7 +538,7 @@ client.on("voiceStateUpdate", (member, update) => {
         //Bot state changed
         if(guild.voiceConnection) {
             if(!action.muted && !action.unmuted && !action.deafened && !action.undeafened)
-                log("VoiceStateUpdate: Joined voice channel \"" + oldChannel.name + "\"");
+                log("VoiceStateUpdate: Joined voice channel \"" + newChannel.name + "\"");
         } else {
             log("VoiceStateUpdate: Left voice channel \"" + oldChannel.name + "\"");
         }
@@ -599,7 +599,7 @@ function checkCommands(msg) {
         var content = input.replace(cmdUsed, "");
 
         //Get arguments (words separated by spaces or newlines)
-        var args = content.replace(/\r?\n|\r/g, " ").split(" ");
+        var args = content.split(" ");
         //Take out the modifiers (words separated by : directly after the command)
         var modifiers = args.splice(0, 1)[0].split(":");
 
