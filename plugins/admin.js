@@ -112,5 +112,13 @@ exports.commands = {
                 message.reply("What?").then(m => m.delete(5000));
             }
         }
+    },
+    invitelink: {
+        commands: ["!invite", "-invite"],
+        requirements: [bot.requirements.isAdmin],
+        exec: async function (command, message) {
+            let link = `<https://discordapp.com/api/oauth2/authorize?client_id=${bot.user.id}&permissions=0&scope=bot>`;
+            message.reply(link);
+        }
     }
 };
