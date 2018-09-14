@@ -252,6 +252,51 @@ function reloadPlugins() {
     });
 }
 
+async function sendPaginatedEmbed(channel, lines, pageSize, embedBase) {
+    let offset = 0;
+    let firstPage = lines.slice(0, pageSize);
+    let embed = (embedBase || new Discord.RichEmbed()).setDescription(firstPage.join("\n"));
+    return channel.send(embed).then(async msg => {
+        if(lines.length > pageSize) {
+            const collector = msg.createReactionCollector((reaction, user) => 
+                !user.bot && (
+                reaction.emoji.name === "◀" ||
+                reaction.emoji.name === "▶" ||
+                reaction.emoji.name === "❌")
+            );
+            collector.on("collect", reaction => {
+                let newOffset = offset;
+                switch(reaction._emoji.name) {
+                    case "◀":
+                        newOffset = Math.max(0, offset - pageSize);
+                        break;
+                    case "▶":
+                    newOffset = Math.min(lines.length - (lines.length % pageSize), offset + pageSize);
+                        break;
+                    case "❌":
+                        if(channel.guild)
+                            msg.delete();
+                        return;
+                    default:
+                        return;
+                }
+                if(newOffset != offset) {
+                    offset = newOffset;
+                    embed.setDescription(lines.slice(offset, offset + pageSize));
+                    msg.edit(embed);
+                }
+                if(channel.guild)
+                    reaction.remove(reaction.users.find(user => !user.bot));
+            });
+            
+            await msg.react("◀");
+            await msg.react("▶");
+            if(channel.guild)
+                await msg.react("❌");
+        }
+    });
+}
+
 async function loadFromFile(key) {
     if(!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
     let path = `./tmp/${key}.json`;
@@ -443,6 +488,9 @@ module.exports = {
         admins: secrets.admins
     },
     requirements: requirements,
+    send: {
+        paginatedEmbed: sendPaginatedEmbed
+    },
     util: {
         httpGet: httpGet,
         httpGetJson: httpGetJson,
@@ -619,7 +667,7 @@ function checkCommands(msg) {
 
 client.on('message', msg => {
     if (process.env["BOT_TESTING"] == "true") {
-        if(!msg.guild || msg.guild.id != process.env["BOT_TEST_SERVER"])
+        if(msg.guild && msg.guild.id != process.env["BOT_TEST_SERVER"])
             return;
         //msg.content = msg.content.substr(1);
     }

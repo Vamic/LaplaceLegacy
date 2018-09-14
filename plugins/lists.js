@@ -159,7 +159,7 @@ exports.commands = {
             }
 
             let response = "";
-            let send = false;
+            let save = false;
             if (!args.length) {
                 if (Object.keys(data.lists).length === 0)
                     response = "No lists here. Use !list add [listname]";
@@ -168,16 +168,19 @@ exports.commands = {
                 return message.channel.send("```\n" + response + "\n```");
             }
             let firstArg = args[0];
+            let listName = firstArg;
+            if(contains(cmds.add, firstArg) || contains(cmds.remove, firstArg))
+                listName = args[1] || ":thinking:";
 
             //Check if list exists
-            if (args.length === 1 && data.lists[firstArg]) {
-                if (data.lists[firstArg]) {
-                    for (i = 0; i < data.lists[firstArg].length; i++) {
-                        response += i + ": " + data.lists[firstArg][i] + "\n";
+            if (args.length === 1 && data.lists[listName]) {
+                if (data.lists[listName]) {
+                    for (i = 0; i < data.lists[listName].length; i++) {
+                        response += i + ": " + data.lists[listName][i] + "\n";
                     }
                 }
             }
-            else if (!data.lists[firstArg]
+            else if (!data.lists[listName]
                 && !contains(cmds.add, firstArg)
                 && !contains(cmds.remove, firstArg)) {
                 response = "404 - List not found.";
@@ -185,20 +188,20 @@ exports.commands = {
             else {
                 //Add a new list
                 if (contains(cmds.add, firstArg) && args.length === 2) {
-                    if (!data.lists[args[1]]) {
-                        data.lists[args[1]] = [];
-                        send = true;
-                        response = "Added new list " + args[1];
+                    if (!data.lists[listName]) {
+                        data.lists[listName] = [];
+                        save = true;
+                        response = "Added new list " + listName;
                     }
                     else {
-                        response = "List " + args[1] + " already exists.";
+                        response = "List " + listName + " already exists.";
                     }
                     //Remove a list
                 } else if (contains(cmds.remove, firstArg) && args.length === 2) {
-                    delete data.lists[args[1]];
+                    delete data.lists[listName];
 
-                    send = true;
-                    response = "Removed list " + args[1];
+                    save = true;
+                    response = "Removed list " + listName;
 
                     //Add item(s) to list
                 } else if (contains(cmds.add, args[1])) {
@@ -207,9 +210,9 @@ exports.commands = {
                     //Put the spaces back, and split on newlines
                     array = array.join(" ").split("\n");
 
-                    data.lists[firstArg] = data.lists[firstArg].concat(array);
+                    data.lists[listName] = data.lists[listName].concat(array);
 
-                    send = true;
+                    save = true;
                     response = array.length + " items added to " + firstArg;
 
                     //Remove item from list
@@ -218,23 +221,22 @@ exports.commands = {
                     let removed = [];
                     while(toRemove.length) {
                         let i = toRemove.shift();
-                        if(data.lists[firstArg][i]) {
-                            removed.push(data.lists[firstArg].splice(i, 1));
+                        if(data.lists[listName][i]) {
+                            removed.push(data.lists[listName].splice(i, 1));
                         }
                     }
-                    send = true;
-                    console.log(removed);
+                    save = true;
                     response = "Removed:\n" + removed.join("\n");
 
                     //Switch two items
                 } else if (contains(cmds.move, args[1])) {
-                    if (!data.lists[firstArg][args[2]] || !data.lists[firstArg][args[3]])
+                    if (!data.lists[listName][args[2]] || !data.lists[listName][args[3]])
                         response = "Can't relocate item " + args[2] + " and " + args[3] + ".";
                     else {
-                        var temp = data.lists[firstArg][args[2]];
-                        data.lists[firstArg][args[2]] = data.lists[firstArg][args[3]];
-                        data.lists[firstArg][args[3]] = temp;
-                        send = true;
+                        var temp = data.lists[listName][args[2]];
+                        data.lists[listName][args[2]] = data.lists[listName][args[3]];
+                        data.lists[listName][args[3]] = temp;
+                        save = true;
                         response = "Moved items";
                     }
                 } else {
@@ -243,15 +245,17 @@ exports.commands = {
             }
 
             //Update list
-            if (send) {
+            if (save) {
                 try {
                     await bot.datastore.set(storageName, data);
-                    message.channel.send("```\n" + response + "\n```");
                 } catch(err) {
-                    message.channel.send("Couldn't save the list.");
+                    return message.channel.send("Couldn't save the list.");
                 }
-            } else if (response.length) {
-                message.channel.send("```\n" + response + "```");
+            } 
+            if (response.length) {
+                bot.send.paginatedEmbed(message.channel, response.split("\n"), 15, new bot.RichEmbed().setTitle(`List: ${listName}`));
+            } else {
+                return message.channel.send("List is empty.");
             }
         }
     }
