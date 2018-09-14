@@ -306,3 +306,7 @@ plugins/djextension.js
 plugins/services/extension/
 *.exe
 tmp/
+
+binaries/
+
+images/

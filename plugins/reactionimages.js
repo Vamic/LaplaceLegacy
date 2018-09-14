@@ -4,14 +4,19 @@ var fs = require('fs');
 
 var sendImage = function (data) {
     //Get filenames in path
-    var images = fs.readdirSync(data.path);
+    var images;
+    try {
+        images = fs.readdirSync(data.path);
+    } catch(e) {
+        return data.channel.send(`Folder \`${data.path}\` not found.`);
+    }
     //In case there are no files
     if (!images || !images.length) data.channel.send("No images found.");
     else {
         //Get random file
         var fileName = images[Math.floor(Math.random() * images.length)];
         //Combine to make path
-        var filePath = data.path + "\\" + fileName;
+        var filePath = data.path + "/" + fileName;
         //Make discord.js attachment
         var attachment = new bot.Attachment(filePath, fileName);
         //Send file with the appropriate text or none depending on input

@@ -209,7 +209,12 @@ function setSongDisplayDescription(song) {
     if(song.info.duration > 0)
         playtime += "/" + toHHMMSS(song.info.duration);
     //let timestamp = song.getTimestamp(song.info.currentTime); <-TODO
-    song.display.embed.setDescription(playtime + " added by " + song.info.addedBy + "\n" + song.info.url);
+    let description = playtime + " added by " + song.info.addedBy + "\n" + song.info.url;
+    if(typeof song.display.embed.setDescription == "function") {
+        song.display.embed.setDescription(description);
+    } else {
+        song.display.embed.description = description;
+    }
 }
 
 function setSongDisplay(song) {
@@ -494,7 +499,7 @@ exports.commands = {
                 }
                 
                 if(!playlist.playing) {
-                    await startPlaying(message.guild.id, playlist, message.member.voiceChannel).catch(err => success = false);
+                    await startPlaying(message.guild.id, playlist, message.member.voiceChannel).catch(err => {bot.error(err); success = false;});
                 }
             }
             

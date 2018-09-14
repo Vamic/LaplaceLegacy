@@ -19,6 +19,6 @@
     "request": "^2.85.0",
     "seedrandom": "^2.4.3",
     "xml2js": "^0.4.19",
-    "ytdl-core": "^0.20.2"
+    "ytdl-core": "^0.20.4"
   }
 }
