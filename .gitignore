@@ -310,3 +310,5 @@ tmp/
 binaries/
 
 images/
+
+settings/\.env

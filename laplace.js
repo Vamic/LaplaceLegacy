@@ -1,10 +1,13 @@
 'use strict';
+require('dotenv').config({path: './settings/.env'});
 const fs = require('fs');
 const Discord = require('discord.js');
 const http = require('http');
 const request = require('request');
 const urlf = require('url');
 const util = require('util');
+
+const isLinux = process.platform === 'linux';
 
 //Juicy secrets, no looking
 const secrets = require('./settings/secrets.json'); 
@@ -521,6 +524,108 @@ module.exports = {
     }
 };
 
+/*
+ * Linux only stuff
+ */
+
+var listenToUser = function(){};
+var stopListeningToUser = function(){};
+
+if(isLinux) {
+    const {Models, Detector} = require("snowboy");
+
+    const models = new Models();
+
+    const detectors = new Map();
+    const receivers = new Map();
+    const streams = new Map();
+
+    let snowboyPath = require.resolve("snowboy/package.json").split("/");
+    snowboyPath.splice(-1);
+    snowboyPath = snowboyPath.join("/");
+
+    models.add({
+        file: snowboyPath + '/resources/alexa/alexa-avs-sample-app/alexa.umdl',
+        sensitivity: '0.6',
+        hotwords: 'alexa'
+    });
+
+    models.add({
+        file: snowboyPath + '/resources/snowboy.umdl',
+        sensitivity: '0.5',
+        hotwords: 'snowboy'
+    });
+
+    listenToUser = function (member) {
+        if(!member) return;
+
+        if(!member.voiceChannel) return;
+
+        if(detectors.has(member.id)) return;
+
+        const voiceConnection = member.voiceChannel.connection;
+
+        if(!voiceConnection) return;
+
+        console.log(`Listening to ${member.user.username}`);
+        const detector = new Detector({
+            resource: snowboyPath + '/resources/common.res',
+            models: models,
+            audioGain: 1.0,
+            applyFrontend: false
+        });
+
+        detector.on('silence', function() {
+            console.log("silence");
+        });
+
+        detector.on('sound', function(buffer) {
+            console.log("sound");
+        });
+
+        detector.on('error', function() {
+            console.log("error");
+            process.exit(0);
+        });
+
+        detector.on('hotword', function(index, hotword, buffer) {
+            console.log("gottem");
+            console.log('hotword', index, hotword);
+        });
+
+        detectors.set(member.id, detector);
+
+        if(receivers.get(voiceConnection.channel.id)) return;
+
+        const receiver = voiceConnection.createReceiver();
+
+        receiver.on('pcm', (user, buffer) => {
+            const detector = detectors.get(user.id);
+            if(!detector) return;
+            detector.write(buffer);
+        });
+        receivers.set(voiceConnection.channel.id, receiver);
+    }
+
+    stopListeningToUser = function (member) {
+        if(!member) {
+            detectors.clear();
+            streams.clear();
+            receivers.forEach(r => r.destroy());
+            receivers.clear();
+        } else {
+            console.log(`Stoppped listening to ${member.user.username}`);
+            detectors.delete(member.id);
+            streams.delete(member.id);
+        }
+    }
+}
+
+
+/* 
+ * Events n commands
+ */
+
 client.on('ready', async () => {
     log(`Logged in as ${client.user.tag}!`);
     //Set again as discord js didnt know what emojis we have until now
@@ -585,10 +690,15 @@ client.on("voiceStateUpdate", (member, update) => {
     if(member.user == client.user) {
         //Bot state changed
         if(guild.voiceConnection) {
-            if(!action.muted && !action.unmuted && !action.deafened && !action.undeafened)
+            if(!action.muted && !action.unmuted && !action.deafened && !action.undeafened) {
                 log("VoiceStateUpdate: Joined voice channel \"" + newChannel.name + "\"");
+                //let me = newChannel.members.find(m => m.id == secrets.admins[0]);
+                //setTimeout(() => listenToUser(vamic, guild.voiceConnection), 1000);
+            }
         } else {
             log("VoiceStateUpdate: Left voice channel \"" + oldChannel.name + "\"");
+            //let me = oldChannel.members.find(m => m.id == secrets.admins[0]);
+            //stopListeningToUser(vamic);
         }
     } else {
         //User state changed
