@@ -11,7 +11,7 @@ var sendImage = function (data) {
         return data.channel.send(`Folder \`${data.path}\` not found.`);
     }
     //In case there are no files
-    if (!images || !images.length) data.channel.send("No images found.");
+    if (!images || !images.length) data.channel.send(`No images found in folder \`${data.path}\`.`);
     else {
         //Get random file
         var fileName = images[Math.floor(Math.random() * images.length)];

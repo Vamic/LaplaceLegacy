@@ -40,6 +40,8 @@ var requirements = {
     userNotInVoice: (msg) => !(msg.member && msg.member.voiceChannel)
 };
 
+//Make tmp dir if its not there
+if(!fs.existsSync("./tmp/")) fs.mkdirSync("./tmp/");
 
 //Functions
 
@@ -310,6 +312,7 @@ async function loadFromFile(key) {
 async function saveToFile(key, data) {
     if(!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
     data = JSON.stringify(data);
+
     return util.promisify(fs.writeFile)(`./tmp/${key}.json`, data);
 }
 

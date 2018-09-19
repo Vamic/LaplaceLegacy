@@ -12,7 +12,8 @@ const os = require('os');
 const path = require("path");
 
 const binName = os.platform().indexOf("win") === 0 ? "youtube-dl.exe" : "youtube-dl";
-var ytdlBinary = path.normalize(path.join(__dirname, "..", "binaries", binName));
+const ytdlPath = path.normalize(path.join(__dirname, "..", "binaries"));
+const ytdlBinary = ytdlPath + binName;
 
 // Where to download the latest YTDL
 var youtubeDlUrl = "https://yt-dl.org/latest/" + binName;
@@ -32,6 +33,7 @@ var downloadYTDL = function (callback) {
     downloadFileTo(youtubeDlUrl, ytdlBinary, callback);
 };
 
+if(!fs.existsSync(ytdlPath)) fs.mkdirSync(ytdlPath);
 if(!fs.existsSync(ytdlBinary)) {
     bot.log("No youtube-dl found on startup. Downloading...");
     downloadYTDL(function () {
@@ -73,7 +75,7 @@ if(keys) {
 }
 if(!keys || !keys.google) bot.log("No Google API key, playing songs without links is disabled", "dj");
 
-const dService = new cassette.DirectService(ytdlBinary);
+const dService = new cassette.DirectService(ytdlPath);
 dService.setSongDisplay = setSongDisplay;
 services[dService.type] = dService;
 
@@ -112,7 +114,7 @@ async function saveCurrentPlaylist(id) {
     else if(!playlist.playing && storedPlaylists.playing.indexOf(id) > -1)
         storedPlaylists.playing.splice(storedPlaylists.playing.indexOf(id));
 
-    fs.writeFileSync("./tmp/dj/queues.json", JSON.stringify(storedPlaylists));
+    return bot.util.save("dj-queues", storedPlaylists);
 }
 
 async function clearPlaylistSave(id) {
@@ -122,20 +124,11 @@ async function clearPlaylistSave(id) {
     if(storedPlaylists.playing.indexOf(id) > -1)
         storedPlaylists.playing.splice(storedPlaylists.playing.indexOf(id));
 
-    fs.writeFileSync("./tmp/dj/queues.json", JSON.stringify(storedPlaylists));
+    return bot.util.save("dj-queues", storedPlaylists);
 }
 
 function loadLastPlaylists() {
-    return new Promise((resolve, reject) => {
-        fs.readFile("./tmp/dj/queues.json", function (err, data) {
-            try {
-                if(err) reject(err);
-                else resolve(storedPlaylists = JSON.parse(data));
-            } catch(e) {
-                resolve(storedPlaylists = { playing: [] });
-            }
-        })
-    });
+    return bot.util.load("dj-queues").then(q => storedPlaylists = q || { playing: [] }).catch(bot.error);
 }
 
 function setVolume(id, volume) {
