@@ -298,6 +298,11 @@ async function sendPaginatedEmbed(channel, lines, pageSize, embedBase) {
             await msg.react("▶");
             if(channel.guild)
                 await msg.react("❌");
+                
+            setTimeout(() => {
+                collector.stop();
+                msg.clearReactions();
+            }, 5 * 60 * 1000);
         }
     });
 }

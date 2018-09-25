@@ -485,20 +485,14 @@ exports.commands = {
                 return;
             tags.sort((a, b) => b.count - a.count);
 
-            var responseText = [];
-            responseText.push("```");
-            for (var i in tags) {
-                if (i > 20) break;
-                var tag = tags[i];
-                if (tag.count > 9 || tags.length < 20)
-                    responseText.push(tag.tag + " (" + tag.count + ")");
+            var lines = [];
+            for (const tag of tags) {
+                lines.push("`" + tag.tag + " (" + tag.count + ")`");
             }
-            if (responseText.length === 1)
-                responseText.push("No tags matched.");
-            responseText.push("```");
-            var response = new bot.RichEmbed()
-                .addField("Tags matching \"" + command.arguments[0] + "\"", responseText.join("\n"));
-            message.channel.send(response);
+            if (lines.length === 1)
+                lines.push("No tags matched.");
+            let embed = new bot.RichEmbed().setTitle(`Tags matching "${command.arguments[0]}" (${lines.length})`);
+            bot.send.paginatedEmbed(message.channel, lines, 10, embed);
         }
     },
     search: {
