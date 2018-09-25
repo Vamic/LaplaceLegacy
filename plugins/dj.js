@@ -13,7 +13,7 @@ const path = require("path");
 
 const binName = os.platform().indexOf("win") === 0 ? "youtube-dl.exe" : "youtube-dl";
 const ytdlPath = path.normalize(path.join(__dirname, "..", "binaries"));
-const ytdlBinary = ytdlPath + binName;
+const ytdlBinary = ytdlPath + "/" + binName;
 
 // Where to download the latest YTDL
 var youtubeDlUrl = "https://yt-dl.org/latest/" + binName;
@@ -75,7 +75,7 @@ if(keys) {
 }
 if(!keys || !keys.google) bot.log("No Google API key, playing songs without links is disabled", "dj");
 
-const dService = new cassette.DirectService(ytdlPath);
+const dService = new cassette.DirectService(ytdlBinary);
 dService.setSongDisplay = setSongDisplay;
 services[dService.type] = dService;
 
