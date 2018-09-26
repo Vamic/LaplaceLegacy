@@ -30,7 +30,9 @@ bot.datastore.get(datastoretarget).then(async data => {
 
 async function checkFeeds(guildID) {
     let guildData = rssData[guildID];
-    let channel = bot.guilds.get(guildID).channels.get(guildData.channelID);
+    let guild = bot.guilds.get(guildID);
+    if(!guild) return;
+    let channel = guild.channels.get(guildData.channelID);
     if(!channel) return;
     //Check each feed
     for(const feed of guildData.feeds) {
