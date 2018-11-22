@@ -1,9 +1,9 @@
 ﻿var bot = module.parent.exports;
 
-const kuroshiro = require("kuroshiro");
+const kuroshiro = new (require("kuroshiro"))();
 const google = bot.secrets.keys && bot.secrets.keys.google ? require('google-translate')(bot.secrets.keys.google) : null;
-kuroshiro.init();
 
+kuroshiro.init(new (require("kuroshiro-analyzer-kuromoji"))());
 let languages;
 
 async function translate(options) {
@@ -78,7 +78,7 @@ exports.commands = {
     romanizeJapanese: {
         commands: ["!rom", "!romanize", "!romaji"],
         usage: ["!rom:(hira|kana|kata):(oku) japanese"],
-        exec: function (command, message) {
+        exec: async function (command, message) {
             if (!command.arguments.length)
             {
                 return message.channel.send("`!rom:(hira|kana|kata):(oku) japanese`");
@@ -93,7 +93,7 @@ exports.commands = {
                 if(/^oku(?:rigana)?$/.test(mod))
                     mode = "okurigana"
             }
-            const result = kuroshiro.convert(command.arguments.join(" "), {to: type, mode});
+            const result = await kuroshiro.convert(command.arguments.join(" "), {to: type, mode});
             let responseType = type[0].toUpperCase() + type.slice(1);
             responseType += (mode != "spaced") ? " (" + mode + ")" : "";
             return message.channel.send(responseType + ": " + result);

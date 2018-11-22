@@ -10,17 +10,18 @@
     "cassette": "git+https://github.com/Vamic/cassette.git#develop",
     "discord.js": "^11.4.2",
     "discord.js-music": "^2.1.0",
-    "dotenv": "^6.0.0",
+    "dotenv": "^6.1.0",
     "google-translate": "^2.2.0",
-    "kuroshiro": "^0.2.3",
-    "mathjs": "^4.2.2",
+    "kuroshiro": "^1.1.2",
+    "kuroshiro-analyzer-kuromoji": "^1.1.0",
+    "mathjs": "^5.2.3",
     "musicmetadata": "^2.0.5",
-    "node-opus": "^0.2.7",
+    "opusscript": "0.0.6",
     "request": "^2.85.0",
-    "rss-parser": "^3.4.3",
+    "rss-parser": "^3.5.4",
     "seedrandom": "^2.4.3",
     "xml2js": "^0.4.19",
-    "ytdl-core": "^0.20.4"
+    "ytdl-core": "^0.28.0"
   },
   "optionalDependencies": {
     "snowboy": "^1.2.0"
