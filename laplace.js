@@ -558,12 +558,6 @@ if(isLinux) {
         hotwords: 'alexa'
     });
 
-    models.add({
-        file: snowboyPath + '/resources/snowboy.umdl',
-        sensitivity: '0.5',
-        hotwords: 'snowboy'
-    });
-
     listenToUser = function (member) {
         if(!member) return;
 
