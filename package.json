@@ -7,15 +7,19 @@
     "name": "deltagare"
   },
   "dependencies": {
+    "boom": "^7.2.2",
     "cassette": "git+https://github.com/Vamic/cassette.git#develop",
+    "cryptiles": "^4.1.3",
     "discord.js": "^11.4.2",
     "discord.js-music": "^2.1.0",
     "dotenv": "^6.1.0",
     "google-translate": "^2.2.0",
+    "hoek": "^6.0.3",
     "kuroshiro": "^1.1.2",
     "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "mathjs": "^5.2.3",
     "musicmetadata": "^2.0.5",
+    "npm-platform-dependencies": "^0.1.0",
     "opusscript": "0.0.6",
     "request": "^2.85.0",
     "rss-parser": "^3.5.4",
@@ -23,7 +27,10 @@
     "xml2js": "^0.4.19",
     "ytdl-core": "^0.28.0"
   },
-  "optionalDependencies": {
-    "snowboy": "^1.2.0"
+  "linuxDependencies": {
+    "snowboy": "^1.3.1"
+  },
+  "scripts": {
+    "postinstall": "npmpd"
   }
 }
