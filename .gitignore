@@ -312,3 +312,4 @@ binaries/
 images/
 
 settings/\.env
+*.zip
