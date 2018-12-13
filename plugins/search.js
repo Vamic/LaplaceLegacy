@@ -16,7 +16,7 @@ async function googleImageSearch(term, fileType) {
         auth: bot.secrets.keys.google
     });
 
-    return result.data.items[0].link;
+    return result.data.items && result.data.items[0].link;
 } 
 async function googleSearch(term, fileType) {
     var result = await customSearch.list({
@@ -27,7 +27,7 @@ async function googleSearch(term, fileType) {
         auth: bot.secrets.keys.google
     });
 
-    return result.data.items[0].link;
+    return result.data.items && result.data.items[0].link;
 } 
 
 var lastSearches = {
@@ -44,7 +44,7 @@ if(google != null) {
             if(args) args.shift(); //Remove "g" or "google"
             if (args.length == 0) return;
             var search = args.join(" ");
-            let result = await googleSearch(search);
+            let result = await googleSearch(search).catch(bot.error);
             message.channel.send(`"${search}": ${result}`);
         }
     };
@@ -63,8 +63,16 @@ if(google != null) {
                 search = args.join(" ");
                 fileType = mods.length ? mods[0] : null;
             }
-            let imageUrl = await googleImageSearch(search, fileType);
-            if(!fileType) fileType = /\.(\w{3,4})$/.exec(imageUrl)[1];
+            let imageUrl = await googleImageSearch(search, fileType).catch(bot.error);
+            if(!imageUrl) return message.channel.send("Nobody here but us reptiles!");
+            if(!fileType) {
+                var regres = /\.(\w{3,4})$/.exec(imageUrl);
+                if(regres.length > 1) {
+                    fileType = regres[1];
+                } else {
+                    fileType = "pingas";
+                }
+            }
             message.channel.send(new bot.RichEmbed().setImage(imageUrl).setDescription(`[${search}.${fileType}](${imageUrl})`));
         }
     };

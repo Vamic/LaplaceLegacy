@@ -91,7 +91,8 @@ var listening = {
 };
 
 const DELETE_TIME = 15000;
-const DEFAULT_VOLUME = 50;
+const DEFAULT_VOLUME = 10;
+const MAX_VOLUME = 20;
 
 var storedPlaylists = { playing: [] };
 async function saveCurrentPlaylist(id) {
@@ -133,6 +134,7 @@ function loadLastPlaylists() {
 
 function setVolume(id, volume) {
     if(!volume || volume < 0) volume = DEFAULT_VOLUME;
+    if(volume > MAX_VOLUME) volume = MAX_VOLUME;
     if(volume > 0) volume = volume / 100;
     volumes[id] = volume;
     bot.log("Set volume to " + volume + " in guild:" + id);
@@ -142,6 +144,7 @@ function setVolume(id, volume) {
     var vc = bot.voiceConnections.get(id);
     if(!vc || !vc.dispatcher) return;
     vc.dispatcher.setVolume(volume);
+    return volume * 100;
 }
 
 function getStreamOptions(id) {
@@ -297,6 +300,11 @@ function startPlaying(id, playlist, channel) {
 }
 
 function listenToPlaylistEvents(playlist) {
+    playlist._end = function(reason) {
+        if (this._dispatcher)
+            this._dispatcher.end(reason);
+    }
+
     playlist.events.on("playing", function () {
         bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
         if(!playlist.interval) {
@@ -323,6 +331,7 @@ function listenToPlaylistEvents(playlist) {
         bot.error(err);
     });
     playlist.events.on("streamError", function (err) {
+        console.log(playlist.length);
         bot.user.setPresence({ game: {}, status: 'online' });
         clearInterval(playlist.interval);
         playlist.interval = null;
@@ -656,8 +665,8 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: function (command, message) {
             if(!isNaN(command.arguments[0])) {
-                setVolume(message.guild.id, command.arguments[0]);
-                message.channel.send("Set volume to " + command.arguments[0]);
+                var setvolume = setVolume(message.guild.id, command.arguments[0]);
+                message.channel.send("Set volume to " + setvolume);
             } else {
                 message.channel.send("Volume is currently " + volumes[message.guild.id] * 100);
             }
