@@ -370,6 +370,23 @@ function removePossiblyDangerousInformation(str) {
     return str.replace(/([?&]k(?:ey)*=).*?([&])/g, "$1[API KEY]$2");
 }
 
+function httpDownloadFile(url, filename, silent, headers, _retries) {
+    return new Promise((resolve, reject) => {
+        if (!silent) log("[HTTP GET]" +
+            (_retries ? " (retry #" + _retries + ") " : " ") +
+            removePossiblyDangerousInformation(url));
+    
+        if (!filename) reject("No filename provided");
+        
+        if (!headers) headers = {};
+    
+        request({
+            url: url,
+            headers: headers
+        }).pipe(fs.createWriteStream(filename)).on('close', resolve);
+    });
+}
+
 function httpGet(url, silent, headers, _retries) {
     return new Promise((resolve, reject) => {
         if (!silent) log("[HTTP GET]" +
@@ -506,6 +523,7 @@ module.exports = {
         httpGet: httpGet,
         httpGetJson: httpGetJson,
         httpGetXml: httpGetXml,
+        httpDownloadFile: httpDownloadFile,
         httpPost: httpPost,
         save: saveToFile,
         load: loadFromFile

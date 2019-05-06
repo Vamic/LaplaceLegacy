@@ -300,6 +300,7 @@ function startPlaying(id, playlist, channel) {
 }
 
 function listenToPlaylistEvents(playlist) {
+    // Override _end function to not default reason to 'terminal'
     playlist._end = function(reason) {
         if (this._dispatcher)
             this._dispatcher.end(reason);
