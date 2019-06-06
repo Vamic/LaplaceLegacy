@@ -91,6 +91,10 @@ exports.commands = {
         requirements: [bot.requirements.guild],
         exec: function (command, message) {
             var members = message.guild.members;
+            
+            //no bots or same user allowed
+            members = members.filter(member => member !== message.member && !member.user.bot);
+            
             var users = members.random(3);
 
             if (users.filter(Boolean).length < 3)
@@ -105,6 +109,10 @@ exports.commands = {
         requirements: [bot.requirements.guild],
         exec: function (command, message) {
             var members = message.guild.members;
+            
+            //no bots or same user allowed
+            members = members.filter(member => member !== message.member && !member.user.bot);
+            
             var users = members.random(3);
 
             if (users.filter(Boolean).length < 3)
