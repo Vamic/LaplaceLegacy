@@ -90,7 +90,15 @@ exports.commands = {
         description: "Roll some dice",
         exec: function (command, message) {
             var user = message.author.username;
-            var results = rollDice(command.arguments.filter(argFilter).join(" "));
+
+            var input = command.arguments.join(" ").toLowerCase();
+            //Remove whitespace between +- and the next character
+            input = input.replace(/\+\s+/g, "+");
+            input = input.replace(/-\s+/g, "-");
+            input = input.split(" ").filter(argFilter).join(" ");
+
+            var results = rollDice(input);
+            
             //Total roll
             var final = results[0];
             //Pieces of the roll ex: (1d6 + 2d4 - 2) is 4 pieces
