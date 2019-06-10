@@ -18,7 +18,9 @@ bot.datastore.get(datastoretarget).then(async data => {
 
     bot.rssinterval = setInterval(async () => {
         bot.log("Checking RSS Feeds - " + new Date().toLocaleTimeString());
+        //Loop through all properties
         for (const guildID in rssData) {
+            //Filter away the default properties (toString and such), leaving only guildIDs
             if (rssData.hasOwnProperty(guildID)) {
                 //Check feeds in each server
                 //TODO: check personal feeds
@@ -28,21 +30,30 @@ bot.datastore.get(datastoretarget).then(async data => {
     }, 10 * 60 * 1000);
 });
 
-async function checkFeeds(guildID) {
-    let guildData = rssData[guildID];
-    let guild = bot.guilds.get(guildID);
-    if(!guild) return;
-    let channel = guild.channels.get(guildData.channelID);
+async function checkFeeds(id) {
+    let guildData = rssData[id];
+    let guild = bot.guilds.get(id);
+    let channel;
+    if(guild) {
+        channel = guild.channels.get(guildData.channelID);
+    }
+    else {
+        channel = await bot.client.fetchUser(id).catch(e => {});
+    }
     if(!channel) return;
+    getAndNotify(guildData.feeds, channel);
+}
+
+async function getAndNotify(feeds, channel) {
     //Check each feed
-    for(const feed of guildData.feeds) {
+    for(const feed of feeds) {
         let xml = await getFeedXml(feed.feedUrl).catch(bot.error);
         if(!xml) continue;
         //Filter out old items
         let items = xml.items.filter(i => new Date(i.pubDate) > feed.lastCheck);
         //If we have new items, send a message
         if(items.length) {
-            let mentions = feed.users.map(uid => `<@${uid}>`);;
+            let mentions = feed.users ? feed.users.map(uid => `<@${uid}>`) : [];
             let links = items.map(i => `[${i.title}](${i.link})`);
             let embed = new bot.RichEmbed().setTitle("RSS Feed update: " + feed.title);
             embed.setDescription(links.join("\n"));
@@ -77,44 +88,46 @@ function getUnusedID(guildID) {
     return newID;
 }
 
-async function addGuildFeed(guildID, url, userID){
-    let feeds = rssData[guildID].feeds;
+async function addFeed(containerId, url, userID){
+    let isGuild = containerId != userID;
+    let feeds = rssData[containerId].feeds;
     let found = feeds.find(f => f.feedUrl == url);
-    if(found) return "that feed is already tracked on this server. Use `!rss sub [ID]` to subscribe to it";
+    if(found) return "That feed is already tracked " + (isGuild ? "on this server. Use `!rss sub [ID]` to subscribe to it." : ".");
     
     bot.log("Checking rss " + url);
     let parsedXml = await getFeedXml(url).catch(bot.error);
     
     //Save the parts we care about and add our own stuff
     let feed = {
-        id: getUnusedID(guildID),
+        id: getUnusedID(containerId),
         title: parsedXml.title,
         feedUrl: url,
         linkUrl: parsedXml.link,
         description: parsedXml.description,
 
-        users: [userID],
         lastCheck: Date.now()
     };
+
+    if(isGuild) feed.users = [userID];
 
     feeds.push(feed);
     
     await bot.datastore.set(datastoretarget, rssData);
 
-    return "added the `" + feed.title + "` rss feed to this server.";
+    return "added the `" + feed.title + "` rss feed" + (isGuild ? " to this server." : ".");
 }
 
-async function removeGuildFeed(guildID, id) {
-    let feed = rssData[guildID].feeds.find(f => f.id == id);
-    if(!feed) return "no rss feed with the id `" + id + "` found on this server.";
+async function removeFeed(containerId, feedId, isGuild) {
+    let feed = rssData[containerId].feeds.find(f => f.id == feedId);
+    if(!feed) return "no rss feed with the id `" + feedId + "` found" + (isGuild ? " on this server." : ".");
 
-    rssData[guildID].feeds = rssData[guildID].feeds.filter(f => f.id != id);
+    rssData[containerId].feeds = rssData[containerId].feeds.filter(f => f.id != feedId);
     await bot.datastore.set(datastoretarget, rssData);
-    return "removed rss feed for `" + feed.title + "` from this server.";
+    return "removed rss feed for `" + feed.title + "`" + (isGuild ? " from this server." : ".");
 }
 
 //Add user to be mentioned when an update is announced
-async function addUserToFeed(guildID, id, userID) {
+async function addUserToGuildFeed(guildID, id, userID) {
     let feed = rssData[guildID].feeds.find(f => f.id == id);
     if(!feed) return "no rss feed with the id `" + id + "` found on this server.";
 
@@ -124,7 +137,7 @@ async function addUserToFeed(guildID, id, userID) {
 }
 
 //Remove user from being mentioned when an update is announced
-async function removeUserFromFeed(guildID, id, userID) {
+async function removeUserFromGuildFeed(guildID, id, userID) {
     let feed = rssData[guildID].feeds.find(f => f.id == id);
     if(!feed) return "no rss feed with the id `" + id + "` found on this server.";
 
@@ -180,56 +193,65 @@ exports.commands = {
             if(!args.length) {
                 return message.reply("usage: `!rss [(un)subscribe|add|remove|list]");
             }
-            if(message.guild) {
-                if(!rssData[message.guild.id]) {
-                    return message.reply("this server doesn't have an rss channel set.\nUse `!setrsschannel` in the channel you want rss updates posted.");
-                } else {
-                    let response = "";
-                    let argument = args.shift();
-                    switch(argument) {
-                        case "subscribe":
-                        case "sub":
-                            if(!args.length) 
-                                response = "usage: `!rss subscribe [ID]`, see IDs in `!rss list`";
-                            else
-                                response = await addUserToFeed(message.guild.id, args.shift(), message.author.id);
-                            break;
-                        case "unsubscribe":
-                        case "unsub":
-                            if(!args.length) 
-                                response = "usage: `!rss unsubscribe [ID]`, see IDs in `!rss list`";
-                            else
-                                response = await removeUserFromFeed(message.guild.id, args.shift(), message.author.id);
-                            break;
-                        case "add":
-                            if(!args.length) 
-                                response = "usage: `!rss add [link to rss]`";
-                            else {
-                                let nextArg = args.shift();
-                                if(/tumblr\.com.*\/rss/.test(nextArg))
-                                    response = "tumblr feeds are not supported because tumblr is retarded and puts a privacy policy screen where the rss should be.";
-                                else  
-                                    response = await addGuildFeed(message.guild.id, nextArg, message.author.id).catch(bot.error);
-                            }
-                            break;
-                        case "remove":
-                            if(!args.length) 
-                                response = "usage: `!rss remove [ID]`, see IDs in `!rss list`";
-                            else 
-                                response = await removeGuildFeed(message.guild.id, args.shift());
-                            break;
-                        case "list":
-                            let feeds = rssData[message.guild.id].feeds;
-                            let embed = new bot.RichEmbed().setTitle("Tracked RSS Feeds");
-                            let lines = feeds.map(feed => `${feed.id}: [${feed.title}](${feed.linkUrl})`);
-                            if (lines.length == 0) lines.push("No feeds tracked in this server yet.");
-                            return bot.send.paginatedEmbed(message.channel, lines, 15, embed);
-                    }
-                    if(response) return message.reply(response);
-                }
+
+            if(!message.guild && !rssData[message.author.id]){
+                rssData[message.author.id] = {
+                    channelID: message.channel.id,
+                    feeds: []
+                };
+            }
+            if(message.guild && !rssData[message.guild.id]) {
+                return message.reply("this server doesn't have an rss channel set.\nUse `!setrsschannel` in the channel you want rss updates posted.");
             } else {
-                //TODO: handle personal RSS things (DMs)
-                message.reply("Not implemented");
+                let response = "";
+                let argument = args.shift();
+                let containerId = message.guild ? message.guild.id : message.author.id;
+                switch(argument) {
+                    case "subscribe":
+                    case "sub":
+                        if(!message.guild) 
+                            response = "useless for personal feeds";
+                        else if(!args.length) 
+                            response = "usage: `!rss subscribe [ID]`, see IDs in `!rss list`";
+                        else
+                            response = await addUserToGuildFeed(containerId, args.shift(), message.author.id);
+                        break;
+                    case "unsubscribe":
+                    case "unsub":
+                        if(!message.guild) 
+                            response = "useless for personal feeds";
+                        else if(!args.length) 
+                            response = "usage: `!rss unsubscribe [ID]`, see IDs in `!rss list`";
+                        else
+                            response = await removeUserFromGuildFeed(containerId, args.shift(), message.author.id);
+                        break;
+                    case "add":
+                        if(!args.length) 
+                            response = "usage: `!rss add <link to rss>`";
+                        else {
+                            let nextArg = args.shift();
+                            if(/tumblr\.com.*\/rss/.test(nextArg))
+                                response = "tumblr feeds are not supported because tumblr puts a privacy policy screen where the rss should be.";
+                            else 
+                                response = await addFeed(containerId, nextArg, message.author.id).catch(bot.error);
+                        }
+                        break;
+                    case "remove":
+                        if(!args.length) 
+                            response = "usage: `!rss remove [ID]`, see IDs in `!rss list`";
+                        else  
+                            response = await removeFeed(containerId, args.shift(), message.guild).catch(bot.error);
+                        
+                        break;
+                    case "list":
+                        let feeds = rssData[containerId].feeds;
+                        let lines = feeds.map(feed => `${feed.id}: [${feed.title}](${feed.linkUrl})`);
+                        if (lines.length == 0) lines.push("No feeds tracked " + (message.guild ? "in this server " : "") + "yet. `!rss add <link to rss>`");
+
+                        let embed = new bot.RichEmbed().setTitle("Tracked RSS Feeds");
+                        return bot.send.paginatedEmbed(message.channel, lines, 15, embed);
+                }
+                if(response) return message.reply(response);
             }
         }
     },

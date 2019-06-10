@@ -505,6 +505,7 @@ function callHooks(hook) {
 module.exports = {
     log: log,
     error: error,
+    client: client,
     user: client.user,
     emojis: client.emojis,
     guilds: client.guilds,
