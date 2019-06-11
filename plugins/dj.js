@@ -685,6 +685,14 @@ exports.commands = {
             message.channel.send("Cleared all songs.").then(m => m.delete(DELETE_TIME));
             message.delete(DELETE_TIME);
         }
+    },
+    updateytdl: {
+        commands: ["!dj update"],
+        exec: function(command, message) {
+            downloadYTDL(function () {
+                message.channel.send("Youtube-dl downloaded");
+            });
+        }
     }
 };
 
