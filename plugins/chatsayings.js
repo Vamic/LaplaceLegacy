@@ -204,41 +204,45 @@ exports.commands = {
             }
         }
     },
-    exec: function (command, message) {
-        let danceDuration = 0;
-        let danceParty = false;
-        let maxDances = 10;
-        
-        //1% chance of dance party cuz calvin wanted that
-        if (Math.floor(Math.random() * 100) == 0) {
-            danceParty = true;
-            danceDuration = maxDances;
-        } else {
-            danceDuration = Math.floor(Math.random() * maxDances);
-        }
-        
-        var left = "\\o)";
-        var right = "(o/";
-        var finisher = "\\o/";
-        
-        if (danceParty) {
-            left = left+"<a:kawaiiDanceParty:604103260676292628>";
-            right = "<a:kawaiiDanceParty:604103260676292628>"+right;
-            finisher = finisher+"<a:kawaiiDanceParty:604103260676292628>"+finisher;
-            message.channel.send("DANCE PARTY!!!");
-        }               
+    dancingyeah: {
+        commands: ["!dance", "!danceparty", "!dancingyeah", "!celebrate", "!dp"],
+        description: "Celebrate good times, come on!",
+        exec: function (command, message) {
+            let danceDuration = 0;
+            let danceParty = false;
+            let maxDances = 10;
             
-        for(var count = 0; count < danceDuration; count++){
-            if (count % 2 == 0){
-                setTimeout(() => message.channel.send(left), 2000 * count);
+            //1% chance of dance party cuz calvin wanted that
+            if (Math.floor(Math.random() * 100) == 0) {
+                danceParty = true;
+                danceDuration = maxDances;
             } else {
-                setTimeout(() => message.channel.send(right), 2000 * count);
+                danceDuration = Math.floor(Math.random() * maxDances);
             }
-            if (count + 1 == danceDuration){
-                setTimeout(() => message.channel.send(finisher), 2000 * count);
+            
+            var left = "\\o)";
+            var right = "(o/";
+            var finisher = "\\o/";
+            
+            if (danceParty) {
+                left = left+"<a:kawaiiDanceParty:604103260676292628>";
+                right = "<a:kawaiiDanceParty:604103260676292628>"+right;
+                finisher = finisher+"<a:kawaiiDanceParty:604103260676292628>"+finisher;
+                message.channel.send("DANCE PARTY!!!");
+            }               
+                
+            for(var count = 0; count < danceDuration; count++){
+                if (count % 2 == 0){
+                    setTimeout(() => message.channel.send(left), 2000 * count);
+                } else {
+                    setTimeout(() => message.channel.send(right), 2000 * count);
+                }
+                if (count + 1 == danceDuration){
+                    setTimeout(() => message.channel.send(finisher), 2000 * count);
+                }
             }
+            
         }
-        
     },
     "/o/": {
         description: "\\o\\",
