@@ -238,7 +238,7 @@ exports.commands = {
                     setTimeout(() => message.channel.send(right), 2000 * count);
                 }
                 if (count + 1 == danceDuration){
-                    setTimeout(() => message.channel.send(finisher), 2000 * count);
+                    setTimeout(() => message.channel.send(finisher), 2000 * (count + 1));
                 }
             }
             
