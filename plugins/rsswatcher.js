@@ -206,7 +206,7 @@ exports.commands = {
         exec: async function (command, message) {
             let args = command.arguments;
             if (!args.length) {
-                return message.reply("usage: `!rss:<alias> [(un)subscribe|add|remove|list]");
+                return message.reply("usage: `!rss:<alias> [(un)subscribe|add|remove|rename|list]");
             }
 
             if (!message.guild && !rssData[message.author.id]) {
