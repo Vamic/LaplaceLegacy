@@ -512,6 +512,7 @@ module.exports = {
     voiceConnections: client.voiceConnections,
     Attachment: Discord.Attachment,
     RichEmbed: Discord.RichEmbed,
+    persistent: {},
     secrets: {
         keys: secrets.keys,
         admins: secrets.admins

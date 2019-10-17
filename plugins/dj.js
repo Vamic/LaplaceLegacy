@@ -1,10 +1,7 @@
 ﻿const bot = module.parent.exports;
 
-const proc = require("child_process");
-const cassette = require("cassette");
-const djsmusic = require("discord.js-music");
-const ytdl = require('ytdl-core'); //For youtube service
-
+const DiscordPlaylist = require("./dj/playlist_extension").default;
+const vdj = require("vdj");
 const request = require("request");
 const fs = require('fs');
 
@@ -48,36 +45,41 @@ const hardcodedLivestreams = [
     "twitch.tv"
 ]
 
-// Services
+// Playlists
 
 const keys = bot.secrets.keys;
+bot.persistent.playlists = bot.persistent.playlists || {};
+const playlists = bot.persistent.playlists;
 const services = module.exports.services || {};
-
-//Register services in the order you want them checked, ergo dService last because it has a catchall regex
 
 if(keys) {
     if(keys.google) {
-        const ytService = new cassette.YouTubeService(keys.google);
+        const ytService = new vdj.YouTubeService(keys.google);
         ytService.setSongDisplay = setSongDisplay;
         services[ytService.type] = ytService;
     } else {
         bot.log("No Google API key, will use DirectService for Youtube videos", "dj");
-    }
+    }/*
     if(keys.soundcloud) {
         const scService = new cassette.SoundcloudService(keys.soundcloud);
         scService.setSongDisplay = setSongDisplay;
         services[scService.type] = scService;
     } else {
         bot.log("No Soundcloud API key, will use DirectService for Soundcloud songs", "dj");
-    }
+    }*/
 } else {
     bot.log("No API keys, will use DirectService for all songs", "dj");
 }
-if(!keys || !keys.google) bot.log("No Google API key, playing songs without links is disabled", "dj");
 
-const dService = new cassette.DirectService(ytdlBinary);
-dService.setSongDisplay = setSongDisplay;
-services[dService.type] = dService;
+function getPlaylist(guild) {
+    if(!playlists[guild.id]) playlists[guild.id] = new DiscordPlaylist(guild, {
+        services: Object.values(services),
+        loop: false,
+        autoplay: false,
+        logger: console.log
+    });
+    return playlists[guild.id];
+}
 
 var volumes = {
     //<GUILD_ID> : <0-1>
@@ -96,7 +98,7 @@ const MAX_VOLUME = 20;
 
 var storedPlaylists = { playing: [] };
 async function saveCurrentPlaylist(id) {
-    var playlist = bot.guilds.get(id).playlist;
+    var playlist = getPlaylist(bot.guilds.get(id));
     var tempSeek = playlist.current.seek;
     playlist.current.seek = Math.floor(getSongTime(playlist.current));
     if(!storedPlaylists[id]) storedPlaylists[id] = {};
@@ -119,7 +121,6 @@ async function saveCurrentPlaylist(id) {
 }
 
 async function clearPlaylistSave(id) {
-    var playlist = bot.guilds.get(id).playlist;
     delete storedPlaylists[id];
 
     if(storedPlaylists.playing.indexOf(id) > -1)
@@ -151,15 +152,16 @@ function getStreamOptions(id) {
     if(!volumes[id])
         setVolume(id, DEFAULT_VOLUME);
     return {
-        seek: Math.min(300, bot.guilds.get(id).playlist.current ? bot.guilds.get(id).playlist.current.seek : 0),
         volume: volumes[id]
     };
 }
 
-function initiateSongInfo(song, requiresFull = true) {
+function initiateSongInfo(song, vc, requiresFull = true) {
     return new Promise(async (resolve) => {
+        if(!song) return resolve(song);
+
         if(song.display && song.display.embed && (!requiresFull || requiresFull && song.info.full)) {
-            setSongDisplayDescription(song);
+            setSongDisplayDescription(song, vc);
             resolve(song);
         }
         else {
@@ -178,33 +180,25 @@ function initiateSongInfo(song, requiresFull = true) {
 
             song.info.addedBy = song.adder;
 
-            var vc = bot.voiceConnections.get(song.guild.id);
-            if(vc && vc.dispatcher)
-                song.info.currentTime = vc.dispatcher.time / 1000;
-            else
-                song.info.currentTime = 0;
-
-            setSongDisplayDescription(song);
+            setSongDisplayDescription(song, vc);
             resolve(song);
         }
     });
 }
 
-function getSongTime(song) {
-    if(!song.guild) return song.seek || 0;
-    var vc = bot.voiceConnections.get(song.guild.id);
+function getSongTime(song, vc) {
     if(vc && vc.dispatcher)
         return song.seek + vc.dispatcher.time / 1000;
     else
         return song.seek;
 }
 
-function setSongDisplayDescription(song) {
-    song.info.currentTime = getSongTime(song);
+function setSongDisplayDescription(song, vc) {
+    song.info.currentTime = getSongTime(song, vc);
     var playtime = toHHMMSS(song.info.currentTime);
     if(song.info.duration > 0)
         playtime += "/" + toHHMMSS(song.info.duration);
-    //let timestamp = song.getTimestamp(song.info.currentTime); <-TODO
+    //let timestamp = song.getTimestamp(song.info.currentTime); TODO: this
     let description = playtime + " added by " + song.info.addedBy + "\n" + song.info.url;
     if(typeof song.display.embed.setDescription == "function") {
         song.display.embed.setDescription(description);
@@ -290,13 +284,14 @@ function isValidURL(str) {
     return pattern.test(str);
 }
 
-function startPlaying(id, playlist, channel) {
-    if(!listening[id]) {
-        listening[id] = true;
+async function startPlaying(playlist, channel) {
+    const guildId = playlist.guild.id;
+    if(!listening[guildId]) {
+        listening[guildId] = true;
         listenToPlaylistEvents(playlist);
     }
-    lastChannel[id] = channel.id;
-    return playlist.start(channel, getStreamOptions(id));
+    lastChannel[guildId] = channel.id;
+    return await playlist.start(channel, getStreamOptions(guildId));
 }
 
 function listenToPlaylistEvents(playlist) {
@@ -332,7 +327,6 @@ function listenToPlaylistEvents(playlist) {
         bot.error(err);
     });
     playlist.events.on("streamError", function (err) {
-        console.log(playlist.length);
         bot.user.setPresence({ game: {}, status: 'online' });
         clearInterval(playlist.interval);
         playlist.interval = null;
@@ -343,7 +337,7 @@ function listenToPlaylistEvents(playlist) {
 
 async function queueSongs(id, input, service) {
     try {
-        return await bot.guilds.get(id).playlist.add(input, [services[service]]);
+        return await getPlaylist(bot.guilds.get(id)).add(input, { service: services[service] });
     }
     catch(err) {
         bot.error(err);
@@ -354,8 +348,9 @@ async function reQueue(id, data) {
     let queue = data.songs;
     let channel = data.channel;
     let guild = bot.guilds.get(id);
+    let playlist = getPlaylist(guild);
 
-    guild.playlist.destroy();
+    playlist.destroy();
 
     for (const song of queue) {
         let songs = await queueSongs(id, song.URL, song.type).catch(bot.error);
@@ -372,7 +367,7 @@ async function reQueue(id, data) {
     }
 
     var voiceChannel = guild.channels.get(channel);
-    startPlaying(id, guild.playlist, voiceChannel);
+    startPlaying(playlist, voiceChannel).catch(bot.error);
     clearPlaylistSave(id).catch(bot.error);
 }
 
@@ -387,11 +382,12 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: async function (command, message) {
             message.delete(DELETE_TIME);
+            const playlist = getPlaylist(message.guild);
             try {
                 await message.member.voiceChannel.join();
                 message.channel.send("Here I am.").then(m => m.delete(DELETE_TIME));
-                if(message.guild.playlist.current) {
-                    message.guild.playlist.start(message.member.voiceChannel);
+                if(playlist.current) {
+                    await startPlaying(playlist, message.member.voiceChannel).catch(err => {bot.error(err); success = false;});
                     lastChannel[message.guild.id] = message.member.voiceChannel.id;
                 }
             }
@@ -409,7 +405,7 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
         exec: function (command, message) {
-            message.guild.playlist.pause();
+            getPlaylist(message.guild).pause();
             bot.voiceConnections.get(message.guild.id).channel.leave();
             message.delete(DELETE_TIME);
         }
@@ -423,96 +419,52 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: async function (command, message) {
             message.delete(DELETE_TIME);
-            if((command.command === "!dj queue" || command.command === "!dj queue") && command.arguments.length === 0) return exports.commands.showqueue.exec(command, message);
+            if((command.command === "!dj queue" || command.command === "!dj q") && command.arguments.length === 0) return exports.commands.showqueue.exec(command, message);
 
-            var foundServices = {};
-
-            var search = "";
-
-            //Allow newlines to separate args
-            command.arguments = command.arguments.join(" ").replace(/\r?\n|\r/g, " ").split(" ");
-
-            for(const arg of command.arguments) {
-                if(isValidURL(arg)) {
-                    var found = false;
-                    for(const type in services) {
-                        if(services[type].regex.test(arg)) {
-                            if(services[type]) {
-                                if(!foundServices[type])
-                                    foundServices[type] = "";
-                                foundServices[type] += arg + " ";
-                                found = true;
-                                break;
-                            }
-                        }
+            var lines = command.arguments.join(" ").split(/\r?\n|\r/);
+            var urls = [];
+            var searches = [];
+            for(var line of lines) {
+                var searchWords = [];
+                var args = line.split(" ");
+                for(var arg of args) {
+                    if(/https?:\/\/|\w+\.\w+\.\w+/g.test(arg)) {
+                        urls.push(arg);
+                    } else {
+                        searchWords.push(arg);
                     }
-                    if(!found) {
-                        if(!foundServices["direct"])
-                            foundServices["direct"] = "";
-                        foundServices["direct"] += arg + " ";
-                    }
-                } else {
-                    search += arg + " ";
                 }
+                if(searchWords.length) searches.push(searchWords.join(" "));
             }
 
-            if(isValidURL(search)) {
-                found = false;
-                for(type in services) {
-                    if(services[type].regex.test(search)) {
-                        if(services[type]) {
-                            if(!foundServices[type])
-                                foundServices[type] = "";
-                            foundServices[type] += search + " ";
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                if(!found) {
-                    if(!foundServices["direct"])
-                        foundServices["direct"] = "";
-                    foundServices["direct"] += search;
-                }
-            } else if (services["youtube"]) {
-                if(!foundServices["youtube"])
-                    foundServices["youtube"] = "";
-                foundServices["youtube"] += search;
-            }
-
-            var playlist = message.guild.playlist;
+            var playlist = getPlaylist(message.guild);
             var totalSongs = [];
 
             let success = true;
-            for(type in foundServices) {
-                let songs = [];
-                songs = await queueSongs(message.guild.id, foundServices[type], type);
-                if(!songs || !songs.length) continue;
 
-                totalSongs = totalSongs.concat(songs);
+            var fetchResult = await playlist.add(urls);
+            var searchResult = await playlist.add(searches,  {
+                playlistAddType: 'searches'
+            });
 
-                for(var i in songs) {
-                    var song = songs[i];
-                    playlist[playlist.indexOf(song)].adder = message.member.displayName;
-                    playlist[playlist.indexOf(song)].guild = message.guild;
-                    song.streamURL = encodeURI(song.streamURL);
-                    if(type == "direct") {
-                        song.live = Boolean(hardcodedLivestreams.find(u => song.streamURL.indexOf(u) > -1));
-                    }
-                }
-                
-                if(!playlist.playing) {
-                    await startPlaying(message.guild.id, playlist, message.member.voiceChannel).catch(err => {bot.error(err); success = false;});
-                }
+            var added = fetchResult.added.concat(searchResult.added);
+            for(var song of added) {
+                song.adder = message.member.displayName;
             }
             
-            if(!success) {
-                message.channel.send("Couldn't start playing music.").then(m => m.delete(DELETE_TIME));
+            if(added.length) {
+                if(!playlist.playing) {
+                    await startPlaying(playlist, message.member.voiceChannel).catch(err => {bot.error(err); success = false;});
+                }
+                if(!success) {
+                    message.channel.send("Couldn't start playing music.").then(m => m.delete(DELETE_TIME));
+                }
             }
-            else if(totalSongs.length === 1)
-                message.channel.send(message.member.displayName + " added song: " + totalSongs[0].title + "\n<" + totalSongs[0].info.url + ">").then(m => m.delete(DELETE_TIME));
-            else
-                message.channel.send(message.member.displayName + " added " + totalSongs.length + " songs").then(m => m.delete(DELETE_TIME));
+            if(added.length === 1)
+                message.channel.send(message.member.displayName + " added song: " + added[0].title + "\n<" + added[0].info.url + ">").then(m => m.delete(DELETE_TIME));
+            else {
+                message.channel.send(message.member.displayName + " added " + added.length + " songs").then(m => m.delete(DELETE_TIME));
+            }
         }
     },
     skipcurrent: {
@@ -525,11 +477,12 @@ exports.commands = {
         exec: function (command, message) {
             message.channel.send("Skipped.").then(m => m.delete(DELETE_TIME));
             //Destroy if it doesn't have a next song
-            if(!message.guild.playlist.hasNext()) message.guild.playlist.destroy();
+            const playlist = getPlaylist(message.guild);
+            if(!playlist.hasNext()) playlist.destroy();
             else {
-                message.guild.playlist.next();
-                if(message.guild.playlist.current) {
-                    message.guild.playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
+                playlist.next();
+                if(playlist.current) {
+                    playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
                     lastChannel[message.guild.id] = message.member.voiceChannel.id;
                 }
             }
@@ -546,7 +499,7 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             message.channel.send("Paused.").then(m => m.delete(DELETE_TIME));
-            let playlist = message.guild.playlist;
+            let playlist = getPlaylist(message.guild);
             playlist.pause();
             bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
             message.delete(DELETE_TIME);
@@ -560,10 +513,10 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: async function (command, message) {
-            let playlist = message.guild.playlist;
+            let playlist = getPlaylist(message.guild);
             if(!playlist.current) {
-                if(message.guild.playlist.hasNext()) {
-                    message.guild.playlist.next();
+                if(playlist.hasNext()) {
+                    playlist.next();
                 }
                 else {
                     return message.reply("No songs in queue.");
@@ -586,7 +539,7 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild],
         exec: async function (command, message) {
-            var playlist = message.guild.playlist;
+            var playlist = getPlaylist(message.guild);
             if(!playlist.length) {
                 return message.channel.send("No songs in queue.");
             }
@@ -605,7 +558,7 @@ exports.commands = {
                 nextSongs = temp;
             }
 
-            let songs = await Promise.all(nextSongs.map(song => initiateSongInfo(song, false)));
+            let songs = await Promise.all(nextSongs.map(song => initiateSongInfo(song, vc, false)));
             for(let song of songs) {
                 responseArr.push("[" + song.info.title + "](" + song.info.url + ") added by " + song.adder);
             }
@@ -634,11 +587,11 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
         exec: async function (command, message) {
             message.delete(DELETE_TIME);
-            var playlist = message.guild.playlist;
-            var vc = bot.voiceConnections.get(message.guild.id);
+            const playlist = getPlaylist(message.guild);
+            const vc = bot.voiceConnections.get(message.guild.id);
             if(!vc.dispatcher) return bot.error("[DJ-showcurrent] Error: No dispatcher.");
 
-            await initiateSongInfo(playlist.current, true);
+            await initiateSongInfo(playlist.current, vc, true);
             
             message.channel.send(playlist.current.display);
         }
@@ -650,7 +603,7 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
-            message.guild.playlist.shuffle();
+            getPlaylist(message.guild).shuffle();
             message.channel.send("Shuffled all songs.").then(m => m.delete(DELETE_TIME));
             message.delete(DELETE_TIME);
         }
@@ -681,7 +634,7 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
-            message.guild.playlist.destroy();
+            getPlaylist(message.guild).destroy();
             message.channel.send("Cleared all songs.").then(m => m.delete(DELETE_TIME));
             message.delete(DELETE_TIME);
         }
