@@ -88,6 +88,7 @@ class DiscordPlaylist extends Playlist {
   
     _destroy() {
       if (this.guild.voiceConnection) this.guild.voiceConnection.disconnect();
+      this.clear();
       this.events.emit('destroyed');
     }
 }
