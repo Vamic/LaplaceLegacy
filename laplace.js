@@ -1,5 +1,5 @@
 'use strict';
-require('dotenv').config({path: './settings/.env'});
+require('dotenv').config({ path: './settings/.env' });
 const fs = require('fs');
 const Discord = require('discord.js');
 const http = require('http');
@@ -10,7 +10,7 @@ const util = require('util');
 const isLinux = process.platform === 'linux';
 
 //Juicy secrets, no looking
-const secrets = require('./settings/secrets.json'); 
+const secrets = require('./settings/secrets.json');
 
 const client = new Discord.Client();
 
@@ -41,15 +41,15 @@ var requirements = {
 };
 
 //Make tmp dir if its not there
-if(!fs.existsSync("./tmp/")) fs.mkdirSync("./tmp/");
+if (!fs.existsSync("./tmp/")) fs.mkdirSync("./tmp/");
 
 //Functions
 
 var log = function (msg, type) {
     if (!type) type = "log";
-    if(typeof msg === "string")
+    if (typeof msg === "string")
         return console.log("[Laplace." + type + "] " + msg);
-        
+
     console.log("[Laplace." + type + "]");
     console.log(msg);
 };
@@ -167,7 +167,7 @@ function saveDisabledPlugins() {
 
 async function loadDisabledPlugins() {
     let data = await getDatastore("disabled_plugins").catch(error);
-    if(!data) return;
+    if (!data) return;
     disabled = data;
 }
 
@@ -231,7 +231,7 @@ function reloadPlugins() {
                 //Reset plugin variables
                 module.exports.admin.plugins = plugins = [];
                 commands = {};
-    
+
                 //Load plugins
                 for (var i in files) {
                     //Load .js files
@@ -245,7 +245,7 @@ function reloadPlugins() {
                     }
                 }
                 log("Reloaded " + successCount + " plugins, " + (success ? "none failed." : failCount + " failed."));
-                if(!success)
+                if (!success)
                     return reject("Couldn't load some plugins. " + failCount + " failed.");
                 return resolve();
             } catch (err) {
@@ -262,43 +262,43 @@ async function sendPaginatedEmbed(channel, lines, pageSize, embedBase) {
     let firstPage = lines.slice(0, pageSize);
     let embed = (embedBase || new Discord.RichEmbed()).setDescription(firstPage.join("\n"));
     return channel.send(embed).then(async msg => {
-        if(lines.length > pageSize) {
-            const collector = msg.createReactionCollector((reaction, user) => 
+        if (lines.length > pageSize) {
+            const collector = msg.createReactionCollector((reaction, user) =>
                 !user.bot && (
-                reaction.emoji.name === "◀" ||
-                reaction.emoji.name === "▶" ||
-                reaction.emoji.name === "❌")
+                    reaction.emoji.name === "◀" ||
+                    reaction.emoji.name === "▶" ||
+                    reaction.emoji.name === "❌")
             );
             collector.on("collect", reaction => {
                 let newOffset = offset;
-                switch(reaction._emoji.name) {
+                switch (reaction._emoji.name) {
                     case "◀":
                         newOffset = Math.max(0, offset - pageSize);
                         break;
                     case "▶":
-                    newOffset = Math.min(lines.length - (lines.length % pageSize), offset + pageSize);
+                        newOffset = Math.min(lines.length - (lines.length % pageSize), offset + pageSize);
                         break;
                     case "❌":
-                        if(channel.guild)
+                        if (channel.guild)
                             msg.delete();
                         return;
                     default:
                         return;
                 }
-                if(newOffset != offset) {
+                if (newOffset != offset) {
                     offset = newOffset;
                     embed.setDescription(lines.slice(offset, offset + pageSize));
                     msg.edit(embed);
                 }
-                if(channel.guild)
+                if (channel.guild)
                     reaction.remove(reaction.users.find(user => !user.bot));
             });
-            
+
             await msg.react("◀");
             await msg.react("▶");
-            if(channel.guild)
+            if (channel.guild)
                 await msg.react("❌");
-                
+
             setTimeout(() => {
                 collector.stop();
                 msg.clearReactions();
@@ -308,14 +308,14 @@ async function sendPaginatedEmbed(channel, lines, pageSize, embedBase) {
 }
 
 async function loadFromFile(key) {
-    if(!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
+    if (!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
     let path = `./tmp/${key}.json`;
-    if(!fs.existsSync(path)) return null;
+    if (!fs.existsSync(path)) return null;
     return JSON.parse(await util.promisify(fs.readFile)(path));
 }
 
 async function saveToFile(key, data) {
-    if(!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
+    if (!/^[\w,\s.-]+$/.test(key)) throw "Illegal filename";
     data = JSON.stringify(data);
 
     return util.promisify(fs.writeFile)(`./tmp/${key}.json`, data);
@@ -326,23 +326,23 @@ async function getDatastore(key) {
         //log("Returning cached Datastore for " + key);
         return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
     } else {
-        if(datastoreURL && datastoreKey) {
+        if (datastoreURL && datastoreKey) {
             var url = datastoreURL + "get?key=" + datastoreKey + "&datakey=" + key;
             try {
                 let data = await httpGetJson(url, true);
                 log("Got Datastore for " + key);
                 datastore[key] = data;
                 return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
-            } catch(err) {
+            } catch (err) {
                 error("Error getting Datastore for " + key + ": " + err.message);
                 throw err;
             }
         } else {
             let data = await loadFromFile("datastore").catch(error);
-            if(data){
+            if (data) {
                 datastore = data;
-                if(datastore[key]) return JSON.parse(JSON.stringify(datastore[key]));
-            } 
+                if (datastore[key]) return JSON.parse(JSON.stringify(datastore[key]));
+            }
         }
         return {};
     }
@@ -351,13 +351,13 @@ async function getDatastore(key) {
 async function setDatastore(key, data) {
     var sdata = JSON.stringify(data);
     datastore[key] = JSON.parse(sdata); // Make sure object is cloned
-    if(datastoreURL && datastoreKey) {
+    if (datastoreURL && datastoreKey) {
         sdata = Buffer(sdata);
         try {
             let data = await httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, true);
             //log("Set Datastore for " + key);
             return data;
-        } catch(err) {
+        } catch (err) {
             error("Error setting Datastore for " + key + ": " + err.message);
             throw err;
         }
@@ -375,11 +375,11 @@ function httpDownloadFile(url, filename, silent, headers, _retries) {
         if (!silent) log("[HTTP GET]" +
             (_retries ? " (retry #" + _retries + ") " : " ") +
             removePossiblyDangerousInformation(url));
-    
+
         if (!filename) reject("No filename provided");
-        
+
         if (!headers) headers = {};
-    
+
         request({
             url: url,
             headers: headers
@@ -387,31 +387,40 @@ function httpDownloadFile(url, filename, silent, headers, _retries) {
     });
 }
 
-function httpGet(url, silent, headers, _retries) {
-    return new Promise((resolve, reject) => {
+async function httpGet(url, silent, headers) {
+    if (!headers) headers = {};
+
+    var tries = 4;
+    for (var retry = 0; retry < tries; retry++) {
         if (!silent) log("[HTTP GET]" +
-            (_retries ? " (retry #" + _retries + ") " : " ") +
+            (retry ? " (retry #" + retry + ") " : " ") +
             removePossiblyDangerousInformation(url));
-    
-        if (!headers) headers = {};
-    
+        try {
+            var res = await _httpGet(url, headers);
+            return res;
+        } catch (err) {
+            if (retry == tries - 1) {
+                error("[HTTP GET] Failed: " + err.message + "(" + err + ")");
+                throw err;
+            } else {
+                error("[HTTP GET] " + removePossiblyDangerousInformation(url) +
+                " (" + retry + "/" + (tries - 1) + " retries) error: " + err.message);
+            }
+        }
+    }
+}
+
+function _httpGet(url, headers) {
+    return new Promise((resolve, reject) => {
         request({
             url: url,
             headers: headers
         }, function (err, response, body) {
             if (err) {
-                var retries = _retries ? _retries : 0;
-                error("[HTTP GET] " + removePossiblyDangerousInformation(url) +
-                    " (" + retries + "/3 retries) error: " + err.message);
-                if (retries === 3) {
-                    error("[HTTP GET] Failed: " + err.message + "(" + err + ")");
-                    reject(err);
-                } else {
-                    return httpGet(url, silent, headers, retries + 1);
-                }
+                reject(err);
+            } else {
+                resolve(body);
             }
-    
-            resolve(body);
         });
     });
 }
@@ -424,9 +433,9 @@ async function httpGetJson(url, silent, headers) {
         jsondata = JSON.parse(data);
     } catch (ex) {
         if (data === "")
-            throw("Empty response body."); //Used in search for gelbooru because no hits = nothing in response
+            throw ("Empty response body."); //Used in search for gelbooru because no hits = nothing in response
         else
-            throw(ex);
+            throw (ex);
     }
     return jsondata;
 }
@@ -439,7 +448,7 @@ async function httpGetXml(url, silent, headers) {
     if (!silent) log("[XML PARSE] " + removePossiblyDangerousInformation(url));
     return new Promise((resolve, reject) => {
         parseString(data, (err, res) => {
-            if(err) reject(err);
+            if (err) reject(err);
             else resolve(res);
         });
     });
@@ -460,13 +469,13 @@ function httpPost(url, data, silent, headers) {
                 "Content-Length": data.length
             }
         };
-    
+
         if (headers) {
             for (var i in headers) {
                 post_options.headers[i] = headers[i];
             }
         }
-    
+
         var req = http.request(post_options, function (res) {
             var body = "";
             res.on("data", function (chunk) {
@@ -476,12 +485,12 @@ function httpPost(url, data, silent, headers) {
                 resolve(body);
             });
         });
-    
+
         req.on("error", function (err) {
             error("[HTTP POST] " + removePossiblyDangerousInformation(url) + " error: " + err.message);
             reject(err);
         });
-    
+
         req.write(data);
         req.end();
     });
@@ -556,11 +565,11 @@ module.exports = {
  * Linux only stuff
  */
 
-var listenToUser = function(){};
-var stopListeningToUser = function(){};
+var listenToUser = function () { };
+var stopListeningToUser = function () { };
 
-if(isLinux) {
-    const {Models, Detector} = require("snowboy");
+if (isLinux) {
+    const { Models, Detector } = require("snowboy");
 
     const models = new Models();
 
@@ -579,15 +588,15 @@ if(isLinux) {
     });
 
     listenToUser = function (member) {
-        if(!member) return;
+        if (!member) return;
 
-        if(!member.voiceChannel) return;
+        if (!member.voiceChannel) return;
 
-        if(detectors.has(member.id)) return;
+        if (detectors.has(member.id)) return;
 
         const voiceConnection = member.voiceChannel.connection;
 
-        if(!voiceConnection) return;
+        if (!voiceConnection) return;
 
         console.log(`Listening to ${member.user.username}`);
         const detector = new Detector({
@@ -597,40 +606,40 @@ if(isLinux) {
             applyFrontend: false
         });
 
-        detector.on('silence', function() {
+        detector.on('silence', function () {
             console.log("silence");
         });
 
-        detector.on('sound', function(buffer) {
+        detector.on('sound', function (buffer) {
             console.log("sound");
         });
 
-        detector.on('error', function() {
+        detector.on('error', function () {
             console.log("error");
             process.exit(0);
         });
 
-        detector.on('hotword', function(index, hotword, buffer) {
+        detector.on('hotword', function (index, hotword, buffer) {
             console.log("gottem");
             console.log('hotword', index, hotword);
         });
 
         detectors.set(member.id, detector);
 
-        if(receivers.get(voiceConnection.channel.id)) return;
+        if (receivers.get(voiceConnection.channel.id)) return;
 
         const receiver = voiceConnection.createReceiver();
 
         receiver.on('pcm', (user, buffer) => {
             const detector = detectors.get(user.id);
-            if(!detector) return;
+            if (!detector) return;
             detector.write(buffer);
         });
         receivers.set(voiceConnection.channel.id, receiver);
     }
 
     stopListeningToUser = function (member) {
-        if(!member) {
+        if (!member) {
             detectors.clear();
             streams.clear();
             receivers.forEach(r => r.destroy());
@@ -655,7 +664,7 @@ client.on('ready', async () => {
     //ditto
     module.exports.user = client.user;
 
-    if(!datastoreURL || !datastoreKey) {
+    if (!datastoreURL || !datastoreKey) {
         log("No datastore specified, data saved to it will be saved locally instead.", "info");
     }
 
@@ -680,39 +689,39 @@ client.on("error", (data) => {
 
 client.on("voiceStateUpdate", (member, update) => {
     let action = {
-        joined : null,
-        left : null, 
-        muted : false,
-        unmuted : false,
-        deafened : false,
-        undeafened : false,
+        joined: null,
+        left: null,
+        muted: false,
+        unmuted: false,
+        deafened: false,
+        undeafened: false,
     }
     let guild = member.guild;
-    
-    if(update.voiceChannelID != member.voiceChannelID) {
-        if(update.voiceChannelID) 
+
+    if (update.voiceChannelID != member.voiceChannelID) {
+        if (update.voiceChannelID)
             action.joined = guild.channels.get(update.voiceChannelID);
-        if(member.voiceChannelID)
+        if (member.voiceChannelID)
             action.left = guild.channels.get(member.voiceChannelID);
     } else {
-        if(!member.selfMute && update.selfMute || !member.serverMute && update.serverMute)
+        if (!member.selfMute && update.selfMute || !member.serverMute && update.serverMute)
             action.muted = true;
-        else if(member.selfMute && !update.selfMute || member.serverMute && !update.serverMute)
+        else if (member.selfMute && !update.selfMute || member.serverMute && !update.serverMute)
             action.unmuted = true;
-            
-        if(!member.selfDeaf && update.selfDeaf || !member.serverDeaf && update.serverDeaf)
+
+        if (!member.selfDeaf && update.selfDeaf || !member.serverDeaf && update.serverDeaf)
             action.deafened = true;
-        else if(member.selfDeaf && !update.selfDeaf || member.serverDeaf && !update.serverDeaf)
+        else if (member.selfDeaf && !update.selfDeaf || member.serverDeaf && !update.serverDeaf)
             action.undeafened = true;
     }
 
     let oldChannel = member.voiceChannelID ? guild.channels.get(member.voiceChannelID) : null;
     let newChannel = update.voiceChannelID ? guild.channels.get(update.voiceChannelID) : null;
-    
-    if(member.user == client.user) {
+
+    if (member.user == client.user) {
         //Bot state changed
-        if(guild.voiceConnection) {
-            if(!action.muted && !action.unmuted && !action.deafened && !action.undeafened) {
+        if (guild.voiceConnection) {
+            if (!action.muted && !action.unmuted && !action.deafened && !action.undeafened) {
                 log("VoiceStateUpdate: Joined voice channel \"" + newChannel.name + "\"");
                 //let me = newChannel.members.find(m => m.id == secrets.admins[0]);
                 //setTimeout(() => listenToUser(vamic, guild.voiceConnection), 1000);
@@ -724,11 +733,11 @@ client.on("voiceStateUpdate", (member, update) => {
         }
     } else {
         //User state changed
-        if(guild.voiceConnection) {
-            if(action.left == guild.voiceConnection.channel) {
+        if (guild.voiceConnection) {
+            if (action.left == guild.voiceConnection.channel) {
                 //console.log("User left bot's voice channel");
             }
-            if(action.joined == guild.voiceConnection.channel) {
+            if (action.joined == guild.voiceConnection.channel) {
                 //console.log("User joined bot's voice channel");
             }
         }
@@ -739,7 +748,7 @@ function checkCommands(msg) {
     let input = msg.content;
     let isAlexa = false;
     let alexaRegex = /^(?:laplace|alexa),? /i;
-    if(alexaRegex.test(input)) {
+    if (alexaRegex.test(input)) {
         isAlexa = true;
         input = input.replace(alexaRegex, "!");
     }
@@ -754,7 +763,7 @@ function checkCommands(msg) {
             foundCmd = commands[cmd];
             cmdUsed = cmd;
             break;
-        //If it starts with the command, followed by a space or : or newline
+            //If it starts with the command, followed by a space or : or newline
         } else if (input.toLowerCase().startsWith(cmd)) {
             var char = input[cmd.length];
             if (/ |:|\r?\n|\r/.test(char)) {
@@ -799,13 +808,13 @@ function checkCommands(msg) {
 
 client.on('message', msg => {
     if (process.env["BOT_TESTING"] == "true") {
-        if(msg.guild && msg.guild.id != process.env["BOT_TEST_SERVER"])
+        if (msg.guild && msg.guild.id != process.env["BOT_TEST_SERVER"])
             return;
         //msg.content = msg.content.substr(1);
     }
 
     if (!msg.author.bot) {
-        if(checkCommands(msg))
+        if (checkCommands(msg))
             return;
     }
 
@@ -824,7 +833,7 @@ client.on('message', msg => {
             }
         }
     }
-    
+
     if (msg.author.bot) {
         checkCommands(msg);
     }
