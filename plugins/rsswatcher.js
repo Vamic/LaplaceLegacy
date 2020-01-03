@@ -67,7 +67,13 @@ async function getAndNotify(feeds, channel) {
 }
 
 async function getFeedXml(url) {
-    let raw = await bot.util.httpGet(url, true);
+    let raw;
+    try {
+        raw = await bot.util.httpGet(url, true);
+    }
+    catch(ex) {
+        throw "Couldn't fetch the feed.";
+    }
 
     //Some rss feeds havent escaped the description area (tumblr, if it ever decides to start working again)
     raw = raw.replace(/<description><!\[CDATA\[/g, '<description>').replace(/]]><\/description>/g, '<\/description>');
