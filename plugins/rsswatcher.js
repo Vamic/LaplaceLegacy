@@ -58,8 +58,7 @@ async function getAndNotify(feeds, channel) {
             let mentions = feed.users ? feed.users.map(uid => `<@${uid}>`) : [];
             let links = items.map(i => `[${i.title}](${i.link})`);
             let embed = new bot.RichEmbed().setTitle("RSS Feed update: " + feed.title);
-            embed.setDescription(links.join("\n"));
-            channel.send(mentions.join(" "), embed);
+            bot.send.paginatedEmbed(channel, links, 15, embed, mentions.join(" "))
         }
         feed.lastCheck = Date.now();
     }

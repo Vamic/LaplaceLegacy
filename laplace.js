@@ -257,11 +257,12 @@ function reloadPlugins() {
     });
 }
 
-async function sendPaginatedEmbed(channel, lines, pageSize, embedBase) {
+async function sendPaginatedEmbed(channel, lines, pageSize, embedBase, nonEmbedMessage) {
     let offset = 0;
     let firstPage = lines.slice(0, pageSize);
     let embed = (embedBase || new Discord.RichEmbed()).setDescription(firstPage.join("\n"));
-    return channel.send(embed).then(async msg => {
+    nonEmbedMessage = nonEmbedMessage || "";
+    return channel.send(nonEmbedMessage, embed).then(async msg => {
         if (lines.length > pageSize) {
             const collector = msg.createReactionCollector((reaction, user) =>
                 !user.bot && (
@@ -352,7 +353,7 @@ async function setDatastore(key, data) {
     var sdata = JSON.stringify(data);
     datastore[key] = JSON.parse(sdata); // Make sure object is cloned
     if (datastoreURL && datastoreKey) {
-        sdata = Buffer(sdata);
+        sdata = Buffer.from(sdata);
         try {
             let data = await httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, true);
             //log("Set Datastore for " + key);
