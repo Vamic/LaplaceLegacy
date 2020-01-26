@@ -570,7 +570,14 @@ var listenToUser = function () { };
 var stopListeningToUser = function () { };
 
 if (isLinux) {
-    const { Models, Detector } = require("snowboy");
+    var snowboy;
+    try {
+        snowboy = require("snowboy");
+    } catch(e){
+        return;
+    }
+
+    const { Models, Detector } = snowboy;
 
     const models = new Models();
 
