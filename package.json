@@ -23,9 +23,8 @@
     "request": "^2.85.0",
     "rss-parser": "^3.7.2",
     "seedrandom": "^2.4.3",
-    "vdj": "^1.0.4",
-    "xml2js": "^0.4.19",
-    "ytdl-core": "^0.29.5"
+    "vdj": "^1.0.6",
+    "xml2js": "^0.4.19"
   },
   "linuxDependencies": {
     "snowboy": "^1.3.1"
