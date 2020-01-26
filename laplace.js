@@ -570,93 +570,90 @@ var listenToUser = function () { };
 var stopListeningToUser = function () { };
 
 if (isLinux) {
-    var snowboy;
     try {
-        snowboy = require("snowboy");
-    } catch(e){
-        return;
-    }
+        const { Models, Detector } = require("snowboy");
+        const models = new Models();
 
-    const { Models, Detector } = snowboy;
+        const detectors = new Map();
+        const receivers = new Map();
+        const streams = new Map();
 
-    const models = new Models();
+        let snowboyPath = require.resolve("snowboy/package.json").split("/");
+        snowboyPath.splice(-1);
+        snowboyPath = snowboyPath.join("/");
 
-    const detectors = new Map();
-    const receivers = new Map();
-    const streams = new Map();
-
-    let snowboyPath = require.resolve("snowboy/package.json").split("/");
-    snowboyPath.splice(-1);
-    snowboyPath = snowboyPath.join("/");
-
-    models.add({
-        file: snowboyPath + '/resources/alexa/alexa-avs-sample-app/alexa.umdl',
-        sensitivity: '0.6',
-        hotwords: 'alexa'
-    });
-
-    listenToUser = function (member) {
-        if (!member) return;
-
-        if (!member.voiceChannel) return;
-
-        if (detectors.has(member.id)) return;
-
-        const voiceConnection = member.voiceChannel.connection;
-
-        if (!voiceConnection) return;
-
-        console.log(`Listening to ${member.user.username}`);
-        const detector = new Detector({
-            resource: snowboyPath + '/resources/common.res',
-            models: models,
-            audioGain: 1.0,
-            applyFrontend: false
+        models.add({
+            file: snowboyPath + '/resources/alexa/alexa-avs-sample-app/alexa.umdl',
+            sensitivity: '0.6',
+            hotwords: 'alexa'
         });
 
-        detector.on('silence', function () {
-            console.log("silence");
-        });
+        listenToUser = function (member) {
+            if (!member) return;
 
-        detector.on('sound', function (buffer) {
-            console.log("sound");
-        });
+            if (!member.voiceChannel) return;
 
-        detector.on('error', function () {
-            console.log("error");
-            process.exit(0);
-        });
+            if (detectors.has(member.id)) return;
 
-        detector.on('hotword', function (index, hotword, buffer) {
-            console.log("gottem");
-            console.log('hotword', index, hotword);
-        });
+            const voiceConnection = member.voiceChannel.connection;
 
-        detectors.set(member.id, detector);
+            if (!voiceConnection) return;
 
-        if (receivers.get(voiceConnection.channel.id)) return;
+            console.log(`Listening to ${member.user.username}`);
+            const detector = new Detector({
+                resource: snowboyPath + '/resources/common.res',
+                models: models,
+                audioGain: 1.0,
+                applyFrontend: false
+            });
 
-        const receiver = voiceConnection.createReceiver();
+            detector.on('silence', function () {
+                console.log("silence");
+            });
 
-        receiver.on('pcm', (user, buffer) => {
-            const detector = detectors.get(user.id);
-            if (!detector) return;
-            detector.write(buffer);
-        });
-        receivers.set(voiceConnection.channel.id, receiver);
-    }
+            detector.on('sound', function (buffer) {
+                console.log("sound");
+            });
 
-    stopListeningToUser = function (member) {
-        if (!member) {
-            detectors.clear();
-            streams.clear();
-            receivers.forEach(r => r.destroy());
-            receivers.clear();
-        } else {
-            console.log(`Stoppped listening to ${member.user.username}`);
-            detectors.delete(member.id);
-            streams.delete(member.id);
+            detector.on('error', function () {
+                console.log("error");
+                process.exit(0);
+            });
+
+            detector.on('hotword', function (index, hotword, buffer) {
+                console.log("gottem");
+                console.log('hotword', index, hotword);
+            });
+
+            detectors.set(member.id, detector);
+
+            if (receivers.get(voiceConnection.channel.id)) return;
+
+            const receiver = voiceConnection.createReceiver();
+
+            receiver.on('pcm', (user, buffer) => {
+                const detector = detectors.get(user.id);
+                if (!detector) return;
+                detector.write(buffer);
+            });
+            receivers.set(voiceConnection.channel.id, receiver);
         }
+
+        stopListeningToUser = function (member) {
+            if (!member) {
+                detectors.clear();
+                streams.clear();
+                receivers.forEach(r => r.destroy());
+                receivers.clear();
+            } else {
+                console.log(`Stoppped listening to ${member.user.username}`);
+                detectors.delete(member.id);
+                streams.delete(member.id);
+            }
+        }
+    }
+    catch(e){
+        
     }
 }
 
