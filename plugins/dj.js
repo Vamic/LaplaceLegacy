@@ -72,7 +72,7 @@ if(keys) {
 }
 
 function getPlaylist(guild) {
-    if(!playlists[guild.id]) playlists[guild.id] = new DiscordPlaylist(guild, {
+    if(!playlists[guild.id]) playlists[guild.id] = new DiscordPlaylist(bot.client.voice, guild.id, {
         services: Object.values(services),
         loop: false,
         autoplay: false,
@@ -142,7 +142,7 @@ function setVolume(id, volume) {
     bot.util.save("dj-volumes", volumes);
 
     //Change vol if currently playing music
-    var vc = bot.voiceConnections.get(id);
+    var vc = bot.voice.connections.get(id);
     if(!vc || !vc.dispatcher) return;
     vc.dispatcher.setVolume(volume);
     return volume * 100;
@@ -175,7 +175,7 @@ function initiateSongInfo(song, vc, requiresFull = true) {
                 song.info = {};
                 song.info.url = song.URL;
                 song.info.title = song.streamURL;
-                song.display = { embed: new bot.RichEmbed().setAuthor(song.live ? "Livestream" : "Unknown").setTitle(song.streamURL) };
+                song.display = { embed: new bot.MessageEmbed().setAuthor(song.live ? "Livestream" : "Unknown").setTitle(song.streamURL) };
             }
 
             song.info.addedBy = song.adder;
@@ -209,7 +209,7 @@ function setSongDisplayDescription(song, vc) {
 
 function setSongDisplay(song) {
     var tags = song.info;
-    var embed = new bot.RichEmbed();
+    var embed = new bot.MessageEmbed();
     song.display = {};
 
     if(tags.metadataType === "youtube") {
@@ -262,7 +262,7 @@ function setSongDisplay(song) {
     } else if(tags.img && tags.imgFormat) {
         var thumbnailName = "thumb." + tags.imgFormat;
         embed.setThumbnail("attachment://" + thumbnailName);
-        song.display.files = [new bot.Attachment(tags.img, thumbnailName)];
+        song.display.files = [new bot.MessageAttachment(tags.img, thumbnailName)];
     }
     song.display.embed = embed;
 }
@@ -285,7 +285,7 @@ function isValidURL(str) {
 }
 
 async function startPlaying(playlist, channel) {
-    const guildId = playlist.guild.id;
+    const guildId = playlist.guildID;
     if(!listening[guildId]) {
         listening[guildId] = true;
         listenToPlaylistEvents(playlist);
@@ -309,7 +309,7 @@ function listenToPlaylistEvents(playlist) {
                     clearInterval(playlist.interval);
                     playlist.interval = null;
                 }
-                saveCurrentPlaylist(playlist.guild.id).catch(bot.error);
+                saveCurrentPlaylist(playlist.guildID).catch(bot.error);
             }, 5000);
         }
     });
@@ -317,7 +317,7 @@ function listenToPlaylistEvents(playlist) {
         bot.user.setPresence({ game: {}, status: 'online' });
         clearInterval(playlist.interval);
         playlist.interval = null;
-        clearPlaylistSave(playlist.guild.id).catch(bot.error);
+        clearPlaylistSave(playlist.guildID).catch(bot.error);
     });
     playlist.events.on("error", function (err) {
         bot.user.setPresence({ game: {}, status: 'online' });
@@ -366,7 +366,7 @@ async function reQueue(id, data) {
         }
     }
 
-    var voiceChannel = guild.channels.get(channel);
+    var voiceChannel = guild.channels.cache.get(channel);
     startPlaying(playlist, voiceChannel).catch(bot.error);
     clearPlaylistSave(id).catch(bot.error);
 }
@@ -381,19 +381,19 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: async function (command, message) {
-            message.delete(DELETE_TIME);
+            message.delete({timeout:DELETE_TIME});
             const playlist = getPlaylist(message.guild);
             try {
-                await message.member.voiceChannel.join();
-                message.channel.send("Here I am.").then(m => m.delete(DELETE_TIME));
+                await message.member.voice.channel.join();
+                message.channel.send("Here I am.").then(m => m.delete({timeout:DELETE_TIME}));
                 if(playlist.current) {
-                    await startPlaying(playlist, message.member.voiceChannel).catch(err => {bot.error(err); success = false;});
-                    lastChannel[message.guild.id] = message.member.voiceChannel.id;
+                    await startPlaying(playlist, message.member.voice.channel).catch(err => {bot.error(err); success = false;});
+                    lastChannel[message.guild.id] = message.member.voice.channel.id;
                 }
             }
             catch (err) {
                 bot.error(err);
-                message.channel.send("Can't do that.").then(m => m.delete(DELETE_TIME));
+                message.channel.send("Can't do that.").then(m => m.delete({timeout:DELETE_TIME}));
             }
         }
     },
@@ -406,8 +406,8 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
         exec: function (command, message) {
             getPlaylist(message.guild).pause();
-            bot.voiceConnections.get(message.guild.id).channel.leave();
-            message.delete(DELETE_TIME);
+            bot.voice.connections.get(message.guild.id).channel.leave();
+            message.delete({timeout:DELETE_TIME});
         }
     },
     addtoqueue: {
@@ -418,7 +418,7 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.userInVoice],
         exec: async function (command, message) {
-            message.delete(DELETE_TIME);
+            message.delete({timeout:DELETE_TIME});
             if((command.command === "!dj queue" || command.command === "!dj q") && command.arguments.length === 0) return exports.commands.showqueue.exec(command, message);
 
             var lines = command.arguments.join(" ").split(/\r?\n|\r/);
@@ -454,16 +454,16 @@ exports.commands = {
             
             if(added.length) {
                 if(!playlist.playing) {
-                    await startPlaying(playlist, message.member.voiceChannel).catch(err => {bot.error(err); success = false;});
+                    await startPlaying(playlist, message.member.voice.channel).catch(err => {bot.error(err); success = false;});
                 }
                 if(!success) {
-                    message.channel.send("Couldn't start playing music.").then(m => m.delete(DELETE_TIME));
+                    message.channel.send("Couldn't start playing music.").then(m => m.delete({timeout:DELETE_TIME}));
                 }
             }
             if(added.length === 1)
-                message.channel.send(message.member.displayName + " added song: " + added[0].title + "\n<" + added[0].info.url + ">").then(m => m.delete(DELETE_TIME));
+                message.channel.send(message.member.displayName + " added song: " + added[0].title + "\n<" + added[0].info.url + ">").then(m => m.delete({timeout:DELETE_TIME}));
             else {
-                message.channel.send(message.member.displayName + " added " + added.length + " songs").then(m => m.delete(DELETE_TIME));
+                message.channel.send(message.member.displayName + " added " + added.length + " songs").then(m => m.delete({timeout:DELETE_TIME}));
             }
         }
     },
@@ -475,19 +475,19 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
-            message.channel.send("Skipped.").then(m => m.delete(DELETE_TIME));
+            message.channel.send("Skipped.").then(m => m.delete({timeout:DELETE_TIME}));
             //Destroy if it doesn't have a next song
             const playlist = getPlaylist(message.guild);
             if(!playlist.hasNext()) playlist.destroy();
             else {
                 playlist.next();
                 if(playlist.current) {
-                    playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
-                    lastChannel[message.guild.id] = message.member.voiceChannel.id;
+                    playlist.start(message.member.voice.channel, getStreamOptions(message.guild.id));
+                    lastChannel[message.guild.id] = message.member.voice.channel.id;
                 }
             }
 
-            message.delete(DELETE_TIME);
+            message.delete({timeout:DELETE_TIME});
         }
     },
     pausemusic: {
@@ -498,11 +498,11 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
-            message.channel.send("Paused.").then(m => m.delete(DELETE_TIME));
+            message.channel.send("Paused.").then(m => m.delete({timeout:DELETE_TIME}));
             let playlist = getPlaylist(message.guild);
             playlist.pause();
             bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
-            message.delete(DELETE_TIME);
+            message.delete({timeout:DELETE_TIME});
         }
     },
     resumemusic: {
@@ -524,12 +524,12 @@ exports.commands = {
             }
             playlist.resume();
             if(!playlist.playing) {
-                await playlist.start(message.member.voiceChannel, getStreamOptions(message.guild.id));
-                lastChannel[message.guild.id] = message.member.voiceChannel.id;
+                await playlist.start(message.member.voice.channel, getStreamOptions(message.guild.id));
+                lastChannel[message.guild.id] = message.member.voice.channel.id;
             }
             bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
-            message.channel.send("Resumed.").then(m => m.delete(DELETE_TIME));
-            message.delete(DELETE_TIME);
+            message.channel.send("Resumed.").then(m => m.delete({timeout:DELETE_TIME}));
+            message.delete({timeout:DELETE_TIME});
         }
     },
     showqueue: {
@@ -543,10 +543,10 @@ exports.commands = {
             if(!playlist.length) {
                 return message.channel.send("No songs in queue.");
             }
-            var vc = bot.voiceConnections.get(message.guild.id);
+            var vc = bot.voice.connections.get(message.guild.id);
             if(!vc.dispatcher) return bot.error("[DJ-showqueue] Error: No Dispatcher.");
 
-            message.delete(DELETE_TIME);
+            message.delete({timeout:DELETE_TIME});
 
             var overflow = 0;
             var responseArr = [];
@@ -567,12 +567,12 @@ exports.commands = {
                 responseArr.push(" . . . and " + overflow + " more.");
             }
 
-            var embed = new bot.RichEmbed();
+            var embed = new bot.MessageEmbed();
             embed.setTitle("Coming up soon . . .");
             responseArr.length > 0 ? embed.setDescription(responseArr.join("\n"))
                                    : embed.setDescription("The sound of silence . . .");
 
-            message.channel.send(embed).then(m => m.delete(DELETE_TIME*10));
+            message.channel.send(embed).then(m => m.delete({timeout:DELETE_TIME*10}));
             return;
         }
     },
@@ -586,9 +586,9 @@ exports.commands = {
         ],
         requirements: [bot.requirements.guild, bot.requirements.botInVoice],
         exec: async function (command, message) {
-            message.delete(DELETE_TIME);
+            message.delete({timeout:DELETE_TIME});
             const playlist = getPlaylist(message.guild);
-            const vc = bot.voiceConnections.get(message.guild.id);
+            const vc = bot.voice.connections.get(message.guild.id);
             if(!vc.dispatcher) return bot.error("[DJ-showcurrent] Error: No dispatcher.");
 
             await initiateSongInfo(playlist.current, vc, true);
@@ -604,8 +604,8 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             getPlaylist(message.guild).shuffle();
-            message.channel.send("Shuffled all songs.").then(m => m.delete(DELETE_TIME));
-            message.delete(DELETE_TIME);
+            message.channel.send("Shuffled all songs.").then(m => m.delete({timeout:DELETE_TIME}));
+            message.delete({timeout:DELETE_TIME});
         }
     },
     volumechange: {
@@ -624,7 +624,7 @@ exports.commands = {
             } else {
                 message.channel.send("Volume is currently " + volumes[message.guild.id] * 100);
             }
-            message.delete(DELETE_TIME);
+            message.delete({timeout:DELETE_TIME});
         }
     },
     clearqueue: {
@@ -635,8 +635,8 @@ exports.commands = {
         requirements: [bot.requirements.guild, bot.requirements.botInVoice, bot.requirements.userInVoice],
         exec: function (command, message) {
             getPlaylist(message.guild).destroy();
-            message.channel.send("Cleared all songs.").then(m => m.delete(DELETE_TIME));
-            message.delete(DELETE_TIME);
+            message.channel.send("Cleared all songs.").then(m => m.delete({timeout:DELETE_TIME}));
+            message.delete({timeout:DELETE_TIME});
         }
     },
     updateytdl: {

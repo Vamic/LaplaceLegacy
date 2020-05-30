@@ -29,7 +29,7 @@ bot.datastore.get(datastoretarget).then(async data => {
                 await checkFeeds(guildID);
             }
         }
-    }, 10 * 60 * 1000);
+    }, 5 * 60 * 1000);
 });
 
 async function checkFeeds(id) {
@@ -37,10 +37,10 @@ async function checkFeeds(id) {
     let guild = bot.guilds.get(id);
     let channel;
     if (guild) {
-        channel = guild.channels.get(guildData.channelID);
+        channel = guild.channels.cache.get(guildData.channelID);
     }
     else {
-        channel = await bot.client.fetchUser(id).catch(e => { });
+        channel = await bot.client.users.fetch(id).catch(_ => { });
     }
     if (!channel) return;
     getAndNotify(guildData.feeds, channel);
@@ -57,7 +57,7 @@ async function getAndNotify(feeds, channel) {
         if (items.length) {
             let mentions = feed.users ? feed.users.map(uid => `<@${uid}>`) : [];
             let links = items.map(i => `[${i.title}](${i.link})`);
-            let embed = new bot.RichEmbed().setTitle("RSS Feed update: " + feed.title);
+            let embed = new bot.MessageEmbed().setTitle("RSS Feed update: " + feed.title);
             bot.send.paginatedEmbed(channel, links, 15, embed, mentions.join(" "))
         }
         feed.lastCheck = Date.now();
@@ -270,7 +270,7 @@ exports.commands = {
                         let lines = feeds.map(feed => `${feed.id}: [${feed.title}](${feed.linkUrl})`);
                         if (lines.length == 0) lines.push("No feeds tracked " + (message.guild ? "in this server " : "") + "yet. `!rss add <link to rss>`");
 
-                        let embed = new bot.RichEmbed().setTitle("Tracked RSS Feeds");
+                        let embed = new bot.MessageEmbed().setTitle("Tracked RSS Feeds");
                         return bot.send.paginatedEmbed(message.channel, lines, 15, embed);
                 }
                 if (response) return message.reply(response);

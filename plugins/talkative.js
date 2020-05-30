@@ -160,7 +160,7 @@ function notLaplaceMention(word) {
 
 function mentionsLaplace(msg) {
     return msg.content.toLowerCase().indexOf("laplace") > -1
-        || msg.isMemberMentioned(bot.user)
+        || msg.mentions.has(bot.user)
         || bot.requirements.direct(msg);
 }
 
@@ -290,7 +290,7 @@ exports.commands = {
             console.log(options);
             try {
                 let result = await calculateTimezoneDiff(options);
-                var em = new bot.RichEmbed();
+                var em = new bot.MessageEmbed();
                 if(!result.time) {
                     var to_name = "`" + result.to.name + "`";
                     var fromname = "`" + result.from.name + "`";

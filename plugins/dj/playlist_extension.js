@@ -10,15 +10,20 @@ class DiscordPlaylist extends Playlist {
       return channel.join();
     }
   
-    constructor(guild, options) {
+    constructor(clientVoiceManager, guildID, options) {
       super(options);
-      this.guild = guild;
+      this.clientVoiceManager = clientVoiceManager;
+      this.guildID = guildID;
       this.events = new EventEmitter();
       this.playing = false;
     }
   
+    get _voiceConnection() {
+      return this.clientVoiceManager.connections.find(x => x.channel.guild.id == this.guildID);
+    }
+
     get _dispatcher() {
-      return this.guild.voiceConnection ? this.guild.voiceConnection.dispatcher : null;
+      return this._voiceConnection ? this._voiceConnection.dispatcher : null;
     }
   
     stop() {
@@ -59,12 +64,12 @@ class DiscordPlaylist extends Playlist {
         this._end();
       });
   
-      if (!this.guild.voiceConnection) {
+      if (!this._voiceConnection) {
         this.events.emit('error', new Error("No voice connection."));
         return;
       }
   
-      const dispatcher = this.guild.voiceConnection.playStream(stream, options);
+      const dispatcher = this._voiceConnection.play(stream, options);
       this.playing = true;
       this.events.emit('playing');
   
@@ -83,11 +88,11 @@ class DiscordPlaylist extends Playlist {
     }
   
     _end(reason = 'terminal') {
-      if (this._dispatcher) this._dispatcher.end(reason);
+      if (this._dispatcher) this._dispatcher.destroy(reason);
     }
   
     _destroy() {
-      if (this.guild.voiceConnection) this.guild.voiceConnection.disconnect();
+      if (this._voiceConnection) this._voiceConnection.disconnect();
       this.clear();
       this.events.emit('destroyed');
     }

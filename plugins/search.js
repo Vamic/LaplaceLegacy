@@ -73,7 +73,7 @@ if(google != null) {
                     fileType = "pingas";
                 }
             }
-            message.channel.send(new bot.RichEmbed().setImage(imageUrl).setDescription(`[${search}.${fileType}](${imageUrl})`));
+            message.channel.send(new bot.MessageEmbed().setImage(imageUrl).setDescription(`[${search}.${fileType}](${imageUrl})`));
         }
     };
 }

@@ -53,14 +53,14 @@ exports.commands = {
                 });
             }
 
-            message.channel.send(new bot.RichEmbed().setDescription("Plugins:\n" + response.join("\n")));
+            message.channel.send(new bot.MessageEmbed().setDescription("Plugins:\n" + response.join("\n")));
         }
     },
     togglePlugins: {
         commands: ["!enable", "-enable", "!disable", "-disable"],
         requirements: [bot.requirements.isAdmin, bot.requirements.guild],
         exec: function (command, message) {
-            if (command.arguments.length === 0) return message.reply("`" + command.command + " plugin1 plugin2`").then(m => m.delete(10000));
+            if (command.arguments.length === 0) return message.reply("`" + command.command + " plugin1 plugin2`").then(m => m.delete({timeout:10000}));
             var i;
             var success = true;
             if (command.command === "-enable") {
@@ -73,9 +73,9 @@ exports.commands = {
                 }
             }
             if (success) {
-                message.reply(":thumbsup::skin-tone-1:").then(m => m.delete(5000));
+                message.reply(":thumbsup::skin-tone-1:").then(m => m.delete({timeout:5000}));
             } else {
-                message.reply(":thumbsdown::skin-tone-1:").then(m => m.delete(5000));
+                message.reply(":thumbsdown::skin-tone-1:").then(m => m.delete({timeout:5000}));
             }
         }
     },
@@ -92,9 +92,9 @@ exports.commands = {
                 command.command === "reload" && command.arguments.length === 0) {
                 try{
                     await bot.admin.reloadPlugins();
-                    message.reply("Plugins successfully reloaded.").then(m => m.delete(5000));
+                    message.reply("Plugins successfully reloaded.").then(m => m.delete({timeout:5000}));
                 } catch(error) {
-                    if(typeof error == "string") message.reply(error).then(m => m.delete(5000));
+                    if(typeof error == "string") message.reply(error).then(m => m.delete({timeout:5000}));
                     else throw error;
                 }
             } else if (command.arguments.length > 0) {
@@ -104,12 +104,12 @@ exports.commands = {
                     if (bot.admin.reloadPlugin(command.arguments[i])) successes++;
                 }
                 if (successes === command.arguments.length) {
-                    message.reply("Plugins successfully reloaded.").then(m => m.delete(5000));
+                    message.reply("Plugins successfully reloaded.").then(m => m.delete({timeout:5000}));
                 } else {
-                    message.reply("One or more plugins failed to load.").then(m => m.delete(5000));
+                    message.reply("One or more plugins failed to load.").then(m => m.delete({timeout:5000}));
                 }
             } else {
-                message.reply("What?").then(m => m.delete(5000));
+                message.reply("What?").then(m => m.delete({timeout:5000}));
             }
         }
     },

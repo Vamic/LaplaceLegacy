@@ -34,10 +34,10 @@ var requirements = {
     isBot: (msg) => msg.author.bot,
     guild: (msg) => msg.guild,
     direct: (msg) => !msg.guild,
-    botInVoice: (msg) => msg.guild && client.voiceConnections.get(msg.guild.id),
-    botNotInVoice: (msg) => !(msg.guild && client.voiceConnections.get(msg.guild.id)),
-    userInVoice: (msg) => msg.member && msg.member.voiceChannel,
-    userNotInVoice: (msg) => !(msg.member && msg.member.voiceChannel)
+    botInVoice: (msg) => msg.guild && client.voice.connections.get(msg.guild.id),
+    botNotInVoice: (msg) => !(msg.guild && client.voice.connections.get(msg.guild.id)),
+    userInVoice: (msg) => msg.member && msg.member.voice.channelID,
+    userNotInVoice: (msg) => !(msg.member && msg.member.voice.channelID)
 };
 
 //Make tmp dir if its not there
@@ -260,7 +260,7 @@ function reloadPlugins() {
 async function sendPaginatedEmbed(channel, lines, pageSize, embedBase, nonEmbedMessage) {
     let offset = 0;
     let firstPage = lines.slice(0, pageSize);
-    let embed = (embedBase || new Discord.RichEmbed()).setDescription(firstPage.join("\n"));
+    let embed = (embedBase || new Discord.MessageEmbed()).setDescription(firstPage.join("\n"));
     nonEmbedMessage = nonEmbedMessage || "";
     return channel.send(nonEmbedMessage, embed).then(async msg => {
         if (lines.length > pageSize) {
@@ -517,11 +517,11 @@ module.exports = {
     error: error,
     client: client,
     user: client.user,
-    emojis: client.emojis,
-    guilds: client.guilds,
-    voiceConnections: client.voiceConnections,
-    Attachment: Discord.Attachment,
-    RichEmbed: Discord.RichEmbed,
+    emojis: client.emojis.cache,
+    guilds: client.guilds.cache,
+    voice: client.voice,
+    MessageAttachment: Discord.MessageAttachment,
+    MessageEmbed: Discord.MessageEmbed,
     persistent: {},
     secrets: {
         keys: secrets.keys,
@@ -562,102 +562,6 @@ module.exports = {
     }
 };
 
-/*
- * Linux only stuff
- */
-
-var listenToUser = function () { };
-var stopListeningToUser = function () { };
-
-if (isLinux) {
-    try {
-        const { Models, Detector } = require("snowboy");
-        const models = new Models();
-
-        const detectors = new Map();
-        const receivers = new Map();
-        const streams = new Map();
-
-        let snowboyPath = require.resolve("snowboy/package.json").split("/");
-        snowboyPath.splice(-1);
-        snowboyPath = snowboyPath.join("/");
-
-        models.add({
-            file: snowboyPath + '/resources/alexa/alexa-avs-sample-app/alexa.umdl',
-            sensitivity: '0.6',
-            hotwords: 'alexa'
-        });
-
-        listenToUser = function (member) {
-            if (!member) return;
-
-            if (!member.voiceChannel) return;
-
-            if (detectors.has(member.id)) return;
-
-            const voiceConnection = member.voiceChannel.connection;
-
-            if (!voiceConnection) return;
-
-            console.log(`Listening to ${member.user.username}`);
-            const detector = new Detector({
-                resource: snowboyPath + '/resources/common.res',
-                models: models,
-                audioGain: 1.0,
-                applyFrontend: false
-            });
-
-            detector.on('silence', function () {
-                console.log("silence");
-            });
-
-            detector.on('sound', function (buffer) {
-                console.log("sound");
-            });
-
-            detector.on('error', function () {
-                console.log("error");
-                process.exit(0);
-            });
-
-            detector.on('hotword', function (index, hotword, buffer) {
-                console.log("gottem");
-                console.log('hotword', index, hotword);
-            });
-
-            detectors.set(member.id, detector);
-
-            if (receivers.get(voiceConnection.channel.id)) return;
-
-            const receiver = voiceConnection.createReceiver();
-
-            receiver.on('pcm', (user, buffer) => {
-                const detector = detectors.get(user.id);
-                if (!detector) return;
-                detector.write(buffer);
-            });
-            receivers.set(voiceConnection.channel.id, receiver);
-        }
-
-        stopListeningToUser = function (member) {
-            if (!member) {
-                detectors.clear();
-                streams.clear();
-                receivers.forEach(r => r.destroy());
-                receivers.clear();
-            } else {
-                console.log(`Stoppped listening to ${member.user.username}`);
-                detectors.delete(member.id);
-                streams.delete(member.id);
-            }
-        }
-    }
-    catch(e){
-        
-    }
-}
-
-
 /* 
  * Events n commands
  */
@@ -690,63 +594,6 @@ client.on('ready', async () => {
 
 client.on("error", (data) => {
     error(data.error);
-});
-
-client.on("voiceStateUpdate", (member, update) => {
-    let action = {
-        joined: null,
-        left: null,
-        muted: false,
-        unmuted: false,
-        deafened: false,
-        undeafened: false,
-    }
-    let guild = member.guild;
-
-    if (update.voiceChannelID != member.voiceChannelID) {
-        if (update.voiceChannelID)
-            action.joined = guild.channels.get(update.voiceChannelID);
-        if (member.voiceChannelID)
-            action.left = guild.channels.get(member.voiceChannelID);
-    } else {
-        if (!member.selfMute && update.selfMute || !member.serverMute && update.serverMute)
-            action.muted = true;
-        else if (member.selfMute && !update.selfMute || member.serverMute && !update.serverMute)
-            action.unmuted = true;
-
-        if (!member.selfDeaf && update.selfDeaf || !member.serverDeaf && update.serverDeaf)
-            action.deafened = true;
-        else if (member.selfDeaf && !update.selfDeaf || member.serverDeaf && !update.serverDeaf)
-            action.undeafened = true;
-    }
-
-    let oldChannel = member.voiceChannelID ? guild.channels.get(member.voiceChannelID) : null;
-    let newChannel = update.voiceChannelID ? guild.channels.get(update.voiceChannelID) : null;
-
-    if (member.user == client.user) {
-        //Bot state changed
-        if (guild.voiceConnection) {
-            if (!action.muted && !action.unmuted && !action.deafened && !action.undeafened) {
-                log("VoiceStateUpdate: Joined voice channel \"" + newChannel.name + "\"");
-                //let me = newChannel.members.find(m => m.id == secrets.admins[0]);
-                //setTimeout(() => listenToUser(vamic, guild.voiceConnection), 1000);
-            }
-        } else {
-            log("VoiceStateUpdate: Left voice channel \"" + oldChannel.name + "\"");
-            //let me = oldChannel.members.find(m => m.id == secrets.admins[0]);
-            //stopListeningToUser(vamic);
-        }
-    } else {
-        //User state changed
-        if (guild.voiceConnection) {
-            if (action.left == guild.voiceConnection.channel) {
-                //console.log("User left bot's voice channel");
-            }
-            if (action.joined == guild.voiceConnection.channel) {
-                //console.log("User joined bot's voice channel");
-            }
-        }
-    }
 });
 
 function checkCommands(msg) {
@@ -845,7 +692,7 @@ client.on('message', msg => {
 });
 
 function helpCommand(command, message) {
-    var response = new Discord.RichEmbed();
+    var response = new Discord.MessageEmbed();
     var plugin, commands, fieldText, cmd;
 
     response.setTitle("Help command for helpful helping.");

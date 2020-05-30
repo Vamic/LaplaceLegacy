@@ -569,7 +569,7 @@ base.commands.tagsearch = {
         }
         if (lines.length === 1)
             lines.push("No tags matched.");
-        let embed = new bot.RichEmbed().setTitle(`Tags matching "${command.arguments[0]}" (${lines.length})`);
+        let embed = new bot.MessageEmbed().setTitle(`Tags matching "${command.arguments[0]}" (${lines.length})`);
         bot.send.paginatedEmbed(message.channel, lines, 10, embed);
     }
 };

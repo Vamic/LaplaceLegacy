@@ -4,7 +4,9 @@ var bot = module.parent.exports;
 var memes = require("./data/meme.json");
 var balls = require("./data/8ball.json");
 var wisdoms = require("./data/wisdom.json");
+
 var seedrandom = require('seedrandom');
+var fs = require('fs');
 
 // Commands
 exports.commands = {
@@ -76,13 +78,9 @@ exports.commands = {
         description: ["For when you need him the most"],
         exec: function (command, message) {
             message.delete();
-            /**
-            if (Math.floor(Math.random() * 100) === 1) {
-                message.channel.send(new bot.Attachment("images/diostop.jpg", "diostop.jpg"));
-            } else {
-                message.channel.send(new bot.Attachment("images/jbstop.png", "jbstop.png"));
-            }/**/
-            message.channel.send(new bot.Attachment("images/jbstop.png", "jbstop.png"));
+            fs.existsSync("images/jbstop.png")
+                ? message.channel.send(new bot.MessageAttachment("images/jbstop.png", "jbstop.png"))
+                : message.channel.send("stop it. get some help.");
         }
     },
     fuckmarrykill: {
@@ -90,7 +88,7 @@ exports.commands = {
         description: "Fuck, marry, kill",
         requirements: [bot.requirements.guild],
         exec: function (command, message) {
-            var members = message.guild.members;
+            var members = message.guild.members.cache;
             
             //no bots or same user allowed
             members = members.filter(member => member !== message.member && !member.user.bot);
@@ -108,7 +106,7 @@ exports.commands = {
         description: "Fuck, marry, kill - Shotgun wedding edition",
         requirements: [bot.requirements.guild],
         exec: function (command, message) {
-            var members = message.guild.members;
+            var members = message.guild.members.cache;
             
             //no bots or same user allowed
             members = members.filter(member => member !== message.member && !member.user.bot);
@@ -161,7 +159,9 @@ exports.commands = {
         description: "Get motivation",
         exec: function (command, message) {
             message.delete(); // Remove the sender's message
-            message.channel.send(new bot.Attachment("images/foxtato.png", "foxtato.png"));
+            fs.existsSync("images/foxtato.png")
+                ? message.channel.send(new bot.MessageAttachment("images/foxtato.png", "foxtato.png"))
+                : message.channel.send("ah belev in u");
         }
     },
     "8ball": {
@@ -196,9 +196,11 @@ exports.commands = {
         requirements: [bot.requirements.guild],
         description: "Find out once and for all",
         exec: function (command, message) {
-            var best = message.guild.members.random();
+            var best = message.guild.members.cache.random();
             if (best.id === message.author.id) {
-                message.channel.send(new bot.Attachment("images/udabest.png", "udabest.png"));
+                fs.existsSync("images/udabest.png")
+                    ? message.channel.send(new bot.MessageAttachment("images/udabest.png", "udabest.png"))
+                    : message.channel.send("it u");
             } else {
                 message.channel.send(best.displayName + " is the best.");
             }

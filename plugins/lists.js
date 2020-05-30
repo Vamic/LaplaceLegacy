@@ -253,7 +253,7 @@ exports.commands = {
                 }
             } 
             if (response.length) {
-                bot.send.paginatedEmbed(message.channel, response.split("\n"), 15, new bot.RichEmbed().setTitle(`List: ${listName}`));
+                bot.send.paginatedEmbed(message.channel, response.split("\n"), 15, new bot.MessageEmbed().setTitle(`List: ${listName}`));
             } else {
                 return message.channel.send("List is empty.");
             }

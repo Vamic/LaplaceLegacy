@@ -41,7 +41,7 @@ exports.commands = {
                 let targetMessage = await getMessageFromIDs(ids.messageID, ids.channelID, ids.guildID);
                 message.delete();
         
-                let embed = new bot.RichEmbed();
+                let embed = new bot.MessageEmbed();
                 embed.setAuthor(targetMessage.author.username, targetMessage.author.avatarURL, targetMessage.url);
                 embed.setFooter("Reposted by " + message.author.username);
                 embed.setURL(url);

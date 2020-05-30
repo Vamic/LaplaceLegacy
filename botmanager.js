@@ -96,7 +96,7 @@ function handleStatusMessage(type, bot, args) {
             break;
         case "success":
             var editMessage = function (restarting) {
-                var newEmbed = new Discord.RichEmbed(bot.status_message.embeds[0]);
+                var newEmbed = new Discord.MessageEmbed(bot.status_message.embeds[0]);
                 delete newEmbed.footer.embed;
                 newEmbed.setColor("#0FBA4D");
 
@@ -129,7 +129,7 @@ function handleStatusMessage(type, bot, args) {
         case "crash":
             clearTimeout(bot.success_timeout);
             var editMessage = function (final) {
-                var newEmbed = new Discord.RichEmbed(bot.status_message.embeds[0]);
+                var newEmbed = new Discord.MessageEmbed(bot.status_message.embeds[0]);
                 delete newEmbed.footer.embed;
                 newEmbed.setColor("#DB1111");
                 
@@ -317,7 +317,7 @@ client.on('ready', () => {
         return error("No report channel specified.");
     }
     else {
-        reportChannel = client.channels.get(settings.reportchannel);
+        reportChannel = client.channels.cache.get(settings.reportchannel);
         if (!reportChannel) {
             return error("Report channel couldn't be found.");
         }
@@ -418,7 +418,7 @@ function _report(embed) {
 }
 
 function reportError(title, desc = "\u200b") {
-    let e = new Discord.RichEmbed();
+    let e = new Discord.MessageEmbed();
     e.setColor('#DB1111');
     e.setTitle(title);
     e.setDescription(desc);
@@ -427,7 +427,7 @@ function reportError(title, desc = "\u200b") {
 }
 
 function reportInfo(title, desc = "\u200b") {
-    let e = new Discord.RichEmbed();
+    let e = new Discord.MessageEmbed();
     e.setColor('#0FBA4D');
     e.setTitle(title);
     e.setDescription(desc);

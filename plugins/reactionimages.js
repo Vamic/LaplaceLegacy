@@ -32,7 +32,7 @@ var sendImage = async function (data) {
         //Combine to make path
         var filePath = data.path + "/" + fileName;
         //Make discord.js attachment
-        var attachment = new bot.Attachment(filePath, fileName);
+        var attachment = new bot.MessageAttachment(filePath, fileName);
         //Send file with the appropriate text or none depending on input
         if (data.arguments.length > 0 && data.message) {
             var msg = "- " + data.username + " " + data.message + " " + data.arguments.join(" ") + " -";
