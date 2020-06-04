@@ -23,10 +23,10 @@
     "node-opus": "^0.3.3",
     "node-pre-gyp": "^0.15.0",
     "request": "^2.88.2",
-    "rss-parser": "^3.7.6",
+    "rss-parser": "^3.8.0",
     "seedrandom": "^2.4.3",
     "sodium": "^3.0.2",
-    "vdj": "^1.0.7",
+    "vdj": "^1.0.8",
     "xml2js": "^0.4.23"
   }
 }

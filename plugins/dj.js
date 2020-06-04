@@ -279,11 +279,6 @@ function toHHMMSS(input) {
     return toDoubleDigit(minutes) + ':' + toDoubleDigit(seconds);
 }
 
-function isValidURL(str) {
-    const pattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-    return pattern.test(str);
-}
-
 async function startPlaying(playlist, channel) {
     const guildId = playlist.guildID;
     if(!listening[guildId]) {
@@ -295,12 +290,6 @@ async function startPlaying(playlist, channel) {
 }
 
 function listenToPlaylistEvents(playlist) {
-    // Override _end function to not default reason to 'terminal'
-    playlist._end = function(reason) {
-        if (this._dispatcher)
-            this._dispatcher.end(reason);
-    }
-
     playlist.events.on("playing", function () {
         bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
         if(!playlist.interval) {
@@ -337,7 +326,7 @@ function listenToPlaylistEvents(playlist) {
 
 async function queueSongs(id, input, service) {
     try {
-        return await getPlaylist(bot.guilds.get(id)).add(input, { service: services[service] });
+        return await getPlaylist(bot.guilds.get(id)).add([input], { service: services[service] });
     }
     catch(err) {
         bot.error(err);
@@ -438,7 +427,6 @@ exports.commands = {
             }
 
             var playlist = getPlaylist(message.guild);
-            var totalSongs = [];
 
             let success = true;
 

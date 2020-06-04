@@ -87,7 +87,7 @@ class DiscordPlaylist extends Playlist {
       });
     }
   
-    _end(reason = 'terminal') {
+    _end(reason) {
       if (this._dispatcher) this._dispatcher.destroy(reason);
     }
   
