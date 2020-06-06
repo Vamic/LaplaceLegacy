@@ -99,7 +99,7 @@ const MAX_VOLUME = 20;
 var storedPlaylists = { playing: [] };
 async function saveCurrentPlaylist(id) {
     var playlist = getPlaylist(bot.guilds.get(id));
-    var tempSeek = playlist.current.seek;
+    var tempSeek = playlist.current && playlist.current.seek || 0;
     playlist.current.seek = Math.floor(getSongTime(playlist.current));
     if(!storedPlaylists[id]) storedPlaylists[id] = {};
     storedPlaylists[id].songs = playlist.map((song) => (
@@ -152,7 +152,9 @@ function getStreamOptions(id) {
     if(!volumes[id])
         setVolume(id, DEFAULT_VOLUME);
     return {
-        volume: volumes[id]
+        highWaterMark: 512,
+        volume: volumes[id],
+        bitrate: "auto"
     };
 }
 
@@ -188,7 +190,7 @@ function initiateSongInfo(song, vc, requiresFull = true) {
 
 function getSongTime(song, vc) {
     if(vc && vc.dispatcher)
-        return song.seek + vc.dispatcher.time / 1000;
+        return song.seek + vc.dispatcher.streamTime / 1000;
     else
         return song.seek;
 }
@@ -291,7 +293,7 @@ async function startPlaying(playlist, channel) {
 
 function listenToPlaylistEvents(playlist) {
     playlist.events.on("playing", function () {
-        bot.user.setPresence({ game: { name: (playlist.playing ? "► " : "❚❚ ") + playlist.current.title }, status: 'online' });
+        bot.user.setActivity((playlist.playing ? "► " : "❚❚ ") + playlist.current.title);
         if(!playlist.interval) {
             playlist.interval = setInterval(function () {
                 if(!playlist.playing) {
@@ -303,24 +305,29 @@ function listenToPlaylistEvents(playlist) {
         }
     });
     playlist.events.on("ended", function (reason) {
-        bot.user.setPresence({ game: {}, status: 'online' });
+        bot.user.setActivity("");
         clearInterval(playlist.interval);
         playlist.interval = null;
         clearPlaylistSave(playlist.guildID).catch(bot.error);
     });
     playlist.events.on("error", function (err) {
-        bot.user.setPresence({ game: {}, status: 'online' });
+        bot.user.setActivity("");
         clearInterval(playlist.interval);
         playlist.interval = null;
         bot.error("Playlist error");
         bot.error(err);
     });
     playlist.events.on("streamError", function (err) {
-        bot.user.setPresence({ game: {}, status: 'online' });
+        bot.user.setActivity("");
         clearInterval(playlist.interval);
         playlist.interval = null;
         bot.error("Playlist streamError");
         bot.error(err);
+    });
+    playlist.events.on("destroyed", function () {
+        bot.user.setActivity("");
+        clearInterval(playlist.interval);
+        playlist.interval = null;
     });
 }
 

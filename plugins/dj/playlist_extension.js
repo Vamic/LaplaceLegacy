@@ -31,11 +31,11 @@ class DiscordPlaylist extends Playlist {
     }
   
     destroy() {
-      return this._end('terminal');
+      return this._destroy();
     }
   
     pause() {
-      if (this._dispatcher) this._dispatcher.pause();
+      if (this._dispatcher) this._dispatcher.pause(true);
       this.events.emit('pause');
     }
   
@@ -73,7 +73,7 @@ class DiscordPlaylist extends Playlist {
       this.playing = true;
       this.events.emit('playing');
   
-      dispatcher.once('end', async (reason) => {
+      dispatcher.on('finish', async (reason) => {
         this.playing = false;
         this.events.emit('ended', reason);
   
@@ -92,6 +92,7 @@ class DiscordPlaylist extends Playlist {
     }
   
     _destroy() {
+      this.playing = false;
       if (this._voiceConnection) this._voiceConnection.disconnect();
       this.clear();
       this.events.emit('destroyed');
