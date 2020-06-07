@@ -76,6 +76,7 @@ function getPlaylist(guild) {
         services: Object.values(services),
         loop: false,
         autoplay: false,
+        fallBackService: new vdj.YoutubedlService(),
         logger: console.log
     });
     return playlists[guild.id];
