@@ -7,17 +7,12 @@ var creatures = require("./data/questgenerator/creatures.json");
 var nouns = require("./data/questgenerator/nouns.json");
 var adjectives = require("./data/questgenerator/adjectives.json");
 
-//Weird li'l object that lets us generate a quest type as an int, then access the corresponding array.
-var questTargetTypes = {
-    //Link to the equivalent arrays. They're references, right? Probably.
-    arrays: [locations, items, creatures],
-    //Pseudo-enum matching the order of the array. Size is number of quest types.
-    location: 0, item: 1, creature: 2, size: 3
-}
-
 //Returns a string containing the quest objective
 var GenerateQuest = function() {
-    let targetType = GetRandomInt(questTargetTypes.size); 
+    let validQuestTargets = [locations, items, creatures];
+
+    let targetType = GetRandomInt(validQuestTargets.length);
+    let targetIsLocation = (targetType == 0);
     let targetIsMultipleThings = Math.random() < 0.25; //0 to 1, 0% chance to 100% chance 
     let targetHasAppender = Math.random() < 0.25;
     let targetHasPrepender = Math.random() < 0.2;
@@ -26,13 +21,13 @@ var GenerateQuest = function() {
     
     let targetCount = (Math.random() < 0.5 ? " the" : "");
     //If multiple targets, changes " the " to " 7x ", for example, to show how many targets are needed for the quest
-    if (targetIsMultipleThings && targetType != questTargetTypes.location) {
+    if (targetIsMultipleThings && !targetIsLocation) {
         targetCount = " "+(GetRandomInt(10)+2)+"x";
     }
     
     quest += targetCount+" ";
     quest += (targetHasPrepender ? GetRandomElement(adjectives)+" " : ""); //Turns target/item "Flower" into "Magic Flower"
-    quest += GetRandomElement(questTargetTypes.arrays[targetType]);
+    quest += GetRandomElement(validQuestTargets[targetType]);
     quest += (targetHasAppender  ? " of "+GetRandomElement(nouns) : ""); //Same as above but other side, e.g. "Flower of Doom"
     
     return quest
@@ -78,8 +73,7 @@ exports.commands = {
         description: "Get a randomly generated quest",
         exec: function(command, message) {
             message.channel.send("Quest: "+GenerateQuest()+
-                                "\n"+
-                                "Reward: "+GenerateReward());
+                                "\nReward: "+GenerateReward());
         }
     }
 }
