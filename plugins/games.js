@@ -59,9 +59,10 @@ exports.commands = {
             const game = new ConnectFourBoard();
             const replyMessage = await message.channel.send(game.toMessage());
             const filter = (reaction, user) => !user.bot && game.columns.indexOf(reaction.emoji.name) !== -1;
-            collector = replyMessage.createReactionCollector(filter, { time: 60000 });
+            collector = replyMessage.createReactionCollector(filter, { time: 30 * 60 * 1000 });
 
             collector.on("collect", async reaction => {
+                collector.resetTimer();
                 if (game.playMove(game.columns.indexOf(reaction.emoji.name))) {
                     await replyMessage.edit(game.toMessage());
                 }
