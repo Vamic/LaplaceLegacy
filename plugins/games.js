@@ -22,6 +22,7 @@ class ConnectFourBoard {
         };
         this.redsMove = false;
         this.board = this.initializeBoard();
+        this.moveHistory = [];
     }
 
     initializeBoard() {
@@ -35,11 +36,14 @@ class ConnectFourBoard {
         return board;
     }
 
-    playMove(column) {
+    playMove(column, playerName) {
         if (this.board[column].nextSpace == 7) return false;
-        this.board[column][this.board[column].nextSpace] = this.redsMove ? this.circles.red : this.circles.blue;
+        let circle = this.redsMove ? this.circles.red : this.circles.blue;
+        this.board[column][this.board[column].nextSpace] = circle;
         this.redsMove = !this.redsMove;
         this.board[column].nextSpace++;
+        this.moveHistory.push(`${playerName} placed ${circle} in column ${column}`);
+        if(this.moveHistory.length > 6) this.moveHistory.shift();
         return true;
     }
 
@@ -48,7 +52,8 @@ class ConnectFourBoard {
         board = Object.keys(board[0]).map(function(c) {
             return board.map(function(r) { return r[c]; });
         }).reverse();
-        return board.map(x => x.join(" "));
+        board.pop(); //for some reason theres an empty row last? /shrug
+        return board.map((x, i) => x.join(" ") + " | " + (this.moveHistory[i] || ""));
     }
 }
 
@@ -61,9 +66,9 @@ exports.commands = {
             const filter = (reaction, user) => !user.bot && game.columns.indexOf(reaction.emoji.name) !== -1;
             collector = replyMessage.createReactionCollector(filter, { time: 30 * 60 * 1000 });
 
-            collector.on("collect", async reaction => {
+            collector.on("collect", async (reaction, user) => {
                 collector.resetTimer();
-                if (game.playMove(game.columns.indexOf(reaction.emoji.name))) {
+                if (game.playMove(game.columns.indexOf(reaction.emoji.name), user.username)) {
                     await replyMessage.edit(game.toMessage());
                 }
             });
