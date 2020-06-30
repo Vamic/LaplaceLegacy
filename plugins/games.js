@@ -3,7 +3,7 @@
 class ConnectFourColumn extends Array {
     constructor(args) {
         super(args);
-        Object.defineProperty(this,'nextSpace',{
+        Object.defineProperty(this, 'nextSpace', {
             value: 1,
             enumerable: false,
             iterable: false,
@@ -42,15 +42,15 @@ class ConnectFourBoard {
         this.board[column][this.board[column].nextSpace] = circle;
         this.redsMove = !this.redsMove;
         this.board[column].nextSpace++;
-        this.moveHistory.push(`${playerName} placed ${circle} in column ${column}`);
-        if(this.moveHistory.length > 6) this.moveHistory.shift();
+        this.moveHistory.push(`${playerName} placed ${circle} in column ${column + 1}`);
+        if (this.moveHistory.length > 6) this.moveHistory.shift();
         return true;
     }
 
     toMessage() {
         var board = this.board;
-        board = Object.keys(board[0]).map(function(c) {
-            return board.map(function(r) { return r[c]; });
+        board = Object.keys(board[0]).map(function (c) {
+            return board.map(function (r) { return r[c]; });
         }).reverse();
         board.pop(); //for some reason theres an empty row last? /shrug
         return board.map((x, i) => x.join(" ") + " | " + (this.moveHistory[i] || ""));
