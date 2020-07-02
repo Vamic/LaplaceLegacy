@@ -173,13 +173,6 @@ exports.commands = {
             message.channel.send(balls[ballRandNum]);
         }
     },
-    "!wisdom": {
-        description: "In case you need some wisdom to guide you",
-        exec: function (command, message) {
-            var randNum = Math.floor(Math.random() * wisdoms.length);
-            message.channel.send(wisdoms[randNum]);
-        }
-    },
     "!meme": {
         description: "Get a dank meme, useful in any situation",
         exec: function (command, message) {
