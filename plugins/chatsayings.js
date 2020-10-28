@@ -3,7 +3,6 @@ var bot = module.parent.exports;
 // Lists
 var memes = require("./data/meme.json");
 var balls = require("./data/8ball.json");
-var wisdoms = require("./data/wisdom.json");
 
 var seedrandom = require('seedrandom');
 var fs = require('fs');
