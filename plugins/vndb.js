@@ -10,7 +10,6 @@ exports.commands = {
     vndbquote: {
         commands: ["!vndb quote", "!vn quote", "!vndb q", "!vn q"],
         exec: async function (command, message) {
-            console.log(vndb);
             try {
                 var result = await vndb.query(`get quote basic (id>=1) {"results":1}`);
                 var quote = result.items[0];
@@ -21,7 +20,7 @@ exports.commands = {
                     ));
             }
             catch (err) {
-                console.log("err", err);
+                bot.error(err);
             }
         }
     }
