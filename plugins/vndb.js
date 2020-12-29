@@ -14,10 +14,7 @@ exports.commands = {
                 var result = await vndb.query(`get quote basic (id>=1) {"results":1}`);
                 var quote = result.items[0];
                 message.channel.send(new bot.MessageEmbed()
-                    .setDescription(`_"${quote.quote}"_`)
-                    .addFields(
-                        { name: '\u200B', value: `[${quote.title}](https://vndb.org/v${quote.id})` },
-                    ));
+                    .setDescription(`_"${quote.quote}"_\n[${quote.title}](https://vndb.org/v${quote.id})`));
             }
             catch (err) {
                 bot.error(err);
