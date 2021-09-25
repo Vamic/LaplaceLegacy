@@ -328,9 +328,9 @@ async function getDatastore(key) {
         return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
     } else {
         if (datastoreURL && datastoreKey) {
-            var url = datastoreURL + "get?key=" + datastoreKey + "&datakey=" + key;
+            var url = datastoreURL + "?key=" + key;
             try {
-                let data = await httpGetJson(url, true);
+                let data = await httpGetJson(url, true, {"x-functions-key": datastoreKey});
                 log("Got Datastore for " + key);
                 datastore[key] = data;
                 return JSON.parse(JSON.stringify(datastore[key])); // Make sure object is cloned
@@ -355,7 +355,7 @@ async function setDatastore(key, data) {
     if (datastoreURL && datastoreKey) {
         sdata = Buffer.from(sdata);
         try {
-            let data = await httpPost(datastoreURL + "set?key=" + datastoreKey + "&datakey=" + key, sdata, true);
+            let data = await httpPost(datastoreURL + "set?key=" + key, sdata, true, {"x-functions-key": datastoreKey});
             //log("Set Datastore for " + key);
             return data;
         } catch (err) {
