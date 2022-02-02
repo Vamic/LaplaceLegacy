@@ -69,17 +69,18 @@ async function getTags(site, unknownTags, knownTags) {
                 bot.error("Error while getting the tag from gelbooru.");
                 bot.error(err);
             });
+            tags = tags.tag;
             
             if(!tags || !tags.length)
                 return getTags(site, unknownTags, knownTags);
             //Add the tag to our known tags and storage
-            if (tags.length && tags[0].tag === nextTag) {
+            if (tags.length && tags[0].name === nextTag) {
                 knownTags[nextTag] = {
                     name: nextTag,
-                    type: tagTypes[site][tags[0].type]
+                    type: "" + tags[0].type
                 };
                 storedTags[site][nextTag] = {
-                    type: tagTypes[site][tags[0].type]
+                    type: "" + tags[0].type
                 };
             }
             //Continue checking after a delay, just to be safe
@@ -341,6 +342,7 @@ async function gbSearch(info, args) {
             info.channel.send("something broke when fetching the images");
         }
     });
+    posts = posts.post;
     if (!posts) return;
 
     //Data from the post

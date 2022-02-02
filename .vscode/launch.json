@@ -7,11 +7,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch Botmanager",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\laplace.js",
+            "program": "${workspaceFolder}\\botmanager.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]
