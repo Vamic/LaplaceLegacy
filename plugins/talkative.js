@@ -325,7 +325,7 @@ exports.commands = {
         exec: function (command, message) {
             let input = command.arguments.filter(notLaplaceMention).join(" ");
             try {
-                let result = math.eval(input);
+                let result = math.evaluate(input);
                 if(result && result.entries) {
                     if(!result.entries.length) return;
                     result = result.entries[0];
@@ -366,7 +366,7 @@ exports.commands = {
                     .replace(/f (to|in) c/gi, "fahrenheit to celsius");
             }
             try {
-                let result = math.eval(input);
+                let result = math.evaluate(input);
                 if(result && result.entries) {
                     if(!result.entries.length) return;
                     result = result.entries[0];
