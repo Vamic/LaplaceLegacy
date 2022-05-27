@@ -311,10 +311,10 @@ async function gbSearch(info, args) {
     //Encode tags
     args = args.map(a => encodeURIComponent(a));
     //Add to parameters
-    var base_params = "?page=dapi&s=post&q=index&tags=rating:safe+-spoilers+" + args.join("+");
+    var base_params = "?page=dapi&s=post&q=index&tags=-rating:questionable-rating:explicit+-spoilers+" + args.join("+");
     
     //XML response has the "count" property so we can see how many results there are for these tags
-    let response = await bot.util.httpGetXml(url + base_params + "&limit=0").catch(async (err) => {
+    let response = await bot.util.httpGetXml(url + base_params + "&limit=1").catch(async (err) => {
         bot.error(err);
         info.channel.send("something broke when fetching the post count");
     });
