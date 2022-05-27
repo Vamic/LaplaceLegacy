@@ -561,6 +561,7 @@ base.commands.tagsearch = {
                 bot.error("Error while getting the tags from gelbooru.");
                 bot.error(err);
         });
+        tags = tags?.tag;
         if(!tags) 
             return;
         tags.sort((a, b) => b.count - a.count);
