@@ -568,7 +568,7 @@ base.commands.tagsearch = {
 
         var lines = [];
         for (const tag of tags) {
-            lines.push("`" + tag.tag + " (" + tag.count + ")`");
+            lines.push("`" + tag.name + " (" + tag.count + ")`");
         }
         if (lines.length === 1)
             lines.push("No tags matched.");
