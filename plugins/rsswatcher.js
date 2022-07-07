@@ -20,6 +20,7 @@ bot.datastore.get(datastoretarget).then(async data => {
 
     bot.rssinterval = setInterval(async () => {
         bot.log("Checking RSS Feeds - " + new Date().toLocaleTimeString());
+        //the loops below are stupid but im not gonna bother changing them lmao - future vamic
         //Loop through all properties
         for (const guildID in rssData) {
             //Filter away the default properties (toString and such), leaving only guildIDs
@@ -52,15 +53,15 @@ async function getAndNotify(feeds, channel) {
         let xml = await getFeedXml(feed.feedUrl).catch(bot.error);
         if (!xml) continue;
         //Filter out old items
-        let items = xml.items.filter(i => new Date(i.pubDate) > feed.lastCheck);
+        let items = xml.items.filter(i => new Date(i.pubDate) > feed.previousItemDate || !feed.previousItemDate);
         //If we have new items, send a message
         if (items.length) {
             let mentions = feed.users ? feed.users.map(uid => `<@${uid}>`) : [];
             let links = items.map(i => `[${i.title}](${i.link})`);
             let embed = new bot.MessageEmbed().setTitle("RSS Feed update: " + feed.title);
             bot.send.paginatedEmbed(channel, links, 15, embed, mentions.join(" "))
+            feed.previousItemDate = new Date(items.sort((a,b) => b.pubDate - a.pubDate)[0].pubDate);
         }
-        feed.lastCheck = Date.now();
     }
     await bot.datastore.set(datastoretarget, rssData);
 }
@@ -103,9 +104,7 @@ async function addFeed(containerId, url, userID, alias) {
         title: feedNameRegex.test(alias) ? alias : parsedXml.title,
         feedUrl: url,
         linkUrl: parsedXml.link,
-        description: parsedXml.description,
-
-        lastCheck: Date.now()
+        description: parsedXml.description
     };
 
     if (isGuild) feed.users = [userID];
