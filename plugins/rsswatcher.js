@@ -60,7 +60,7 @@ async function getAndNotify(feeds, channel) {
             let links = items.map(i => `[${i.title}](${i.link})`);
             let embed = new bot.MessageEmbed().setTitle("RSS Feed update: " + feed.title);
             bot.send.paginatedEmbed(channel, links, 15, embed, mentions.join(" "))
-            feed.previousItemDate = new Date(items.sort((a,b) => b.pubDate - a.pubDate)[0].pubDate);
+            feed.previousItemDate = new Date(items.sort((a,b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())[0].pubDate);
         }
     }
     await bot.datastore.set(datastoretarget, rssData);
