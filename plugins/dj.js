@@ -52,11 +52,7 @@ bot.persistent.playlists = bot.persistent.playlists || {};
 const playlists = bot.persistent.playlists;
 const services = module.exports.services || {};
 
-/**
- * TODO: reactive when vdj is updated with something other than ytdl-core
- * Disabled due to ytdl-core being bad
- */
-if(keys && false) {
+if(keys) {
     if(keys.google) {
         const ytService = new vdj.YouTubeService(keys.google);
         ytService.setSongDisplay = setSongDisplay;
