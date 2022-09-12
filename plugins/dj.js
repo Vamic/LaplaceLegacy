@@ -48,8 +48,7 @@ bot.persistent.playlists = bot.persistent.playlists || {};
 const playlists = bot.persistent.playlists;
 const services = module.exports.services || {};
 
-if (keys) {
-    /*
+if (keys) {    
     if(keys.google) {
         const ytService = new vdj.YouTubeService(keys.google);
         ytService.setSongDisplay = setSongDisplay;
@@ -57,13 +56,15 @@ if (keys) {
     } else {
         bot.log("No Google API key, will use DirectService for Youtube videos", "dj");
     }
+    /*
     if(keys.soundcloud) {
         const scService = new cassette.SoundcloudService(keys.soundcloud);
         scService.setSongDisplay = setSongDisplay;
         services[scService.type] = scService;
     } else {
         bot.log("No Soundcloud API key, will use DirectService for Soundcloud songs", "dj");
-    }*/
+    }
+    */
 } else {
     bot.log("No API keys, will use DirectService for all songs", "dj");
 }
@@ -287,7 +288,7 @@ async function startPlaying(playlist, channel) {
 function listenToPlaylistEvents(playlist) {
     playlist.events.on("playing", async function () {
         if (!playlist.current["info.title"] && !playlist.current.info.full) await playlist.current.getSongInfo();
-        bot.user.setActivity((playlist.playing ? "► " : "❚❚ ") + playlist.current.info.title);
+        bot.user.setActivity((playlist.playing ? "► " : "❚❚ ") + playlist.current.info?.title);
         if (!playlist.interval) {
             playlist.interval = setInterval(function () {
                 if (!playlist.playing) {

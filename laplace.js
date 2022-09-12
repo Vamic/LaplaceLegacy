@@ -291,8 +291,6 @@ async function sendPaginatedEmbed(channel, lines, pageSize, embedBase, nonEmbedM
                     embed.setDescription(lines.slice(offset, offset + pageSize));
                     msg.edit(nonEmbedMessage, embed);
                 }
-                if (channel.guild)
-                    reaction.remove(reaction.users.find(user => !user.bot));
             });
 
             await msg.react("◀");
